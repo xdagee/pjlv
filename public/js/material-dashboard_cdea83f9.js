@@ -65,7 +65,7 @@
      });
 
      
-var breakCards = true;
+var breakCards = false;
 
 var searchVisible = 0;
 var transparent = true;
