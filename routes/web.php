@@ -19,4 +19,10 @@ Auth::routes();
 
 Route::get('/home', 'HomeController@index');
 
-Route::get('/employees', 'HomeController@show');
+Route::get('/employees', 'EmployeesController@index');
+
+Route::get('/leaves', 'LeavesController@index');
+
+Route::get('/calendar', 'CalendarsController@index');
+
+Route::get('/reports', 'ReportsController@index');
