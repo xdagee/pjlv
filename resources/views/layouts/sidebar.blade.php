@@ -1,6 +1,6 @@
 <body>
     <div class="wrapper">
-        <div class="sidebar" data-active-color="red" data-background-color="black">
+        <div class="sidebar" data-active-color="blue" data-background-color="black">
             <!--
                 Tip 1: You can change the color of active element of the sidebar using: data-active-color="purple | blue | green | orange | red | rose"
                 Tip 2: you can also add an image using data-image tag

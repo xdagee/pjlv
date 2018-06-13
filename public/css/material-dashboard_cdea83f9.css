@@ -11356,7 +11356,7 @@ fieldset[disabled] .form-group.is-focused .togglebutton label {
     padding: 3px 0 0 15px;
 }
 
-.navbar .notification {
+.navbar .notification, span.notification {
     position: absolute;
     top: 5px;
     border: 1px solid #FFF;
@@ -13044,12 +13044,16 @@ footer .btn {
 }
 
 .nav-tabs>li>a,
-.nav-tabs>li>a:hover,
 .nav-tabs>li>a:focus {
     background-color: transparent;
     border: 0 !important;
     color: #FFFFFF !important;
     font-weight: 500;
+}
+
+.nav-tabs>li>a:hover{
+    color:rgba(0, 188, 212, 0.4) !important;
+    background-color: white;
 }
 
 .nav-tabs>li.disabled>a,

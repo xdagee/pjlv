@@ -36,24 +36,41 @@
 
  //setting clicked tabs as active
     //remove all active class from sidebar menu
-    function removeActive(){
-        $(".sidebar .nav li").each(function(){
+    function removeActive(list){
+        $(list).each(function(){
             $(this).removeClass("active");
         });
     }
 
     //add active class to sidebar menu using url of current page after page reload
     function addActive(menu){
-        removeActive();
+        removeActive($(".sidebar .nav li"));
         $('.sidebar .nav li>a[href$="/' + location.pathname.split("/")[1] + '"]').parent().addClass('active');
     }
     addActive();
 
     //add active to sidebar menu on click
      $(".sidebar .nav li, .sidebar .nav li>a").on('click', function(){
-        removeActive();
+        removeActive($(".sidebar .nav li"));
        $(this).addClass('active');
      });
+
+
+    
+     function generateLoading(name){
+        return "<p><i class='fa fa-fw fa-spinner fa-spin' color='red'></i>Loading "+name+" Leave Data....Please Wait</p>";
+     }
+
+
+        $(".nav-tabs li>a").on('click', function(){
+            removeActive($(".nav-tabs li"));
+            $(this).parent().addClass('active');
+            var value = $(this).attr('href').split("#")[1];
+            var name = value.charAt(0).toUpperCase() + value.slice(1);
+            var loading = generateLoading(name);
+          $("#tab-table tbody").empty().append(loading).jAnimate("fadeIn");
+        });
+
 
 
     isWindows = navigator.platform.indexOf('Win') > -1 ? true : false;
