@@ -33,6 +33,29 @@
  * ========================================================= */
 
 (function() {
+
+ //setting clicked tabs as active
+    //remove all active class from sidebar menu
+    function removeActive(){
+        $(".sidebar .nav li").each(function(){
+            $(this).removeClass("active");
+        });
+    }
+
+    //add active class to sidebar menu using url of current page after page reload
+    function addActive(menu){
+        removeActive();
+        $('.sidebar .nav li>a[href$="/' + location.pathname.split("/")[1] + '"]').parent().addClass('active');
+    }
+    addActive();
+
+    //add active to sidebar menu on click
+     $(".sidebar .nav li, .sidebar .nav li>a").on('click', function(){
+        removeActive();
+       $(this).addClass('active');
+     });
+
+
     isWindows = navigator.platform.indexOf('Win') > -1 ? true : false;
 
     if (isWindows && !$('body').hasClass('sidebar-mini')) {
@@ -45,24 +68,8 @@
     }
 })();
 
+  
 
-
-
-    //setting clicked tabs as active
-    function removeActive(){
-        $(".sidebar .nav li").each(function(){
-            $(this).removeClass("active");
-        });
-    }
-
-    function addActive(menu){
-        removeActive();
-        $(menu).addClass("active");
-    }
-
-     $(".sidebar .nav li, .sidebar .nav li>a").on('click', function(){
-        addActive(this);
-     });
 
      
 var breakCards = false;

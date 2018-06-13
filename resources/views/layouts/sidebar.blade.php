@@ -46,7 +46,7 @@
                     </div>
                 </div>
                 <ul class="nav">
-                    <li class="active">
+                    <li>
                         <a href="{{ url ('/home') }}">
                             <i class="material-icons">dashboard</i>
                             <p> Dashboard </p>
