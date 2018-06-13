@@ -20,14 +20,14 @@
                         <img src="/img/faces/avatar.jpg" />
                     </div>
                     <div class="info">
-                        <a data-toggle="collapse" href="#collapseExample" class="collapsed">
+                        <a data-toggle="collapse" href="#profile" class="collapsed">
                             <span>
                                 Obaa Papa Bi
                                 <b class="caret"></b>
                             </span>
                         </a>
                         <div class="clearfix"></div>
-                        <div class="collapse" id="collapseExample">
+                        <div class="collapse" id="profile">
                             <ul class="nav">
                                 <li>
                                     <a href="{{ url ('/profile') }}">
@@ -88,6 +88,7 @@
                             <i class="material-icons visible-on-sidebar-mini">view_list</i>
                         </button>
                     </div>
+                    
                     <div class="navbar-header">
                         <button type="button" class="navbar-toggle" data-toggle="collapse">
                             <span class="sr-only">Toggle navigation</span>
@@ -95,8 +96,9 @@
                             <span class="icon-bar"></span>
                             <span class="icon-bar"></span>
                         </button>
-                        <a class="navbar-brand" href="#"> Dashboard </a>
+                        <a class="navbar-brand" href="{{ url ('/home') }}"> Dashboard </a>
                     </div>
+
                     <div class="collapse navbar-collapse">
                         <ul class="nav navbar-nav navbar-right">
                             <li>
