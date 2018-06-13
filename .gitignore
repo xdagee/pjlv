@@ -2,5 +2,8 @@
 /public/storage
 /storage/*.key
 /.idea
+/vendor
+*.example
+.env
 Homestead.json
 Homestead.yaml
