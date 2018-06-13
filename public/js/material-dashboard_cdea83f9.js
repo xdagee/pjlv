@@ -71,7 +71,13 @@
           $("#tab-table tbody").empty().append(loading).jAnimate("fadeIn");
         });
 
-
+        //bootbox alerts for recommending or declining a leave
+        $("#tab-table").on('click', 'button[name=recommend-leave]',function(){
+            bootbox.alert("confirm recommed leave");
+        });
+         $("#tab-table").on('click', 'button[name=decline-leave]',function(){
+             bootbox.alert("confirm decline leave with reasons");
+        });
 
     isWindows = navigator.platform.indexOf('Win') > -1 ? true : false;
 

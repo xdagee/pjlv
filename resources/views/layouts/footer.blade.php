@@ -54,6 +54,7 @@
 <!-- Material Dashboard javascript methods -->
 <script src="/js/material-dashboard_cdea83f9.js"></script>
 <script src="/js/janimate.min.js"></script>
+<script src="/js/bootbox.min.js"></script>
 <!-- Material Dashboard DEMO methods, don't include it in your project! -->
 <!-- <script src="/js/demo.js"></script> -->
 <script type="text/javascript">
