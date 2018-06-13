@@ -17,7 +17,7 @@
             <div class="sidebar-wrapper">
                 <div class="user">
                     <div class="photo">
-                        <img src="/img/faces/avatar.jpg" />
+                        <img src="/img/faces/nan.jpg" />
                     </div>
                     <div class="info">
                         <a data-toggle="collapse" href="#profile" class="collapsed">

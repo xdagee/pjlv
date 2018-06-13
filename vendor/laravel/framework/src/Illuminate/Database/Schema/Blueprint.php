@@ -35,7 +35,7 @@ class Blueprint
      *
      * @var string
      */
-    public $engine;
+    public $engine='InnoDB';
 
     /**
      * The default character set that should be used for the table.
