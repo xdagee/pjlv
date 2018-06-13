@@ -62,22 +62,6 @@ $(document).ready(function() {
     initDashboardPageCharts();
 
     initVectorMap();
-
-    //setting clicked tabs as active
-    function removeActive(){
-        $("ul.nav li").removeClass("active");
-    }
-
-    function addActive($menu){
-        removeActive();
-        $menu.addClass("active");
-    }
-
-     $("ul.nav li").on('click', function(){
-        addActive($(this));
-     });
-
-
 });
 </script>
 

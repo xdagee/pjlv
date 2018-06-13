@@ -45,6 +45,26 @@
     }
 })();
 
+
+
+
+    //setting clicked tabs as active
+    function removeActive(){
+        $(".sidebar .nav li").each(function(){
+            $(this).removeClass("active");
+        });
+    }
+
+    function addActive(menu){
+        removeActive();
+        $(menu).addClass("active");
+    }
+
+     $(".sidebar .nav li, .sidebar .nav li>a").on('click', function(){
+        addActive(this);
+     });
+
+     
 var breakCards = true;
 
 var searchVisible = 0;
