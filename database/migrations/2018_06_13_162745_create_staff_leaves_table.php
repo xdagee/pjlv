@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateEmployeeLeavesTable extends Migration
+class CreateStaffLeavesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,7 +13,7 @@ class CreateEmployeeLeavesTable extends Migration
      */
     public function up()
     {
-        Schema::create('employee_leaves', function (Blueprint $table) {
+        Schema::create('staff_leaves', function (Blueprint $table) {
             $table->increments('id');
             $table->date('start_date')->nullable($value=false);
             $table->date('end_date')->nullable($value=false);
@@ -21,13 +21,13 @@ class CreateEmployeeLeavesTable extends Migration
             $table->dateTime('requested_date')->nullable($value=false);
             $table->unsignedInteger('leave_status_id')->nullable($value = false);
             $table->unsignedInteger('leave_type_id')->nullable($value = false);
-            $table->unsignedInteger('employee_id')->nullable($value = false);
+            $table->unsignedInteger('staff_id')->nullable($value = false);
 
 
 
             $table->foreign('leave_status_id')->references('id')->on('leave_statuses')->onDelete('restrict')->onUpdate('cascade');
             $table->foreign('leave_type_id')->references('id')->on('leave_types')->onDelete('restrict')->onUpdate('cascade');
-            $table->foreign('employee_id')->references('id')->on('employees')->onDelete('restrict')->onUpdate('cascade');
+            $table->foreign('staff_id')->references('id')->on('staffs')->onDelete('restrict')->onUpdate('cascade');
             $table->timestamps();
         });
     }
@@ -39,6 +39,6 @@ class CreateEmployeeLeavesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('employee_leaves');
+        Schema::dropIfExists('staff_leaves');
     }
 }

@@ -6,9 +6,6 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname($vendorDir);
 
 return array(
-    'CreateEmployeeJobsTable' => $baseDir . '/database/migrations/2018_06_13_163639_create_employee_jobs_table.php',
-    'CreateEmployeeLeavesTable' => $baseDir . '/database/migrations/2018_06_13_162745_create_employee_leaves_table.php',
-    'CreateEmployeesTable' => $baseDir . '/database/migrations/2018_06_13_155323_create_employees_table.php',
     'CreateJobsTable' => $baseDir . '/database/migrations/2018_06_13_163413_create_jobs_table.php',
     'CreateLeaveActionsTable' => $baseDir . '/database/migrations/2018_06_13_164257_create_leave_actions_table.php',
     'CreateLeaveLevelsTable' => $baseDir . '/database/migrations/2018_06_13_154331_create_leave_levels_table.php',
@@ -18,6 +15,9 @@ return array(
     'CreateLoginsTable' => $baseDir . '/database/migrations/2018_06_13_161206_create_logins_table.php',
     'CreatePasswordResetsTable' => $baseDir . '/database/migrations/2014_10_12_100000_create_password_resets_table.php',
     'CreateRolesTable' => $baseDir . '/database/migrations/2018_06_13_154401_create_roles_table.php',
+    'CreateStaffJobsTable' => $baseDir . '/database/migrations/2018_06_13_163639_create_employee_jobs_table.php',
+    'CreateStaffLeavesTable' => $baseDir . '/database/migrations/2018_06_13_162745_create_staff_leaves_table.php',
+    'CreateStaffsTable' => $baseDir . '/database/migrations/2018_06_13_155323_create_staffs_table.php',
     'CreateUsersTable' => $baseDir . '/database/migrations/2014_10_12_000000_create_users_table.php',
     'DatabaseSeeder' => $baseDir . '/database/seeds/DatabaseSeeder.php',
     'File_Iterator' => $vendorDir . '/phpunit/php-file-iterator/src/Iterator.php',

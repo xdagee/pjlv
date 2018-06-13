@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateEmployeesTable extends Migration
+class CreateStaffsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,17 +13,17 @@ class CreateEmployeesTable extends Migration
      */
    public function up()
     {
-        Schema::create('employees', function (Blueprint $table) {
+        Schema::create('staffs', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('employee_number', 11)->nullable($value = false);
+            $table->string('staff_number', 11)->nullable($value = false);
             $table->string('title',4)->nullable($value =false);
             $table->string('firstname',125)->nullable($value = false);
             $table->string('lastname',125)->nullable($value = false);
-            $table->string('othername',125)->nullable($value = false);
+            $table->string('othername',125)->nullable();
             $table->date('dob')->nullable($value = false);
             $table->string('mobile_number',14)->nullable($value = false);
             $table->boolean('gender')->nullable($value = false);
-            $table->string('picture',125)->nullable($value = false);
+            $table->string('picture',125)->nullable();
             $table->boolean('is_active')->nullable($value = false);
             $table->date('date_joined')->nullable($value = false);
             $table->unsignedInteger('leave_level_id')->nullable($value = true);

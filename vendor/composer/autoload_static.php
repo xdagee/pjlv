@@ -274,9 +274,6 @@ class ComposerStaticInit633d4449c8881b703677e3881ee37551
     );
 
     public static $classMap = array (
-        'CreateEmployeeJobsTable' => __DIR__ . '/../..' . '/database/migrations/2018_06_13_163639_create_employee_jobs_table.php',
-        'CreateEmployeeLeavesTable' => __DIR__ . '/../..' . '/database/migrations/2018_06_13_162745_create_employee_leaves_table.php',
-        'CreateEmployeesTable' => __DIR__ . '/../..' . '/database/migrations/2018_06_13_155323_create_employees_table.php',
         'CreateJobsTable' => __DIR__ . '/../..' . '/database/migrations/2018_06_13_163413_create_jobs_table.php',
         'CreateLeaveActionsTable' => __DIR__ . '/../..' . '/database/migrations/2018_06_13_164257_create_leave_actions_table.php',
         'CreateLeaveLevelsTable' => __DIR__ . '/../..' . '/database/migrations/2018_06_13_154331_create_leave_levels_table.php',
@@ -286,6 +283,9 @@ class ComposerStaticInit633d4449c8881b703677e3881ee37551
         'CreateLoginsTable' => __DIR__ . '/../..' . '/database/migrations/2018_06_13_161206_create_logins_table.php',
         'CreatePasswordResetsTable' => __DIR__ . '/../..' . '/database/migrations/2014_10_12_100000_create_password_resets_table.php',
         'CreateRolesTable' => __DIR__ . '/../..' . '/database/migrations/2018_06_13_154401_create_roles_table.php',
+        'CreateStaffJobsTable' => __DIR__ . '/../..' . '/database/migrations/2018_06_13_163639_create_employee_jobs_table.php',
+        'CreateStaffLeavesTable' => __DIR__ . '/../..' . '/database/migrations/2018_06_13_162745_create_staff_leaves_table.php',
+        'CreateStaffsTable' => __DIR__ . '/../..' . '/database/migrations/2018_06_13_155323_create_staffs_table.php',
         'CreateUsersTable' => __DIR__ . '/../..' . '/database/migrations/2014_10_12_000000_create_users_table.php',
         'DatabaseSeeder' => __DIR__ . '/../..' . '/database/seeds/DatabaseSeeder.php',
         'File_Iterator' => __DIR__ . '/..' . '/phpunit/php-file-iterator/src/Iterator.php',

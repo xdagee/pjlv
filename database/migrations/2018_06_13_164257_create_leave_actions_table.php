@@ -23,9 +23,9 @@ class CreateLeaveActionsTable extends Migration
             
 
 
-            $table->foreign('leave_id')->references('id')->on('employee_leaves')->onDelete('restrict')->onUpdate('cascade');
+            $table->foreign('leave_id')->references('id')->on('staff_leaves')->onDelete('restrict')->onUpdate('cascade');
             $table->foreign('status_id')->references('id')->on('leave_statuses')->onDelete('restrict')->onUpdate('cascade');
-            $table->foreign('actionby_id')->references('id')->on('employees')->onDelete('restrict')->onUpdate('cascade');
+            $table->foreign('actionby_id')->references('id')->on('staffs')->onDelete('restrict')->onUpdate('cascade');
             $table->timestamps();
         });
     }
