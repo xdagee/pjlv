@@ -40,12 +40,12 @@ class Blueprint
     /**
      * The default character set that should be used for the table.
      */
-    public $charset;
+    public $charset = 'utf8';
 
     /**
      * The collation that should be used for the table.
      */
-    public $collation;
+    public $collation = 'utf8_general_ci';
 
     /**
      * Whether to make the table temporary.
