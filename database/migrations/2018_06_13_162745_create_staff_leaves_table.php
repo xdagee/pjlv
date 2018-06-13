@@ -39,6 +39,7 @@ class CreateStaffLeavesTable extends Migration
      */
     public function down()
     {
+        Schema::disableForeignKeyConstraints();
         Schema::dropIfExists('staff_leaves');
     }
 }
