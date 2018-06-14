@@ -47,15 +47,15 @@
                 </div>
                 <ul class="nav">
                     <li>
-                        <a href="{{ url ('/home') }}">
+                        <a href="{{ url ('/dashboard') }}">
                             <i class="material-icons">dashboard</i>
                             <p> Dashboard </p>
                         </a>
                     </li>
                     <li>
-                        <a href="{{ url ('/employees') }}">
+                        <a href="{{ url ('/staffs') }}">
                             <i class="material-icons">people</i>
-                            <p> Employees </p>
+                            <p> Staffs </p>
                         </a>
                     </li>
                     <li>
@@ -96,7 +96,7 @@
                             <span class="icon-bar"></span>
                             <span class="icon-bar"></span>
                         </button>
-                        <a class="navbar-brand" href="{{ url ('/home') }}"> Dashboard </a>
+                        <a class="navbar-brand" href="#"> Dashboard </a>
                     </div>
 
                     <div class="collapse navbar-collapse">
