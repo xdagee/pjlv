@@ -28,6 +28,8 @@ class CreateLeaveTypesTable extends Migration
      */
     public function down()
     {
+        DB::statement('SET FOREIGN_KEY_CHECKS = 0');
         Schema::dropIfExists('leave_types');
+        DB::statement('SET FOREIGN_KEY_CHECKS = 1');
     }
 }

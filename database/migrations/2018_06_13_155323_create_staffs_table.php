@@ -50,6 +50,7 @@ class CreateStaffsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('employees');
+        Schema::disableForeignKeyConstraints();
+        Schema::dropIfExists('staffs');
     }
 }

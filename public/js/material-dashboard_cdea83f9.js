@@ -71,6 +71,24 @@
           $("#tab-table tbody").empty().append(loading).jAnimate("fadeIn");
         });
 
+        //bootbox alerts for recommending or declining a leave
+        $("#tab-table").on('click', 'button[name=recommend-leave]',function(){
+            bootbox.alert("confirm recommed leave");
+        });
+         $("#tab-table").on('click', 'button[name=decline-leave]',function(){
+             bootbox.alert("confirm decline leave with reasons");
+        });
+
+         //function to load add user form when add user is clicked
+        $("button[name=add-user]").on('click', function(){
+            bootbox.alert("This is a placeholder for add users form/edit user form");
+        });
+
+    //function to load user details form when add user is clicked
+    $("button[name=view-user]").on('click', function(){
+        bootbox.alert("This is a placeholder for full user details");
+    })
+
 
 
     isWindows = navigator.platform.indexOf('Win') > -1 ? true : false;
