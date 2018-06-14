@@ -18,7 +18,7 @@
 <script src="/js/material.min.js" type="text/javascript"></script>
 <script src="/js/perfect-scrollbar.jquery.min.js" type="text/javascript"></script>
 <!-- Include a polyfill for ES6 Promises (optional) for IE11, UC Browser and Android browser support SweetAlert -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/core-js/2.4.1/core.js"></script>
+<script src="/js/core.js"></script>
 <!-- Library for adding dinamically elements -->
 <script src="/js/arrive.min.js" type="text/javascript"></script>
 <!-- Forms Validations Plugin -->
@@ -56,7 +56,7 @@
 <script src="/js/janimate.min.js"></script>
 <!-- Material Dashboard DEMO methods, don't include it in your project! -->
 <!-- <script src="/js/demo.js"></script> -->
-<script type="text/javascript">
+{{-- <script type="text/javascript">
 $(document).ready(function() {
 
     // Javascript method's body can be found in /js/demos.js
@@ -68,6 +68,6 @@ $(document).ready(function() {
     });
 
 
-</script>
+</script> --}}
 
 </html>
