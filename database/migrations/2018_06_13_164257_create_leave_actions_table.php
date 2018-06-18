@@ -16,7 +16,7 @@ class CreateLeaveActionsTable extends Migration
         Schema::create('leave_actions', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('leave_id')->unsigned()->nullable($value = false);
-            $table->integer('actionby_id')->unsigned()->nullable($value = false);
+            $table->integer('actionby')->unsigned()->nullable($value = false);
             $table->integer('status_id')->unsigned()->nullable($value = false);
             $table->dateTime('action_date')->nullable($value=false);
             $table->string('action_reason')->nullable($value=false);
@@ -25,7 +25,7 @@ class CreateLeaveActionsTable extends Migration
 
             $table->foreign('leave_id')->references('id')->on('staff_leaves')->onDelete('restrict')->onUpdate('cascade');
             $table->foreign('status_id')->references('id')->on('leave_statuses')->onDelete('restrict')->onUpdate('cascade');
-            $table->foreign('actionby_id')->references('id')->on('staffs')->onDelete('restrict')->onUpdate('cascade');
+            $table->foreign('actionby')->references('id')->on('staff')->onDelete('restrict')->onUpdate('cascade');
             $table->timestamps();
         });
     }

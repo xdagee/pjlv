@@ -2,7 +2,9 @@
 
 namespace App;
 
-class Role extends Model
+use Illuminate\Database\Eloquent\Model;
+
+class LeaveLevel extends Model
 {
     public function staffs()
     {

@@ -27,7 +27,7 @@ class CreateStaffLeavesTable extends Migration
 
             $table->foreign('leave_status_id')->references('id')->on('leave_statuses')->onDelete('restrict')->onUpdate('cascade');
             $table->foreign('leave_type_id')->references('id')->on('leave_types')->onDelete('restrict')->onUpdate('cascade');
-            $table->foreign('staff_id')->references('id')->on('staffs')->onDelete('restrict')->onUpdate('cascade');
+            $table->foreign('staff_id')->references('id')->on('staff')->onDelete('restrict')->onUpdate('cascade');
             $table->timestamps();
         });
     }

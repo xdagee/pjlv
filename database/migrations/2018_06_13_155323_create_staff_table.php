@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateStaffsTable extends Migration
+class CreateStaffTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,10 +13,10 @@ class CreateStaffsTable extends Migration
      */
    public function up()
     {
-        Schema::create('staffs', function (Blueprint $table) {
+        Schema::create('staff', function (Blueprint $table) {
             $table->increments('id');
             $table->string('staff_number', 11)->nullable($value = false);
-            $table->string('title',4)->nullable($value =false);
+            $table->string('title',5)->nullable($value =false);
             $table->string('firstname',125)->nullable($value = false);
             $table->string('lastname',125)->nullable($value = false);
             $table->string('othername',125)->nullable();
@@ -51,6 +51,6 @@ class CreateStaffsTable extends Migration
     public function down()
     {
         Schema::disableForeignKeyConstraints();
-        Schema::dropIfExists('staffs');
+        Schema::dropIfExists('staff');
     }
 }

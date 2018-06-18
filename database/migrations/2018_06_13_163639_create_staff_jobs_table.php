@@ -22,7 +22,7 @@ class CreateStaffJobsTable extends Migration
 
 
 
-        $table->foreign('staff_id')->references('id')->on('staffs')->onDelete('restrict')->onUpdate('cascade');
+        $table->foreign('staff_id')->references('id')->on('staff')->onDelete('restrict')->onUpdate('cascade');
         $table->foreign('job_id')->references('id')->on('jobs')->onDelete('restrict')->onUpdate('cascade');
         $table->timestamps();
         });

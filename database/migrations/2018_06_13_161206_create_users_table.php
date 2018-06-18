@@ -20,7 +20,7 @@ class CreateUsersTable extends Migration
 
             $table->primary('id');
 
-            $table->foreign('id')->references('id')->on('staffs')->onDelete('restrict')->onUpdate('cascade');
+            $table->foreign('id')->references('id')->on('staff')->onDelete('restrict')->onUpdate('cascade');
 
             $table->rememberToken();
             $table->timestamps();

@@ -3,7 +3,7 @@
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
-class StaffsTableSeeder extends Seeder
+class StaffTableSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -12,7 +12,7 @@ class StaffsTableSeeder extends Seeder
      */
     public function run()
     {
-        DB::table('staffs')->insert([
+        DB::table('staff')->insert([
         	'staff_number'		=>	'11111111111',
         	'title'				=>	'Mr',
         	'firstname'			=>	'admin',
@@ -27,5 +27,9 @@ class StaffsTableSeeder extends Seeder
         	'total_leave_days'	=>	10,
         	'role_id'			=>	1
         ]);
+
+        factory(App\Staff::class, 50)->create()->each(function ($s) {
+            $s->user()->save(factory(App\User::class)->make());
+        });
     }
 }
