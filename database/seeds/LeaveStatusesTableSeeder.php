@@ -3,7 +3,7 @@
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
-class LeaveStatusTableSeeder extends Seeder
+class LeaveStatusesTableSeeder extends Seeder
 {
     /**
      * Run the database seeds.

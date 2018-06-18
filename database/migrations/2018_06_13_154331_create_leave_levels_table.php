@@ -15,7 +15,7 @@ class CreateLeaveLevelsTable extends Migration
     {
         Schema::create('leave_levels', function (Blueprint $table) {
             $table->increments('id');
-            $table-> string('level_name',17)->nullable($value = false);
+            $table-> string('level_name',17)->nullable($value = false)->unique();
             $table->tinyInteger('annual_leave_days')->nullable($value = false);
             $table->timestamps();
         });

@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Staff;
+use App\Job;
 use Illuminate\Http\Request;
 
-class StaffsController extends Controller
+class JobsController extends Controller
 {
+
     /**
      * Create a new controller instance.
      *
@@ -26,7 +27,7 @@ class StaffsController extends Controller
     public function index()
     {
         //
-        return view('staffs.index');
+        return view('jobs.index');
     }
 
     /**
@@ -37,7 +38,7 @@ class StaffsController extends Controller
     public function create()
     {
         //
-        return view ('staffs.create');
+        return view ('jobs.create');
     }
 
     /**
@@ -49,10 +50,11 @@ class StaffsController extends Controller
     public function store(Request $request)
     {
         //
-        Staff::create(request(
-            ['title','firstname','lastname','dob','mobile_number','gender','date_joined']
+        Job::create(request (
+            ['job_title','job_description','is_multiple_staff']
         ));
-        return redirect('/staffs');
+
+        return redirect('jobs');
     }
 
     /**
@@ -64,7 +66,7 @@ class StaffsController extends Controller
     public function show($id)
     {
         //
-        return view ('staffs.show');
+        return view ('jobs.show');
     }
 
     /**

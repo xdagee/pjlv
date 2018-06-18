@@ -332,6 +332,7 @@ class ComposerStaticInit633d4449c8881b703677e3881ee37551
         'CreateLeaveLevelsTable' => __DIR__ . '/../..' . '/database/migrations/2018_06_13_154331_create_leave_levels_table.php',
         'CreateLeaveStatusesTable' => __DIR__ . '/../..' . '/database/migrations/2018_06_13_155136_create_leave_statuses_table.php',
         'CreateLeaveTypesTable' => __DIR__ . '/../..' . '/database/migrations/2018_06_13_154346_create_leave_types_table.php',
+        'CreateRoleUserTable' => __DIR__ . '/../..' . '/database/migrations/2018_06_18_154152_create_role_user_table.php',
         'CreateRolesTable' => __DIR__ . '/../..' . '/database/migrations/2018_06_13_154401_create_roles_table.php',
         'CreateStaffJobsTable' => __DIR__ . '/../..' . '/database/migrations/2018_06_13_163639_create_staff_jobs_table.php',
         'CreateStaffLeavesTable' => __DIR__ . '/../..' . '/database/migrations/2018_06_13_162745_create_staff_leaves_table.php',
@@ -1567,6 +1568,7 @@ class ComposerStaticInit633d4449c8881b703677e3881ee37551
         'League\\Flysystem\\Util\\MimeType' => __DIR__ . '/..' . '/league/flysystem/src/Util/MimeType.php',
         'League\\Flysystem\\Util\\StreamHasher' => __DIR__ . '/..' . '/league/flysystem/src/Util/StreamHasher.php',
         'LeaveLevelsTableSeeder' => __DIR__ . '/../..' . '/database/seeds/LeaveLevelsTableSeeder.php',
+<<<<<<< HEAD
         'LeaveStatusTableSeeder' => __DIR__ . '/../..' . '/database/seeds/LeaveStatusTableSeeder.php',
         'Mockery' => __DIR__ . '/..' . '/mockery/mockery/library/Mockery.php',
         'Mockery\\Adapter\\Phpunit\\MockeryPHPUnitIntegration' => __DIR__ . '/..' . '/mockery/mockery/library/Mockery/Adapter/Phpunit/MockeryPHPUnitIntegration.php',
@@ -1722,6 +1724,9 @@ class ComposerStaticInit633d4449c8881b703677e3881ee37551
         'Monolog\\Processor\\UidProcessor' => __DIR__ . '/..' . '/monolog/monolog/src/Monolog/Processor/UidProcessor.php',
         'Monolog\\Processor\\WebProcessor' => __DIR__ . '/..' . '/monolog/monolog/src/Monolog/Processor/WebProcessor.php',
         'Monolog\\Registry' => __DIR__ . '/..' . '/monolog/monolog/src/Monolog/Registry.php',
+=======
+        'LeaveStatusesTableSeeder' => __DIR__ . '/../..' . '/database/seeds/LeaveStatusesTableSeeder.php',
+>>>>>>> c380fb589c0ec27f25f4962c2c90243f5fef6602
         'PHPUnit\\Framework\\Assert' => __DIR__ . '/..' . '/phpunit/phpunit/src/ForwardCompatibility/Assert.php',
         'PHPUnit\\Framework\\AssertionFailedError' => __DIR__ . '/..' . '/phpunit/phpunit/src/ForwardCompatibility/AssertionFailedError.php',
         'PHPUnit\\Framework\\BaseTestListener' => __DIR__ . '/..' . '/phpunit/phpunit/src/ForwardCompatibility/BaseTestListener.php',

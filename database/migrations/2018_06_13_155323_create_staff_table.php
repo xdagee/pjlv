@@ -37,10 +37,6 @@ class CreateStaffTable extends Migration
             $table->foreign('leave_level_id')->references('id')->on('leave_levels')->onDelete('restrict')->onUpdate('cascade');
             $table->timestamps();  
         });
-
-        // Schema::table('employees', function($table){
-        //     $table->foreign('leave_level_id')->references('id')->on('leave_levels');
-        // });
     }
 
     /**
