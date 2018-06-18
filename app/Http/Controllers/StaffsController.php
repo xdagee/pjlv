@@ -49,7 +49,9 @@ class StaffsController extends Controller
     public function store(Request $request)
     {
         //
-        Staff::create(request(['firstname','lastname','mobile_number','gender','date_joined']));
+        Staff::create(request(
+            ['title','firstname','lastname','dob','mobile_number','gender','date_joined']
+        ));
         return redirect('/staffs');
     }
 

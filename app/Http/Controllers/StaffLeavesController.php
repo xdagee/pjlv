@@ -2,12 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Job;
+use App\StaffLeave;
 use Illuminate\Http\Request;
 
-class JobsController extends Controller
+class StaffLeavesController extends Controller
 {
-
     /**
      * Create a new controller instance.
      *
@@ -18,17 +17,16 @@ class JobsController extends Controller
         $this->middleware('auth');
     }
 
-
     /**
-     * Display a listing of the resource.
+     * Show the application dashboard.
      *
      * @return \Illuminate\Http\Response
      */
     public function index()
     {
-        //
-        return view('jobs.index');
+        return view('leaves');
     }
+
 
     /**
      * Show the form for creating a new resource.
@@ -38,8 +36,9 @@ class JobsController extends Controller
     public function create()
     {
         //
-        return view ('jobs.create');
+        return view ('leaves.create');
     }
+
 
     /**
      * Store a newly created resource in storage.
@@ -50,12 +49,14 @@ class JobsController extends Controller
     public function store(Request $request)
     {
         //
-        Job::create(request (
-            ['job_title','job_description','is_multiple_staff']
+        StaffLeave::create(request (
+            ['start_date','leave_days','staff_id']
         ));
 
-        return redirect('jobs');
+        return redirect('/leaves');
     }
+
+
 
     /**
      * Display the specified resource.
@@ -66,8 +67,10 @@ class JobsController extends Controller
     public function show($id)
     {
         //
-        return view ('jobs.show');
+        return view ('leaves.show');
     }
+
+
 
     /**
      * Show the form for editing the specified resource.
@@ -80,6 +83,8 @@ class JobsController extends Controller
         //
     }
 
+
+
     /**
      * Update the specified resource in storage.
      *
@@ -91,6 +96,8 @@ class JobsController extends Controller
     {
         //
     }
+
+
 
     /**
      * Remove the specified resource from storage.

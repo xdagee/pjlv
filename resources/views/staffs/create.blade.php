@@ -14,7 +14,14 @@
                                     </div>
 
                                     <div class="card-content">
-                                        <h4 class="card-title">Create New Employee Form</h4>
+                                        <h4 class="card-title">Add New Staff Form</h4>
+
+                                        <div class="form-group label-floating">
+                                            <label class="control-label">Title
+                                                <star>*</star>
+                                            </label>
+                                            <input class="form-control" name="title" type="text" title="true" required="true" />
+                                        </div>
 
                                         <div class="form-group label-floating">
                                             <label class="control-label">First Name
@@ -31,10 +38,17 @@
                                         </div>
 
                                         <div class="form-group label-floating">
+                                            <label class="control-label">Date of Birth
+                                                <star>*</star>
+                                            </label>
+                                            <input class="form-control" name="dob" type="text" dob="true" required="true" />
+                                        </div>
+
+                                        <div class="form-group label-floating">
                                             <label class="control-label">Mobile Number
                                                 <star>*</star>
                                             </label>
-                                            <input class="form-control" name="mobile_number" type="text" required="true" />
+                                            <input class="form-control" name="mobile_number" type="text" mobile_number="true" required="true" />
                                         </div>
 
                                         <div class="form-group label-floating">
@@ -58,14 +72,14 @@
                                             <label class="label-control">Date Joined
                                                 <star>*</star>
                                             </label>
-                                            <input class="form-control datetimepicker" name="date_joined" type="text" required="true" />
+                                            <input class="form-control" name="date_joined" type="text" date_joined="true" required="true" />
                                         </div>
 
                                         <div class="category form-category">
                                             <star>*</star> Required fields </div>
 
                                         <div class="text-center">
-                                            <button type="submit" class="btn btn-rose btn-fill btn-wd">Save</button>
+                                            <button type="submit" class="btn btn-rose btn-fill btn-wd pull-right">Add</button>
                                         </div>
                                     </div>
                                 </form>

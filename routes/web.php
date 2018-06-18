@@ -25,9 +25,11 @@ Route::get('/staffs/', 'StaffsController@index');
 
 Route::get('/staffs/create', 'StaffsController@create');
 
-Route::post('/staffs', 'StaffsController@store');
+Route::post('staffs', 'StaffsController@store');
 
 Route::get('/staffs/{staff}', 'StaffsController@show');
+
+
 
 
 // jobs controller with all possible job options
@@ -42,8 +44,20 @@ Route::get('/jobs/{job}', 'JobsController@show');
 
 
 // leave controller and it's eqivallent methods
-Route::get('/leaves', 'LeavesController@index');
+Route::get('/leaves/', 'StaffLeavesController@index');
 
+Route::get('/leaves/create', 'StaffLeavesController@create');
+
+Route::post('leaves', 'StaffLeavesController@store');
+
+Route::get('/leaves/{staffleave}', 'StaffLeavesController@show');
+
+
+
+// calender controller and it's eqivallents...
 Route::get('/calendar', 'CalendarsController@index');
 
+
+
+// reports
 Route::get('/reports', 'ReportsController@index');
