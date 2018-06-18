@@ -2,7 +2,7 @@
 
 namespace App;
 
-<<<<<<< HEAD
+
 use Illuminate\Database\Eloquent\Relations\Pivot;
 
 class StaffLeave extends Pivot
@@ -17,9 +17,4 @@ class StaffLeave extends Pivot
     // {
     // 	return $this->belongsTo(LeaveStatus::class);
     // }
-=======
-class StaffLeave extends Model
-{
-    //
->>>>>>> c380fb589c0ec27f25f4962c2c90243f5fef6602
 }
