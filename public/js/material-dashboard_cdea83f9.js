@@ -79,18 +79,6 @@
              bootbox.alert("confirm decline leave with reasons");
         });
 
-         //function to load add user form when add user is clicked
-        $("button[name=add-user]").on('click', function(){
-            bootbox.alert("This is a placeholder for add users form/edit user form");
-        });
-
-    //function to load user details form when add user is clicked
-    $("button[name=view-user]").on('click', function(){
-        bootbox.alert("This is a placeholder for full user details");
-    })
-
-
-
     isWindows = navigator.platform.indexOf('Win') > -1 ? true : false;
 
     if (isWindows && !$('body').hasClass('sidebar-mini')) {
