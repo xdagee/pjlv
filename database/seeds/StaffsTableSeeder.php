@@ -17,16 +17,14 @@ class StaffsTableSeeder extends Seeder
         	'title'				=>	'Mr',
         	'firstname'			=>	'admin',
         	'lastname'			=>	'system',
-        	'othername'			=>	null,
+        	'othername'			=>	'administrator',
         	'dob'				=>	'1995-06-10',
         	'mobile_number' 	=>	'+233202996677',
-        	'gender'			=>	true,
-        	'picture'			=>	null,
-        	'is_active'			=>	true,
+        	'gender'			=>	1,
+        	'is_active'			=>	1,
         	'date_joined'		=>	'2018-06-14',
         	'leave_level_id'	=>	1,
         	'total_leave_days'	=>	10,
-        	'supervisor_id'		=>	null,
         	'role_id'			=>	1
         ]);
     }

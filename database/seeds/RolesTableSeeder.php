@@ -15,23 +15,23 @@ class RolesTableSeeder extends Seeder
         $roles = [
     		[
         	'role_name' =>	'Admin',
-        	'role_status' =>	true,
+        	'role_status' =>	1,
         	],
         	[
         	'role_name' =>	'HR',
-        	'role_status' =>	true,
+        	'role_status' =>	1,
         	],
         	[
         	'role_name' =>	'DG',
-        	'role_status' =>	true,
+        	'role_status' =>	1,
         	],
         	[
         	'role_name' =>	'Director',
-        	'role_status' =>	true,
+        	'role_status' =>	1,
         	],
         	[
         	'role_name' =>	'Normal',
-        	'role_status' =>	true,
+        	'role_status' =>	1,
         	]
 
     	];
