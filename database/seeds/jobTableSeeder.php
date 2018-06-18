@@ -12,5 +12,12 @@ class jobTableSeeder extends Seeder
     public function run()
     {
         //
+          $jobs = [
+        	['job_title' -> '',
+        	 'job_description' ->'',],
+
+        ];
+        DB::table('jobs')->insert($jobs);
+   
     }
 }
