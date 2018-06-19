@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\StaffLeave;
+use App\LeaveType;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
-class StaffLeavesController extends Controller
+class LeaveTypesController extends Controller
 {
     /**
      * Create a new controller instance.
@@ -19,15 +19,15 @@ class StaffLeavesController extends Controller
     }
 
     /**
-     * Show the application dashboard.
+     * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
     public function index()
     {
-        return view('leaves');
+        //
+        return ('leaveTypes');
     }
-
 
     /**
      * Show the form for creating a new resource.
@@ -37,9 +37,7 @@ class StaffLeavesController extends Controller
     public function create()
     {
         //
-        return view ('leaves.create');
     }
-
 
     /**
      * Store a newly created resource in storage.
@@ -50,14 +48,7 @@ class StaffLeavesController extends Controller
     public function store(Request $request)
     {
         //
-        StaffLeave::create(request (
-            ['start_date','end_date','leave_days','leave_type_id','staff_id']
-        ));
-
-        return redirect('/leaves');
     }
-
-
 
     /**
      * Display the specified resource.
@@ -68,10 +59,8 @@ class StaffLeavesController extends Controller
     public function show($id)
     {
         //
-        return view ('leaves.show');
+        return view ('leaveTypes.show');
     }
-
-
 
     /**
      * Show the form for editing the specified resource.
@@ -84,8 +73,6 @@ class StaffLeavesController extends Controller
         //
     }
 
-
-
     /**
      * Update the specified resource in storage.
      *
@@ -97,8 +84,6 @@ class StaffLeavesController extends Controller
     {
         //
     }
-
-
 
     /**
      * Remove the specified resource from storage.
