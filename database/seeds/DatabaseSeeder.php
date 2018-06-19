@@ -13,8 +13,11 @@ class DatabaseSeeder extends Seeder
     {
         $this->call(LeaveLevelsTableSeeder::class);
         $this->call(LeaveStatusesTableSeeder::class);
+        $this->call(LeaveTypesTableSeeder::class);
+        $this->call(JobTableSeeder::class);
         $this->call(RolesTableSeeder::class);
         $this->call(StaffTableSeeder::class);
         $this->call(UsersTableSeeder::class);
+        $this->call(LeaveActionsTableSeeder::class);
     }
 }

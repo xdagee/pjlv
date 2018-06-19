@@ -17,15 +17,15 @@ class LeaveLevelsTableSeeder extends Seeder
     	$leave_levels = [
     		[
         	'level_name' =>	'Management',
-        	'annual_leave_days' =>	36,
+        	'annual_leave_days' =>	36
         	],
         	[
         	'level_name' =>	'Senior',
-        	'annual_leave_days' =>	28,
+        	'annual_leave_days' =>	28
         	],
         	[
         	'level_name' =>	'Junior',
-        	'annual_leave_days' =>	21,
+        	'annual_leave_days' =>	21
         	]
 
     	];
