@@ -42,7 +42,7 @@ class StaffTableSeeder extends Seeder
                     'start_date'                =>  $faker->date($format = 'Y-m-d', $max = 'now+100'),
                     'end_date'                  =>  $faker->date($format = 'Y-m-d', $max = 'now+200'),
                     'leave_days'                =>  $faker->numberBetween($min = 1, $max = 36),
-                    'requested_date'            =>  $faker->date($format = 'Y-m-d', $max = 'now+50')
+                    'created_at'                =>  $faker->date($format = 'Y-m-d', $max = 'now+50')
                 ]);
 
         });

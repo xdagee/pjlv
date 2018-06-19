@@ -17,11 +17,9 @@ class CreateStaffLeavesTable extends Migration
             $table->increments('id');
             $table->date('start_date')->nullable($value=false);
             $table->date('end_date')->nullable($value=false);
-            $table->tinyInteger('leave_days')->nullable($value=false)->default($value=0);
-            $table->dateTime('requested_date')->nullable($value=false);
+            $table->Integer('leave_days')->nullable($value=false)->default($value=0);
             $table->unsignedInteger('leave_type_id')->nullable($value = false);
             $table->unsignedInteger('staff_id')->nullable($value = false);
-
 
 
             $table->foreign('leave_type_id')->references('id')->on('leave_types')->onDelete('restrict')->onUpdate('cascade');
