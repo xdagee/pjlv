@@ -18,6 +18,14 @@
     <!--  Material Dashboard CSS    -->
     <link href="/css/material-dashboard_cdea83f9.css" rel="stylesheet" />
     <link href="/css/animate.css" rel="stylesheet" />
+<<<<<<< HEAD
+     <link href="/css/material.css" rel="stylesheet" />
+     <link href="/css/datepicker3.css" rel="stylesheet" />
+    <!--     Fonts and icons     -->
+    <!-- <link href="https://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css" rel="stylesheet" /> -->
+    <!-- <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons" /> -->
+    <!-- <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" /> -->
+=======
     <link href="/css/css.css" rel="stylesheet" />
     <link href="/css/icon.css" rel="stylesheet" />
     <link href="/css/materialdesignicons.min.css" rel="stylesheet" />
@@ -25,6 +33,7 @@
     <!--     Fonts and icons     -->
     {{-- <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons" /> --}}
     {{-- <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" /> --}}
+>>>>>>> 21861419f90005441ab75f227d6375299ed6b3f3
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <!-- Scripts -->
     <script>

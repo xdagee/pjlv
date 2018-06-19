@@ -11,14 +11,19 @@
             </footer>
         </div>
     </div>
-</body>
+
 <!--   Core JS Files   -->
 <script src="/js/jquery-3.2.1.min.js" type="text/javascript"></script>
+<script src="/js/moment.min.js" type="text/javascript"></script>
 <script src="/js/bootstrap.min.js" type="text/javascript"></script>
 <script src="/js/material.min.js" type="text/javascript"></script>
 <script src="/js/perfect-scrollbar.jquery.min.js" type="text/javascript"></script>
 <!-- Include a polyfill for ES6 Promises (optional) for IE11, UC Browser and Android browser support SweetAlert -->
+<<<<<<< HEAD
+<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/core-js/2.4.1/core.js"></script> -->
+=======
 <script src="/js/core.js"></script>
+>>>>>>> 21861419f90005441ab75f227d6375299ed6b3f3
 <!-- Library for adding dinamically elements -->
 <script src="/js/arrive.min.js" type="text/javascript"></script>
 <!-- Forms Validations Plugin -->
@@ -44,7 +49,7 @@
 <!--  DataTables.net Plugin, full documentation here: https://datatables.net/    -->
 <script src="/js/jquery.datatables.js"></script>
 <!-- Sweet Alert 2 plugin, full documentation here: https://limonte.github.io/sweetalert2/ -->
-<script src="/js/sweetalert2.js"></script>
+<!-- <script src="/js/sweetalert2.js"></script> -->
 <!-- Plugin for Fileupload, full documentation here: http://www.jasny.net/bootstrap/javascript/#fileinput -->
 <script src="/js/jasny-bootstrap.min.js"></script>
 <!--  Full Calendar Plugin, full documentation here: https://github.com/fullcalendar/fullcalendar    -->
@@ -57,6 +62,8 @@
 <script src="/js/bootbox.min.js"></script>
 <!-- Material Dashboard DEMO methods, don't include it in your project! -->
 <!-- <script src="/js/demo.js"></script> -->
+<<<<<<< HEAD
+=======
 {{-- <script type="text/javascript">
 $(document).ready(function() {
 
@@ -70,5 +77,5 @@ $(document).ready(function() {
 
 
 </script> --}}
+>>>>>>> 21861419f90005441ab75f227d6375299ed6b3f3
 
-</html>

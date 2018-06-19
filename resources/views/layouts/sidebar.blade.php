@@ -46,6 +46,14 @@
                     </div>
                 </div>
                 <ul class="nav">
+
+                 <li>
+                        <a id="apply-leave" href="{{ url ('/apply') }}">
+                            <i class="material-icons">library_books</i>
+                            <p> Apply for leave </p>
+                        </a>
+                    </li>
+                    <li>
                     <li>
                         <a href="{{ url ('/dashboard') }}">
                             <i class="material-icons">dashboard</i>

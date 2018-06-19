@@ -55,7 +55,8 @@
        $(this).addClass('active');
      });
 
-
+     //date-picker default
+    $.fn.datepicker.defaults.format = "mm/dd/yyyy";
     
      function generateLoading(name){
         return "<p><i class='fa fa-fw fa-spinner fa-spin' color='red'></i>Loading "+name+" Leave Data....Please Wait</p>";
@@ -79,7 +80,41 @@
              bootbox.alert("confirm decline leave with reasons");
         });
 
-    isWindows = navigator.platform.indexOf('Win') > -1 ? true : false;
+         //function to load add user form when add user is clicked
+        $("button[name=add-user]").on('click', function(){
+            bootbox.alert("This is a placeholder for add users form/edit user form");
+        });
+
+    //function to load user details form when add user is clicked
+    $("button[name=view-user]").on('click', function(){
+        bootbox.alert("This is a placeholder for full user details");
+    });
+
+    $("#apply-leave").on('click', function(e){
+        e.preventDefault();
+     $.get("/apply", function(data){
+        bootbox.dialog({
+            title:"<h3 class='text-center text-primary' >Apply for leave</h3>",
+            message:data,
+            closeButton:false,
+            buttons:{
+                confirm:{
+                    label:"Apply",
+                    className:"btn-primary",
+                    callback:function(){
+
+                    }
+                },
+                cancel:{
+                    label:"Cancel",
+                    className:"btn-danger"
+                }
+            }
+        });
+
+     }, "html");
+
+    });
 
     if (isWindows && !$('body').hasClass('sidebar-mini')) {
         // if we are on windows OS we activate the perfectScrollbar function
@@ -91,10 +126,6 @@
     }
 })();
 
-  
-
-
-     
 var breakCards = false;
 
 var searchVisible = 0;

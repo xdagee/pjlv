@@ -98,8 +98,9 @@
  </div>
   </div>
  </div>
-
-<!-- <script type="text/javascript">
+@endsection
+@section('scripts')
+<script type="text/javascript">
 	$(document).ready(function(){
 
 		var loading = "<tr><i class='fa fa-fw spinner spin'></i>Loading Data....Please Wait</tr>";
@@ -113,7 +114,5 @@
 	});
 
 
-</script>    -->                                 
-
-
+</script>
 @endsection

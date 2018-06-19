@@ -8,3 +8,8 @@
 Homestead.json
 Homestead.yaml
 .env
+vendor/composer/autoload_real.php
+public/js/material-dashboard_cdea83f9.js
+public/js/material-dashboard_cdea83f9.js
+app/Http/Controllers/StaffsController.php
+vendor/composer/autoload_static.php
