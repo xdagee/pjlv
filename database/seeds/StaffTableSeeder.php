@@ -13,7 +13,7 @@ class StaffTableSeeder extends Seeder
     public function run()
     {
         DB::table('staff')->insert([
-        	'staff_number'		=>	'11111111111',
+        	'staff_number'		=>	'11111111',
         	'title'				=>	'Mr',
         	'firstname'			=>	'admin',
         	'lastname'			=>	'system',
