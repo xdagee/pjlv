@@ -32,5 +32,14 @@ class Staff extends Model
     public function leaveLevel(){
     	return $this->belongsTo(LeaveLevel::class);
     }
+
+    // public function newPivot(Model $parent, array $attributes, $table, $exists)
+    // {
+    //     if ($parent instanceof LeaveType) {
+    //         return new StaffLeave($parent, $attributes, $table, $exists);
+    //     }
+
+    //     return parent::newPivot($parent, $attributes, $table, $exists);
+    // }
 }
 

@@ -11,10 +11,10 @@ class LeaveAction extends Model
     	return $this->belongsTo(StaffLeave::class, 'leave_id');
     }
 
-    // public function leaveStatus()
-    // {
-    // 	return $this->belongsTo(LeaveStatus::class, 'status_id');
-    // }
+    public function leaveStatus()
+    {
+    	return $this->belongsTo(LeaveStatus::class, 'status_id');
+    }
 
     public function actionBy()
     {

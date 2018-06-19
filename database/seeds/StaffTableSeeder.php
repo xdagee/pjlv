@@ -3,6 +3,8 @@
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
+use Faker\Factory as Faker;
+
 class StaffTableSeeder extends Seeder
 {
     /**
@@ -28,8 +30,21 @@ class StaffTableSeeder extends Seeder
         	'role_id'			=>	1
         ]);
 
+
         factory(App\Staff::class, 50)->create()->each(function ($s) {
             $s->user()->save(factory(App\User::class)->make());
+            //$s->leaveTypes()->attach(App\LeaveType::all()->random()->id);
+
+            $s->jobs()->attach(App\Job::all()->random()->id);
+
+            $faker = Faker::create();
+            $s->leaveTypes()->attach(App\LeaveType::all()->random()->id, [
+                    'start_date'                =>  $faker->date($format = 'Y-m-d', $max = 'now+100'),
+                    'end_date'                  =>  $faker->date($format = 'Y-m-d', $max = 'now+200'),
+                    'leave_days'                =>  $faker->numberBetween($min = 1, $max = 36),
+                    'requested_date'            =>  $faker->date($format = 'Y-m-d', $max = 'now+50')
+                ]);
+
         });
     }
 }

@@ -12,7 +12,6 @@ class LeaveStatusesTableSeeder extends Seeder
      */
     public function run()
     {
-        //
         $leave_statuses = [
 
         	['status_name'=>'Unattended'],
