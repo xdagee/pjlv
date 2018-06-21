@@ -13,4 +13,13 @@ class StaffLeave extends Pivot
     {
         return $this->hasMany(LeaveAction::class, 'leave_id');
     }
+
+    public static function getAll(){
+    	$staff = Staff::all();
+    	$leaves = array();
+    	foreach ($staff as $s) {
+    		array_push($leaves,$s->leaveTypes);
+    	}
+    	return $leaves;
+    }
 }

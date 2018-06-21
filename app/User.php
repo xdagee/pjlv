@@ -31,9 +31,9 @@ class User extends Authenticatable
         return $this->belongsTo(Staff::class, 'id');
     }    
 
-    // public function roles()
+    // public function role()
     // {
-    //   return $this->belongsToMany(Role::class);
+    //     return $this->belongsTo(Role::class, 'role_id');
     // }
 
 }

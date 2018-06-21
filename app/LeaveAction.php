@@ -6,6 +6,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class LeaveAction extends Model
 {
+
+    public $timestamps = false;
+
     public function staffLeave()
     {
     	return $this->belongsTo(StaffLeave::class, 'leave_id');

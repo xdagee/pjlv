@@ -17,7 +17,6 @@ class CreateRolesTable extends Migration
             $table->increments('id');
             $table-> string('role_name',25)->nullable($value=false)->unique();
             $table-> boolean('role_status')->nullable($value=false);
-            $table->timestamps();
         });
     }
 
