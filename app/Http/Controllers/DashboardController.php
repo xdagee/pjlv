@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 
-class DashboardsController extends Controller
+class DashboardController extends Controller
 {
     /**
      * Create a new controller instance.
