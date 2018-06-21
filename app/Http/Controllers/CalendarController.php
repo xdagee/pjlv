@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 
-class DashboardsController extends Controller
+class CalendarController extends Controller
 {
     /**
      * Create a new controller instance.
@@ -23,6 +23,6 @@ class DashboardsController extends Controller
      */
     public function index()
     {
-        return view('dashboard');
+        return view('calendar');
     }
 }

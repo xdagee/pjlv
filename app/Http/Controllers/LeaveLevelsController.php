@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Staff;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
 
-class StaffsController extends Controller
+use App\LeaveLevel;
+
+class LeaveLevelsController extends Controller
 {
     /**
      * Create a new controller instance.
@@ -16,8 +18,7 @@ class StaffsController extends Controller
     {
         $this->middleware('auth');
     }
-
-
+    
     /**
      * Display a listing of the resource.
      *
@@ -26,7 +27,8 @@ class StaffsController extends Controller
     public function index()
     {
         //
-        return view('staffs.index');
+        $leavelevels = LeaveLevel::get();
+        return $leavelevels;
     }
 
     /**
@@ -37,7 +39,6 @@ class StaffsController extends Controller
     public function create()
     {
         //
-        return view ('staffs.create');
     }
 
     /**
@@ -49,10 +50,6 @@ class StaffsController extends Controller
     public function store(Request $request)
     {
         //
-        Staff::create(request(
-            ['title','firstname','lastname','dob','mobile_number','gender','date_joined']
-        ));
-        return redirect('/staffs');
     }
 
     /**
@@ -61,10 +58,10 @@ class StaffsController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(LeaveLevel $leavelevel)
     {
         //
-        return view ('staffs.show');
+        return view('leavelevels.show', compact('leavelevel'));
     }
 
     /**

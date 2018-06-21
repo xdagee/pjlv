@@ -30,7 +30,7 @@
                         <div class="collapse" id="profile">
                             <ul class="nav">
                                 <li>
-                                    <a href="{{ url ('/profile') }}">
+                                    <a href="{{ url ('/staff/profile') }}">
                                         <span class="sidebar-mini"> P </span>
                                         <span class="sidebar-normal"> Profile </span>
                                     </a>
@@ -70,9 +70,9 @@
                         </a>
                     </li>
                     <li>
-                        <a href="{{ url ('/staffs') }}">
+                        <a href="{{ url ('/staff') }}">
                             <i class="material-icons">people</i>
-                            <p> Staffs </p>
+                            <p> Staff </p>
                         </a>
                     </li>
                     <li>

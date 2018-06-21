@@ -25,7 +25,9 @@ class StaffLeavesController extends Controller
      */
     public function index()
     {
-        return view('leaves');
+        $leaves = StaffLeave::orderby('id', 'desc');
+        // return $leaves;
+        return view('leaves.index', compact('leaves'));
     }
 
 
@@ -37,7 +39,7 @@ class StaffLeavesController extends Controller
     public function create()
     {
         //
-        return view ('leaves.create');
+        return view ('leaves.apply');
     }
 
 
@@ -50,8 +52,15 @@ class StaffLeavesController extends Controller
     public function store(Request $request)
     {
         //
+        $this->validate($request, [
+            'start_date'=>'required',
+            'end_date'=>'required',
+            'leave_days'=>'required',
+            'leave_type_id'=>'required',
+            'staff_id'=>'required',]);
+
         StaffLeave::create(request (
-            ['start_date','end_date','leave_days','leave_type_id','staff_id']
+            ['start-date','end-date','duration','leave-type-id','staff-id']
         ));
 
         return redirect('/leaves');
@@ -68,6 +77,7 @@ class StaffLeavesController extends Controller
     public function show($id)
     {
         //
+
         return view ('leaves.show');
     }
 
