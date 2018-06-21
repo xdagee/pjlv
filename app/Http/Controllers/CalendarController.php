@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 
-class CalendarsController extends Controller
+class CalendarController extends Controller
 {
     /**
      * Create a new controller instance.
