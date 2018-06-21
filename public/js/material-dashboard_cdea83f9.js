@@ -42,6 +42,17 @@
         });
     }
 
+    var $navbrand = $('a.navbar-brand');
+
+
+    function navbarLoad()
+    {
+        var value =location.pathname.split("/")[1];
+        var name = value.charAt(0).toUpperCase() + value.slice(1);
+        $navbrand.html(name).css("color", "purple");
+    }
+
+    navbarLoad();
     //add active class to sidebar menu using url of current page after page reload
     function addActive(menu){
         removeActive($(".sidebar .nav li"));
@@ -50,12 +61,14 @@
     addActive();
 
     //add active to sidebar menu on click
-     $(".sidebar .nav li, .sidebar .nav li>a").on('click', function(){
+     $(".sidebar .nav>li, .sidebar .nav>li>a").on('click', function(){
+        if($(this).attr('id')==="apply-leave"){return false;}
         removeActive($(".sidebar .nav li"));
        $(this).addClass('active');
      });
 
-
+     //date-picker default
+    $.fn.datepicker.defaults.format = "mm/dd/yyyy";
     
      function generateLoading(name){
         return "<p><i class='fa fa-fw fa-spinner fa-spin' color='red'></i>Loading "+name+" Leave Data....Please Wait</p>";
@@ -79,8 +92,56 @@
              bootbox.alert("confirm decline leave with reasons");
         });
 
-    isWindows = navigator.platform.indexOf('Win') > -1 ? true : false;
+         //function to load add user form when add user is clicked
+        $("button[name=add-user]").on('click', function(){
+            bootbox.alert("This is a placeholder for add users form/edit user form");
+        });
 
+    //function to load user details form when add user is clicked
+    $("button[name=view-user]").on('click', function(){
+        bootbox.alert("This is a placeholder for full user details");
+    });
+
+    $("#apply-leave").on('click', function(e){
+        e.preventDefault();
+     $.get("/apply", function(data){
+        bootbox.dialog({
+            title:"<h3 class='text-center text-primary' >Apply For Leave</h3>",
+            message:data,
+            closeButton:false,
+            buttons:{
+                confirm:{
+                    label:"Apply",
+                    className:"btn-primary",
+                    callback:function(){
+                        var $form = $('form[name=apply-leave-form]');
+                        //var formData = new FormData($form.get(0));
+                        $form.validate();
+
+                        if($form.valid())
+                        {
+                            var data = JSON.stringify($form.serializeArray());
+                            setTimeout(function () {
+                                bootbox.alert("Application successful: "+data);
+                            },1000);
+                        }
+                        else
+                        {
+                            return false;
+                        }
+                    }
+                },
+                cancel:{
+                    label:"Cancel",
+                    className:"btn-danger"
+                }
+            }
+        });
+
+     }, "html");
+
+    });
+    isWindows = navigator.platform.indexOf('Win') > -1 ? true : false;
     if (isWindows && !$('body').hasClass('sidebar-mini')) {
         // if we are on windows OS we activate the perfectScrollbar function
         $('.sidebar .sidebar-wrapper, .main-panel').perfectScrollbar();
@@ -91,10 +152,6 @@
     }
 })();
 
-  
-
-
-     
 var breakCards = false;
 
 var searchVisible = 0;

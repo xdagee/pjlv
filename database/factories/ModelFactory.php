@@ -25,21 +25,45 @@ $factory->define(App\User::class, function (Faker $faker) {
 });
 
 
-$factory->define(App\Staff::class, function (Faker $faker) {
+$factory->define(App\Job::class, function (Faker $faker) {
+    static $password;
 
     return [
-        'staff_number'		=>	$faker->ean8,
-        	'title'				=>	$faker->title($gender = 1|0),
-        	'firstname'			=>	$faker->firstName($gender = 1|0),
-        	'lastname'			=>	$faker->firstName($gender = 1|0),
+        'job_title' => $faker->unique()->jobTitle,
+        'job_description' => $faker->realText($maxNbChars = 200, $indexSize = 2),
+        'is_multiple_staff' => $faker->boolean($chanceOfGettingTrue = 50),
+    ];
+});
+
+
+$factory->define(App\Staff::class, function (Faker $faker) {
+    $gender = $faker->boolean($chanceOfGettingTrue = 50);
+    $gend = $gender ? 'male': 'female';
+
+    return [
+        	'staff_number'		=>	$faker->ean8,
+        	'title'				=>	$faker->title($gend),
+        	'firstname'			=>	$faker->firstName($gend),
+        	'lastname'			=>	$faker->firstName($gend),
         	'othername'			=>	null,
-        	'dob'				=>	$faker->date($format = 'Y-m-d', $max = 'now'),
+        	'dob'				=>	$faker->date($format = 'Y-m-d', $max = 'now+100'),
         	'mobile_number' 	=>	$faker->unique()->e164PhoneNumber,
-        	'gender'			=>	$faker->boolean($chanceOfGettingTrue = 50),
+        	'gender'			=>	$gender,
         	'is_active'			=>	1,
         	'date_joined'		=>	$faker->date($format = 'Y-m-d', $max = 'now'),
         	'leave_level_id'	=>	$faker->numberBetween($min = 1, $max = 3),
         	'total_leave_days'	=>	10,
-        	'role_id'			=>	$faker->numberBetween($min = 2, $max = 5),
+        	'role_id'			=>	$faker->numberBetween($min = 2, $max = 5)
+    ];
+});
+
+$factory->define(App\LeaveAction::class, function (Faker $faker) {
+
+    return [
+        	'leave_id'			    =>	App\Job::all()->random()->id,
+        	'actionby'				=>	App\Staff::all()->random()->id,
+        	'status_id'				=>	App\LeaveStatus::all()->random()->id,
+        	'action_date'			=>	$faker->date($format = 'Y-m-d', $max = 'now'),
+        	'action_reason'			=>	$faker->realText($maxNbChars = 30, $indexSize = 2)
     ];
 });

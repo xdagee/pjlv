@@ -61,3 +61,8 @@ Route::get('/calendar', 'CalendarsController@index');
 
 // reports
 Route::get('/reports', 'ReportsController@index');
+Route::get('/apply', function () {
+	return view('leaves.apply');
+	});
+
+

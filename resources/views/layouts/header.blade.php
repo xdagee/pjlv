@@ -11,13 +11,19 @@
     
     <title>{{ config('app.name', 'projektLeve') }}</title>
     <meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0' name='viewport' />
-    <meta name="viewport" content="width=device-width" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content="An employee leave management system" />
     <!-- Bootstrap core CSS     -->
     <link href="/css/bootstrap.min.css" rel="stylesheet" />
     <!--  Material Dashboard CSS    -->
     <link href="/css/material-dashboard_cdea83f9.css" rel="stylesheet" />
     <link href="/css/animate.css" rel="stylesheet" />
+     <link href="/css/material.css" rel="stylesheet" />
+     <link href="/css/datepicker3.css" rel="stylesheet" />
+    <!--     Fonts and icons     -->
+    <!-- <link href="https://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css" rel="stylesheet" /> -->
+    <!-- <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons" /> -->
+    <!-- <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" /> -->
     <link href="/css/css.css" rel="stylesheet" />
     <link href="/css/icon.css" rel="stylesheet" />
     <link href="/css/materialdesignicons.min.css" rel="stylesheet" />
@@ -27,9 +33,4 @@
     {{-- <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" /> --}}
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <!-- Scripts -->
-    <script>
-        window.Laravel = <?php echo json_encode([
-            'csrfToken' => csrf_token(),
-        ]); ?>
-    </script>
 </head>

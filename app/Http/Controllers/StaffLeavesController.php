@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\StaffLeave;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
 
 class StaffLeavesController extends Controller
 {
@@ -50,7 +51,7 @@ class StaffLeavesController extends Controller
     {
         //
         StaffLeave::create(request (
-            ['start_date','leave_days','staff_id']
+            ['start_date','end_date','leave_days','leave_type_id','staff_id']
         ));
 
         return redirect('/leaves');
