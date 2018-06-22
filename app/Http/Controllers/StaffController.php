@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Staff;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
 
 class StaffController extends Controller
 {
@@ -16,8 +17,7 @@ class StaffController extends Controller
     {
         $this->middleware('auth');
     }
-
-
+    
     /**
      * Display a listing of the resource.
      *

@@ -6,7 +6,7 @@
     <link rel="apple-touch-icon" sizes="76x76" href="/img/apple-icon.png" />
     <link rel="icon" type="image/png" href="/img/favicon.png" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
-    <title>projektLeve | Login</title>
+    <title>projektLeve | login</title>
     <meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0' name='viewport' />
     <meta name="viewport" content="width=device-width" />
     <meta name="description" content="an employee leve management system." />
@@ -15,9 +15,10 @@
     <!--  Material Dashboard CSS    -->
     <link href="/css/material-dashboard_cdea83f9.css" rel="stylesheet" />
     <!--     Fonts and icons     -->
-    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css" rel="stylesheet" />
-    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons" />
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+    {{-- <link href="https://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css" rel="stylesheet" /> --}}
+    {{-- <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons" /> --}}
+    {{-- <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" /> --}}
+    <link href="/css/material.css" rel="stylesheet" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 </head>
 
@@ -45,7 +46,13 @@
                                                 </span>
                                             <div class="form-group label-floating">
                                                 <label for="email" class="control-label">Email</label>
-                                                <input id="email" name="email" type="email" class="form-control" required autofocus />
+                                                <input id="email" name="email" type="email" class="form-control{{ $errors->has('email') ? ' is-invalid' : '' }}" value="{{ old('email') }}" required autofocus />
+
+                                                @if ($errors->has('email'))
+                                                    <span class="invalid-feedback" role="alert">
+                                                        <strong>{{ $errors->first('email') }}</strong>
+                                                    </span>
+                                                @endif
                                             </div>
                                         </div>
                                         <div class="input-group">
@@ -53,13 +60,24 @@
                                                     <i class="material-icons">lock_outline</i>
                                                 </span>
                                             <div class="form-group label-floating">
-                                                <label for="password" class="control-label">Password</label>
-                                                <input id="password" name="password" type="password" class="form-control" required>
+                                                <label id="password" for="password" class="control-label">Password</label>
+                                                <input id="password" name="password" type="password" class="form-control{{ $errors->has('password') ? ' is-invalid' : '' }}" required>
+
+                                                @if ($errors->has('password'))
+                                                    <span class="invalid-feedback" role="alert">
+                                                        <strong>{{ $errors->first('password') }}</strong>
+                                                    </span>
+                                                @endif
                                             </div>
                                         </div>
                                     </div>
                                     <div class="footer text-center">
-                                        <button type="submit" class="btn btn-red btn-simple btn-wd btn-lg">Let's go</button>
+                                        <button type="submit" class="btn btn-rose btn-wd btn-lg">Login</button>
+                                    </div>
+                                    <div class="text-center">
+                                        <a class="btn-link" href="{{ url('/password/reset') }}">
+                                            forgot password?
+                                        </a>
                                     </div>
                                 </div>
                             </form>
@@ -76,7 +94,7 @@
 <script src="/js/material.min.js" type="text/javascript"></script>
 <script src="/js/perfect-scrollbar.jquery.min.js" type="text/javascript"></script>
 <!-- Include a polyfill for ES6 Promises (optional) for IE11, UC Browser and Android browser support SweetAlert -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/core-js/2.4.1/core.js"></script>
+<script src="/js/core.js" type="text/javascript"></script>
 <!-- Forms Validations Plugin -->
 <script src="/js/jquery.validate.min.js"></script>
 <!--  Plugin for Date Time Picker and Full Calendar Plugin-->

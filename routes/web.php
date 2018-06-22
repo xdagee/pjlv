@@ -92,3 +92,6 @@ Route::get('/reports', 'ReportsController@index');
 Route::get('/apply', function () {
 	return view('leaves.apply');
 	});
+Auth::routes();
+
+Route::get('/home', 'HomeController@index');
