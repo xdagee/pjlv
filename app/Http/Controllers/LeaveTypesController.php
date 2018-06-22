@@ -26,7 +26,10 @@ class LeaveTypesController extends Controller
     public function index()
     {
         //
-        return ('leaveTypes');
+        $leavetypes = LeaveType::get();
+        return $leavetypes;
+
+        // return ('leaveTypes');
     }
 
     /**
@@ -56,10 +59,10 @@ class LeaveTypesController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(LeaveType $leavetype)
     {
         //
-        return view ('leaveTypes.show');
+        return view ('leavetypes.show', compact('leavetypes'));
     }
 
     /**
