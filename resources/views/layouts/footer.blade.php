@@ -5,7 +5,7 @@
                         <script>
                         document.write(new Date().getFullYear())
                         </script>
-                        excitedFuture 3.0 made with love for a better web.
+                        excitedFuture&trade; 3.0 made with love for a better web.
                     </p>
                 </div>
             </footer>
@@ -19,11 +19,8 @@
 <script src="/js/material.min.js" type="text/javascript"></script>
 <script src="/js/perfect-scrollbar.jquery.min.js" type="text/javascript"></script>
 <!-- Include a polyfill for ES6 Promises (optional) for IE11, UC Browser and Android browser support SweetAlert -->
-<<<<<<< HEAD
 <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/core-js/2.4.1/core.js"></script> -->
-=======
 <script src="/js/core.js"></script>
->>>>>>> 21861419f90005441ab75f227d6375299ed6b3f3
 <!-- Library for adding dinamically elements -->
 <script src="/js/arrive.min.js" type="text/javascript"></script>
 <!-- Forms Validations Plugin -->
@@ -60,22 +57,3 @@
 <script src="/js/material-dashboard_cdea83f9.js"></script>
 <script src="/js/janimate.min.js"></script>
 <script src="/js/bootbox.min.js"></script>
-<!-- Material Dashboard DEMO methods, don't include it in your project! -->
-<!-- <script src="/js/demo.js"></script> -->
-<<<<<<< HEAD
-=======
-{{-- <script type="text/javascript">
-$(document).ready(function() {
-
-    // Javascript method's body can be found in /js/demos.js
-    initDashboardPageCharts();
-
-    initVectorMap();
-
-        
-    });
-
-
-</script> --}}
->>>>>>> 21861419f90005441ab75f227d6375299ed6b3f3
-

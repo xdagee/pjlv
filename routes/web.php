@@ -23,7 +23,7 @@ Route::get('/dashboard', 'DashboardsController@index');
 // staffs controller with all the possible methods
 Route::get('/staffs/', 'StaffsController@index');
 
-Route::get('/staffs/create', 'StaffsController@create');
+Route::get('/staffs/create', function(){ return view('staffs.create');});
 
 Route::post('staffs', 'StaffsController@store');
 
