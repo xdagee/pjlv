@@ -88,11 +88,7 @@
                                         </tbody>
                                     </table>
                                         </div>
-                                        <div class="col-md-offset-10">
-                                        <button type="button" rel="tooltip" title="Load more" class="btn btn-info btn-simple btn-xs" >More Data
-                                        <i class="material-icons">more_horiz</i></button>
-                                        </div>
-                                       
+
                                  </div>
 
  </div>
@@ -106,9 +102,11 @@
 		var loading = "<tr><i class='fa fa-fw spinner spin'></i>Loading Data....Please Wait</tr>";
 
 		$(".nav-tabs>li>a").on('click', function(){
-			var name = $(this).href();
-			console.log(name);
+			//var name = $(this).href();
 			$("#tab-table").empty().append(loading);
+			setTimeout(function () {
+                $("#tab-table").empty().append("<tr><td>Data successfully loaded, thank you for your cooperation</td></tr>");
+            }, 1000)
 		});
 
 	});
