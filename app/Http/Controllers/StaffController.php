@@ -26,7 +26,11 @@ class StaffController extends Controller
     public function index()
     {
         //
-        return view('staffs.index');
+        $staff = Staff::latest()->get();
+        // json
+        return $staff;
+        // view
+        // return view('staffs.index');
     }
 
     /**
@@ -37,7 +41,7 @@ class StaffController extends Controller
     public function create()
     {
         //
-        return view ('staffs.create');
+        return view ('staff.create');
     }
 
     /**
@@ -48,11 +52,22 @@ class StaffController extends Controller
      */
     public function store(Request $request)
     {
+        // server side validation
+        $this->validate(request(),[
+            'title'=>'required',
+            'firstname'=>'required',
+            'lastname'=>'required',
+            'dob'=> 'required',
+            'mobile_number' => 'required',
+            'gender' => 'required',
+            'date_joined' => 'required'
+        ]);
+
         //
         Staff::create(request(
             ['title','firstname','lastname','dob','mobile_number','gender','date_joined']
         ));
-        return redirect('/staffs');
+        return redirect('/staff');
     }
 
     /**
@@ -64,7 +79,10 @@ class StaffController extends Controller
     public function show($id)
     {
         //
-        return view ('staffs.show');
+        $staff = Staff::findOrFail($id);
+        return $staff;
+        // return view ('staff.show', compact('staff'));
+
     }
 
     /**
@@ -76,6 +94,9 @@ class StaffController extends Controller
     public function edit($id)
     {
         //
+        $job = Job::findOrFail($id);
+
+        return view('jobs.edit', compact('job'));
     }
 
     /**
@@ -88,6 +109,27 @@ class StaffController extends Controller
     public function update(Request $request, $id)
     {
         //
+        $this->validate($request, [
+            'title'=>'required',
+            'firstname'=>'required',
+            'lastname'=>'required',
+            'dob'=> 'required',
+            'mobile_number' => 'required',
+            'gender' => 'required',
+            'date_joined' => 'required'
+        ]);
+
+        $staff = Staff::findOrFail($id);
+        $staff -> title = $request->input('title');
+        $staff -> firstname = $request->input('firstname');
+        $staff -> lastname = $request->input('lastname');
+        $staff -> dob = $request->input('dob');
+        $staff -> mobile_number->input('mobile_number');
+        $staff -> gender->input('gender');
+        $staff -> date_joined->input('date_joined');
+        $staff -> save();
+
+
     }
 
     /**
@@ -99,5 +141,7 @@ class StaffController extends Controller
     public function destroy($id)
     {
         //
+        $staff = Staff::findOrFail($id);
+        $staff->delete();
     }
 }

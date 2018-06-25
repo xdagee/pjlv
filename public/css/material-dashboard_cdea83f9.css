@@ -2583,7 +2583,6 @@ svg {
 .table-condensed>tfoot>tr>th,
 .table-condensed>thead>tr>td,
 .table-condensed>thead>tr>th {
-    padding: 1px;
     text-align: center;
     z-index: 1;
 }

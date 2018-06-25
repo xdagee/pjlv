@@ -1,171 +1,93 @@
-             
-                                    <form class="form-horizontal">
-                                    <p  class="text-center">You have <span class="text-danger">XX </span>days remaining</p>
+<style>
+    label.error, .error{
+        color:red;
+    }
+</style>
+
+                                    <hr class="text-primary">
+                                    <form name="apply-leave-form" role="form" action="{{ url('/staffs') }}" >
+
+                                        <p  class="text-center">You have <span class="text-danger">XX </span>days remaining</p>
+                                        <hr class="text-primary">
                                         <div class="row">
                                             <label class="col-md-3 label-on-left">Leave Type</label>
                                             <div class="col-md-9">
                                                 <div class="form-group label-floating is-empty">
                                                     <label class="control-label"></label>
-                                                    <select   class="form-control" name="leave-type-id" required>
+                                                    <select class="form-control" name="leave-type-id" required>
                                                         <option value="">Select a leave type</option>
                                                         <option value="1">Annual Leave</option>
                                                         <option value="2">Other Leave types</option>
                                                     </select>
+                                                    <span class="help-block">Select type of leave you wish to go, only eligible types are displayed</span>
                                                         </div>
-                                                
                                             </div>
                                         </div>
 
-
+                                        <br>
 
                                         <div class="row">
                                             <label class="col-md-3 label-on-left">Start date</label>
                                             <div class="col-md-9">
-                                                <div class="form-group label-floating is-empty">
+                                                <div class="form-group label-floating is-empty input-group date">
                                                     <label class="control-label"></label>
-                                                    <input type="text" name="start-date" class="form-control" placeholder="Please select a leave type" required disabled/>
+                                                    <input type="text" name="start-date" class="form-control" placeholder="Leave start date(First select a leave type)" readonly="readonly" required disabled/>
+                                                    <span class="help-block">
+                                                       This is the day you start your leave
+                                                    </span>
+                                                    <span class="input-group-addon">
+                                                        <i class="material-icons text-primary" rel="tooltip"
+                                                           title="Choose the date you wish start your leave.You can select a return date or type in duration" >event</i>
+                                                    </span>
                                                 </div>
                                             </div>
                                         </div>
 
+                                        <br>
 
                                         <div class="row">
-                                            <label class="col-md-3 label-on-left">End date</label>
+                                            <label class="col-md-3 label-on-left">Return date</label>
                                             <div class="col-md-9">
-                                                <div class="form-group label-floating is-empty">
+                                                <div class="form-group label-floating is-empty input-group date">
                                                     <label class="control-label"></label>
                                                     <input type="text" name="end-date" class="form-control"
-                                                    placeholder="Please choose a start date first" required disabled/>
+                                                           placeholder="Leave return date(First select a start date)" readonly="readonly" required disabled/>
+                                                    <span class="help-block">
+                                                        This is the day you will return to work
+                                                    </span>
+                                                    <span class="input-group-addon">
+                                                        <i class="material-icons text-primary" rel="tooltip"
+                                                           title="Choose the date you wish to end your leave" >event</i>
+                                                    </span>
                                                 </div>
                                             </div>
                                         </div>
+
+                                        <br>
+
                                         <div class="row">
                                             <label class="col-md-3 label-on-left">Duration</label>
                                             <div class="col-md-9">
-                                                <div class="form-group label-floating is-empty">
+                                                <div class="form-group label-floating is-empty input-group">
                                                     <label class="control-label"></label>
-                                                    <span>
                                                     <input type="text" class="form-control" name="duration"
-                                                     placeholder="Duration in days" required disabled/>
+                                                     placeholder="Duration in days(First select a start date)" required disabled/>
+                                                    <span class="help-block">
+                                                        You may enter the number of days you want to be on leave
+                                                    </span>
+                                                    <span class="input-group-addon">
+                                                        <i class="material-icons text-primary" rel="tooltip"
+                                                           title="Enter the number of days you wish to go on leave" >date_range</i>
+                                                    </span>
                                                 </div>
                                             </div>
                                         </div>
+
+                                        <br>
+                                        {{ csrf_field() }}
                                     </form>
-                                       
-                                        <!-- <div class="row">
-                                            <label class="col-md-3"></label>
-                                            <div class="col-md-9">
-                                                <div class="form-group form-button">
-                                                    <button type="submit" class="btn btn-fill btn-rose">Sign in</button>
-                                                </div>
-                                            </div>
-                                        </div> -->
-
-                               
-             
-            <script>
-             $(document).ready(function(){
-
-                    var startDate = $("input[name=start-date]");
-                    var endDate = $('input[name=end-date]');
-                    var duration = $('input[name=duration]');
-                    var maxdays= 30;
-
-                    var today=moment(new Date());
-                    var holidays=["2018-07-02","2018-06-19", "2018-06-25", "2018-07-01"];
-                    var holidaysAsInt = [];
-                    $(holidays).each(function(i){
-                        holidaysAsInt.push(moment(holidays[i]).dayOfYear());
-                    });
-                    console.log(holidaysAsInt);
-
-                    function initDatepicker(element,minDate, maxDate){
-                        $(element).datepicker({
-                            format : "yyyy-mm-dd",
-                            startDate: moment(minDate).format('YYYY-MM-DD'),
-                            endDate: moment(maxDate).format('YYYY-MM-DD'),
-                            daysOfWeekDisabled:[0,6],
-                            autoClose:true
-                        });
-                    }
-
-                  function calculateStartDate(){
-
-                  } 
-
-                  function calculateEndDate(date, duration=maxdays){
-                       var count=0;
-                       var thisDate=date;
-                       while(count < duration){
-                        thisDate=moment(thisDate).add(1, "days");
-                        var day = moment(thisDate).day();
-                        if(day!==6&&day!==0)
-                        {
-                            var doy = moment(thisDate).dayOfYear();
-                            if(!holidaysAsInt.includes(doy))
-                            {
-                                count++; 
-                            }
-                        }
-                        
-                       }
-                       return thisDate; 
-                  } 
-
-                  function calculateDuration(){
-
-                  }
-
-                  function disableField($element, boolean, placehold, initial)
-                  {
-                    $element.datepicker("destroy");
-                    var placeholder = "Choose a "+placehold+" date";
-                    if(boolean){placeholder = "Select a "+initial+" first";}
-                    $element.val(''); 
-                    $element.attr('disabled',boolean);
-                    $element.attr('placeholder',placeholder);
-                  }
-
-                function disableAllFields()
-                {
-                    disableField(startDate,true, "start date", "leave type");
-                    disableField(endDate,true, "end date", "start date");
-                    disableField(duration,true, "duration", "end date");
-                }
-
-                $('select').on('change',function(){ 
-                  var type = $(this).val();
-                   disableAllFields();
-                    if(isNaN(type) || type==="")
-                    {
-                        return false;
-                    }
-                    var c= type==="1"? 14 : 1;
-                    disableField(startDate,false, "start date", "leave type");
-                    mindate=calculateEndDate(today,c);
-                    maxdate=calculateEndDate(mindate);
-                    initDatepicker(startDate,mindate,maxdate);
-                });
-
-                startDate.on('change', function(){
-
-                    var enddate=calculateEndDate(this.value);
-                    var mindate =calculateEndDate((this.value),1);
-                    disableField(endDate,false, "end date", "start date");
-                    disableField(duration,false, "duration", "end date");
-                    initDatepicker(endDate,mindate,enddate);
-                });
-
-                endDate.on('change',function(){
-                    var duration = calculateDuration();
+                                <br>
 
 
-                });
-
-
-
-             	
-
-             })
-             </script>
+            <script src="{{URL::asset('js/customjs/apply-leave-rules.js')}}"></script>
            

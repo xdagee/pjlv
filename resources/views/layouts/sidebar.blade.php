@@ -1,6 +1,6 @@
 <body>
     <div class="wrapper">
-        <div class="sidebar" data-active-color="blue" data-background-color="black">
+        <div class="sidebar" data-active-color="purple" data-background-color="black">
             <!--
                 Tip 1: You can change the color of active element of the sidebar using: data-active-color="purple | blue | green | orange | red | rose"
                 Tip 2: you can also add an image using data-image tag
@@ -30,7 +30,7 @@
                         <div class="collapse" id="profile">
                             <ul class="nav">
                                 <li>
-                                    <a href="{{ url ('/profile') }}">
+                                    <a href="{{ url ('/staff/profile') }}">
                                         <span class="sidebar-mini"> P </span>
                                         <span class="sidebar-normal"> Profile </span>
                                     </a>
@@ -51,15 +51,18 @@
                         </div>
                     </div>
                 </div>
-                <ul class="nav">
 
-                 <li>
-                        <a id="apply-leave" href="{{ url ('/apply') }}">
-                            <i class="material-icons">library_books</i>
-                            <p> Apply for leave </p>
-                        </a>
+
+
+
+                <ul class="nav">
+                   <li>
+                            <a id="apply-leave" href="{{ url ('/apply') }}">
+                                <i class="material-icons">filter_none</i>
+                                <p>Apply for leave</p>
+                            </a>
                     </li>
-                    <li>
+
                     <li>
                         <a href="{{ url ('/dashboard') }}">
                             <i class="material-icons">dashboard</i>
@@ -67,9 +70,9 @@
                         </a>
                     </li>
                     <li>
-                        <a href="{{ url ('/staffs') }}">
+                        <a href="{{ url ('/staff') }}">
                             <i class="material-icons">people</i>
-                            <p> Staffs </p>
+                            <p> Staff </p>
                         </a>
                     </li>
                     <li>
@@ -110,7 +113,7 @@
                             <span class="icon-bar"></span>
                             <span class="icon-bar"></span>
                         </button>
-                        <a class="navbar-brand" href="#"> Dashboard </a>
+                        <a class="navbar-brand" href="#"> </a>
                     </div>
 
                     <div class="collapse navbar-collapse">

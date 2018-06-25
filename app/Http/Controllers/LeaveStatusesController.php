@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Job;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
 
-class JobsController extends Controller
+use App\LeaveStatus;
+
+class LeaveStatusesController extends Controller
 {
-
     /**
      * Create a new controller instance.
      *
@@ -27,10 +28,12 @@ class JobsController extends Controller
     public function index()
     {
         //
-        $jobs = Job::latest()->get();
-        //
-        return $jobs;
-        // return view('jobs.index', compact('jobs')); // view
+        $leavestatuses = LeaveStatus::get();
+
+        // json
+        return $leavestatuses;
+
+        // return view ('leavestatuses.index', compact('leavestatuses'));
     }
 
     /**
@@ -41,7 +44,6 @@ class JobsController extends Controller
     public function create()
     {
         //
-        return view ('jobs.create');
     }
 
     /**
@@ -52,19 +54,7 @@ class JobsController extends Controller
      */
     public function store(Request $request)
     {
-        // server side validation
-        $this->validate(request(), [
-            'job_title' => 'required',
-            'job_description' => 'required',
-            'is_multiple_staff' => 'required'
-        ]);
-
         //
-        $jobs = Job::create(request (
-            ['job_title','job_description','is_multiple_staff']
-        ));
-
-        return redirect('jobs');
     }
 
     /**
@@ -73,12 +63,10 @@ class JobsController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(LeaveStatus $leavestatus)
     {
         //
-        $job = Job::findOrFail($id);
-        return $job;
-        // return view ('jobs.show', compact('job'));
+        return view('leavestatuses.show', compact('leavestatus'));
     }
 
     /**
@@ -90,9 +78,6 @@ class JobsController extends Controller
     public function edit($id)
     {
         //
-        $job = Job::findOrFail($id);
-        // return $job;
-        return view ('jobs.edit', compact('job'));
     }
 
     /**
@@ -105,17 +90,6 @@ class JobsController extends Controller
     public function update(Request $request, $id)
     {
         //
-        $this->validate($request, [
-            'job_title'=>'required',
-            'job_description'=>'required',
-            'is_multiple_staff'=>'required',
-        ]);
-
-        $job = Job::findOrFail($id);
-        $job -> job_title = $request -> input('job_title');
-        $job -> job_description = $request -> input('job_description');
-        $job -> is_multiple_staff = $request -> input('is_multiple_staff');
-        $job = save();
     }
 
     /**
@@ -127,7 +101,5 @@ class JobsController extends Controller
     public function destroy($id)
     {
         //
-        $job = Job::findOrFail($id);
-        $job->delete();
     }
 }
