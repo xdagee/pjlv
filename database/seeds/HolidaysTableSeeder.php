@@ -25,33 +25,27 @@ class HolidaysTableSeeder extends Seeder
         $myHolidays = [
 
         	[
-        		'description'	=>	"New Year's Day",
         		'date'			=>	myHoliday(Carbon::parse('first day of January'))
         	],
 
         	[
-                'description'   =>  'Independence Day',
-                'date'          =>  myHoliday(Carbon::createFromDate(null, 3, 6))
+               'date'          =>  myHoliday(Carbon::createFromDate(null, 3, 6))
             ],
 
        		[
-                'description'   =>  'Good Friday',
-                'date'          =>  myHoliday(Carbon::parse(date("Y-M-d", easter_date()))->subDays(2))
+               'date'          =>  myHoliday(Carbon::parse(date("Y-M-d", easter_date()))->subDays(2))
             ],
 
        		[
-                'description'   =>  'Easter Monday',
-                'date'          =>  myHoliday(Carbon::parse(date("Y-M-d", easter_date()))->addDay())
+               'date'          =>  myHoliday(Carbon::parse(date("Y-M-d", easter_date()))->addDay())
             ],
 
        		[
-                'description'   =>  'May Day',
-                'date'          =>  myHoliday(Carbon::parse('first day of May'))
+               'date'          =>  myHoliday(Carbon::parse('first day of May'))
             ],
 
             [
-                'description'   =>  'African Unity Day',
-                'date'          =>  myHoliday(Carbon::createFromDate(null, 5, 25))
+               'date'          =>  myHoliday(Carbon::createFromDate(null, 5, 25))
             ],
 
             // [
@@ -60,8 +54,7 @@ class HolidaysTableSeeder extends Seeder
             // ],
 
             [
-                'description'   =>  'Republic Day',
-                'date'          =>  myHoliday(Carbon::parse('first day of July'))
+               'date'          =>  myHoliday(Carbon::parse('first day of July'))
             ],
 
             // [
@@ -70,23 +63,19 @@ class HolidaysTableSeeder extends Seeder
             // ],
 
             [
-                'description'   =>  "Founders Day",
-                'date'          =>  myHoliday(Carbon::createFromDate(null, 9, 21))
+               'date'          =>  myHoliday(Carbon::createFromDate(null, 9, 21))
             ],
 
             [
-                'description'   =>  "Farmer's Day",
-                'date'          =>  myHoliday(Carbon::createFromDate(null, 12, 7))
+               'date'          =>  myHoliday(Carbon::createFromDate(null, 12, 7))
             ],
 
             [
-                'description'   =>  'Christmas Day',
-                'date'          =>  myHoliday(Carbon::createFromDate(null, 12, 25))
+               'date'          =>  myHoliday(Carbon::createFromDate(null, 12, 25))
             ],
 
             [
-                'description'   =>  'Boxing Day',
-                'date'          =>  myHoliday(Carbon::createFromDate(null, 12, 26))
+               'date'          =>  myHoliday(Carbon::createFromDate(null, 12, 26))
             ]
 
         ];
