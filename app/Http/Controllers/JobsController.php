@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Job;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
 
 class JobsController extends Controller
 {
@@ -126,8 +127,8 @@ class JobsController extends Controller
      */
     public function destroy($id)
     {
-        //
-        $job = Job::findOrFail($id);
-        $job->delete();
+        // 
+        // $job = Job::findOrFail($id);
+        // $job->delete();
     }
 }

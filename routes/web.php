@@ -22,10 +22,6 @@ Route::get('/dashboard', 'DashboardController@index');
 
 
 
-Route::get('/staffs/create', function(){ return view('staffs.create');});
-
-
-
 // staff controller with all the possible methods
 Route::get('/staff/', 'StaffController@index');
 
@@ -96,3 +92,6 @@ Route::get('/reports', 'ReportsController@index');
 Route::get('/apply', function () {
 	return view('leaves.apply');
 	});
+Auth::routes();
+
+Route::get('/home', 'HomeController@index');

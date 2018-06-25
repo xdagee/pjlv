@@ -3,7 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Staff;
+use App\StaffLeave;
+
 use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
 
 class StaffController extends Controller
 {
@@ -16,8 +19,7 @@ class StaffController extends Controller
     {
         $this->middleware('auth');
     }
-
-
+    
     /**
      * Display a listing of the resource.
      *
@@ -141,7 +143,7 @@ class StaffController extends Controller
     public function destroy($id)
     {
         //
-        $staff = Staff::findOrFail($id);
-        $staff->delete();
+        // $staff = Staff::findOrFail($id);
+        // $staff->delete();
     }
 }
