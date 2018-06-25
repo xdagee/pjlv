@@ -29,7 +29,9 @@ Route::get('/staff/create', 'StaffController@create');
 
 Route::post('staff', 'StaffController@store');
 
-Route::get('/staff/{staff}', 'StaffController@show');
+// Route::get('/staff/{staff}', 'StaffController@show');
+
+Route::get('staff/{id}', 'ShowProfile' );
 
 
 
@@ -48,6 +50,10 @@ Route::get('/jobs/{job}', 'JobsController@show');
 Route::get('/leaves/', 'StaffLeavesController@index');
 
 Route::get('/leaves/apply', 'StaffLeavesController@create');
+
+Route::get('/apply', function () {
+	return view('leaves.apply');
+	});
 
 Route::post('leaves', 'StaffLeavesController@store');
 
@@ -89,9 +95,3 @@ Route::get('/calendar', 'CalendarController@index');
 
 // reports
 Route::get('/reports', 'ReportsController@index');
-Route::get('/apply', function () {
-	return view('leaves.apply');
-	});
-Auth::routes();
-
-Route::get('/home', 'HomeController@index');

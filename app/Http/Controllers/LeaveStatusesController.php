@@ -63,10 +63,17 @@ class LeaveStatusesController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show(LeaveStatus $leavestatus)
+    public function show($id)
     {
         //
-        return view('leavestatuses.show', compact('leavestatus'));
+        $leavestatus = LeaveStatus::FindOrFail($id);
+
+        //json
+        return $leavestatus;
+
+        // view
+        // return view('leavestatuses.show', compact('leavestatus'));
+
     }
 
     /**

@@ -60,10 +60,15 @@ class LeaveActionsController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show(LeaveAction $leaveaction)
+    public function show($id)
     {
-        //
-        return view('leaveactions.show', compact('leaveaction'));
+        $leaveactions = LeaveAction::findOrFail($id);
+
+        //json
+        return $leaveactions;
+
+        // view
+        // return view('leaveactions.show', compact('leaveaction'));
     }
 
     /**

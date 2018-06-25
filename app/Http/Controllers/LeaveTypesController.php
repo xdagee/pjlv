@@ -59,10 +59,13 @@ class LeaveTypesController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show(LeaveType $leavetype)
+    public function show($id)
     {
-        //
-        return view ('leavetypes.show', compact('leavetypes'));
+        $leavetypes = LeaveType::FindOrFail($id);
+        // json
+        return $leavetypes;
+        // view
+        // return view ('leavetypes.show', compact('leavetypes'));
     }
 
     /**

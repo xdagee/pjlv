@@ -58,10 +58,13 @@ class LeaveLevelsController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show(LeaveLevel $leavelevel)
-    {
-        //
-        return view('leavelevels.show', compact('leavelevel'));
+    public function show($id)
+    {   
+        $leavelevel = LeaveLevel::findOrFail($id);
+        //json
+        return $leavelevel;
+        // view
+        // return view('leavelevels.show', compact('leavelevel'));
     }
 
     /**

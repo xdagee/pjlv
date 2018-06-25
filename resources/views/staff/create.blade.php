@@ -5,7 +5,7 @@
     <div class="col-md-12 col-lg-12">
         <div class="col-md-8 col-md-8">
                             <div class="card pull">
-                                <form method="POST" role="form"  action="{{ url('/staffs') }}"/>
+                                <form method="POST" role="form"  action="{{ url('/staff') }}"/>
 
                                     {{ csrf_field() }}
                                     

@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Staff;
 use App\StaffLeave;
+use App\StaffLeaveLevel;
+use App\Role;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -27,12 +29,21 @@ class StaffController extends Controller
      */
     public function index()
     {
-        //
-        $staff = Staff::latest()->get();
+        // get all staff sorting by latest added
+        // $staff = Staff::latest()->get();
+
+        // get all staff with limits
+        // $staff = Staff::orderby('id', 'desc')->paginate(5); 
+
+        // explicitly selecting
+        $data = array();
+        $staff = Staff::select('id','staff_number','title','firstname','lastname', 'mobile_number','is_active', 'supervisor_id')->latest()->get();
         // json
-        return $staff;
+        $data['data']=$staff;
+        return $data;
+
         // view
-        // return view('staffs.index');
+        // return view('staff.index');
     }
 
     /**
@@ -42,7 +53,7 @@ class StaffController extends Controller
      */
     public function create()
     {
-        //
+        // a view for staff
         return view ('staff.create');
     }
 
@@ -62,13 +73,26 @@ class StaffController extends Controller
             'dob'=> 'required',
             'mobile_number' => 'required',
             'gender' => 'required',
-            'date_joined' => 'required'
+            'date_joined' => 'required',
+            'leave_level_id' => 'required',
+            'role_id' => 'required'
         ]);
 
-        //
-        Staff::create(request(
-            ['title','firstname','lastname','dob','mobile_number','gender','date_joined']
-        ));
+        // save staff
+        Staff::create(
+            [
+                'title' => request('title'),
+                'firstname' => request ('firstname'),
+                'lastname' => request ('lastname'),
+                'dob' => request ('dob'),
+                'mobile_number' => request ('mobile_number'),
+                'gender' => request ('gender'),
+                'date_joined' => request ('date_joined'),
+                'leave_level_id' => request ('leave_level_id'),
+                'role_id' => request ('role_id')
+            ]
+        );
+
         return redirect('/staff');
     }
 
@@ -80,12 +104,16 @@ class StaffController extends Controller
      */
     public function show($id)
     {
-        //
+        // find a staff by id
         $staff = Staff::findOrFail($id);
+
+        // json
         return $staff;
         // return view ('staff.show', compact('staff'));
 
     }
+
+
 
     /**
      * Show the form for editing the specified resource.
@@ -95,10 +123,11 @@ class StaffController extends Controller
      */
     public function edit($id)
     {
-        //
-        $job = Job::findOrFail($id);
+        // update staff info by id
+        $staff = Staff::findOrFail($id);
 
-        return view('jobs.edit', compact('job'));
+        // a view
+        return view('staff.edit', compact('staff'));
     }
 
     /**
@@ -110,7 +139,7 @@ class StaffController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        // validate fields
         $this->validate($request, [
             'title'=>'required',
             'firstname'=>'required',
@@ -130,8 +159,6 @@ class StaffController extends Controller
         $staff -> gender->input('gender');
         $staff -> date_joined->input('date_joined');
         $staff -> save();
-
-
     }
 
     /**

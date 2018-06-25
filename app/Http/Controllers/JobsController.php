@@ -27,9 +27,13 @@ class JobsController extends Controller
      */
     public function index()
     {
-        //
-        $jobs = Job::latest()->get();
-        //
+        // getting all jobs
+        // $jobs = Job::latest()->get();
+
+        // explicitly selecting jobs
+        $jobs = Job::select('id','job_title','job_description','is_multiple_staff')->latest()->get();
+
+        // json
         return $jobs;
         // return view('jobs.index', compact('jobs')); // view
     }
@@ -76,9 +80,11 @@ class JobsController extends Controller
      */
     public function show($id)
     {
-        //
+        //find the id
         $job = Job::findOrFail($id);
+        // json
         return $job;
+        // view
         // return view ('jobs.show', compact('job'));
     }
 
@@ -90,7 +96,7 @@ class JobsController extends Controller
      */
     public function edit($id)
     {
-        //
+        // find id
         $job = Job::findOrFail($id);
         // return $job;
         return view ('jobs.edit', compact('job'));
