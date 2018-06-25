@@ -118,8 +118,8 @@ $(document).ready(function(){
         }
         var c= type==="1"? 14 : 1;
         disableField($startDate,false, "start date", "leave type");
-        mindate=calculateEndDate(today,c);
-        maxdate=calculateEndDate(mindate);
+        var mindate=calculateEndDate(today,c);
+        var maxdate=calculateEndDate(mindate);
         initDatepicker($startDate,mindate,maxdate);
     });
 

@@ -22,18 +22,30 @@ Route::get('/dashboard', 'DashboardController@index');
 
 
 
-Route::get('/staffs/create', function(){ return view('staffs.create');});
+Route::get('/staff/create', function(){ return view('staffs.create');});
 
 
 
 // staff controller with all the possible methods
-Route::get('/staff/', 'StaffController@index');
+Route::get('/staff/',function (){
+    return view('staff.index');
+} );
+
+Route::get('/staff/data', 'StaffController@index');
+
+Route::get('/staff/profile', function(){ return view('staff.profile');});
+
+Route::get('/staff/{staff}', 'StaffController@show');
 
 Route::get('/staff/create', 'StaffController@create');
 
 Route::post('staff', 'StaffController@store');
 
-Route::get('/staff/{staff}', 'StaffController@show');
+
+
+
+
+
 
 
 
