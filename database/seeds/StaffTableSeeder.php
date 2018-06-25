@@ -4,6 +4,7 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
 use Faker\Factory as Faker;
+use Carbon\Carbon;
 
 class StaffTableSeeder extends Seeder
 {
@@ -31,18 +32,24 @@ class StaffTableSeeder extends Seeder
         ]);
 
 
-        factory(App\Staff::class, 50)->create()->each(function ($s) {
+        factory(App\Staff::class, 10)->create()->each(function ($s) {
             $s->user()->save(factory(App\User::class)->make());
             //$s->leaveTypes()->attach(App\LeaveType::all()->random()->id);
 
             $s->jobs()->attach(App\Job::all()->random()->id);
 
             $faker = Faker::create();
+            $startDate = $faker->date($format = 'Y-m-d', $max = 'now');
+            $duration =  $faker->numberBetween($min = 1, $max = 36);
+            $endDate = Carbon::parse($startDate)->addDays($duration)->toDateString();
+            $createdAt = Carbon::parse($startDate)->subDays(18)->toDateString();
+            
             $s->leaveTypes()->attach(App\LeaveType::all()->random()->id, [
-                    'start_date'                =>  $faker->date($format = 'Y-m-d', $max = 'now+100'),
-                    'end_date'                  =>  $faker->date($format = 'Y-m-d', $max = 'now+200'),
-                    'leave_days'                =>  $faker->numberBetween($min = 1, $max = 36),
-                    'created_at'                =>  $faker->date($format = 'Y-m-d', $max = 'now+50')
+                    'start_date'                =>  $startDate,
+                    'end_date'                  =>  $endDate,
+                    'leave_days'                =>  $duration,
+                    'created_at'                =>  $createdAt,
+                    'updated_at'                =>  $createdAt
                 ]);
 
         });

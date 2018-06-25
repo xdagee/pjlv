@@ -16,10 +16,7 @@ class HolidaysTable extends Migration
         Schema::create('holidays', function (Blueprint $table) {
             $table->increments('id');
             $table->string('description',30)->nullable($value=false)->unique();
-            $table->string('year',4)->nullable($value=false);
-            $table->string('month',9)->nullable($value=false);
-            $table->string('day_of_month)',2)->nullable($value=false);
-            $table->timestamps();
+            $table->string('date',20)->nullable($value=false)->unique();
         });
     }
 

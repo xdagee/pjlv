@@ -17,7 +17,6 @@ class CreateLeaveTypesTable extends Migration
             $table->increments('id');
             $table->string('leave_type_name',100)->nullable($value = false)->unique();
             $table->Integer('leave_duration')->nullable($value = false);
-            $table->timestamps();
         });
     }
 

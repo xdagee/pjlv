@@ -4,8 +4,8 @@ namespace App;
 
 class Job extends Model
 {
-	public function staffJob()
+	public function staff()
 	{
-		return $this->belongsToMany(Staff::class)->using(StaffJob::class);
+		return $this->belongsToMany(Staff::class, 'staff_jobs');
 	}
 }

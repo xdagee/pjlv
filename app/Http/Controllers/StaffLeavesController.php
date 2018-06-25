@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\StaffLeave;
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+
+use App\Staff;
+use App\StaffLeave;
+use App\LeaveType;
 
 class StaffLeavesController extends Controller
 {
@@ -25,8 +27,10 @@ class StaffLeavesController extends Controller
      */
     public function index()
     {
-        $leaves = StaffLeave::orderby('id', 'desc');
-        // return $leaves;
+        $leaves = StaffLeave::latest()->get();
+        // json
+        return $leaves;
+        // view
         return view('leaves.index', compact('leaves'));
     }
 
@@ -53,16 +57,16 @@ class StaffLeavesController extends Controller
     {
         //
         $this->validate($request, [
-            'start_date'=>'required',
-            'end_date'=>'required',
-            'leave_days'=>'required',
-            'leave_type_id'=>'required',
-            'staff_id'=>'required',]);
+            'start_date'=>'required|date',
+            'end_date'=>'required|date',
+            'leave_days'=>'required|integer',
+        ]);
 
         StaffLeave::create(request (
-            ['start-date','end-date','duration','leave-type-id','staff-id']
+            ['start_date','end_date','leave_days','leave_type_id'=>$leavetype->$id, 'staff-id'=>$staff->$id, ]
         ));
 
+        // 
         return redirect('/leaves');
     }
 

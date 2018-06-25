@@ -51,11 +51,3 @@
 	</div>
 
 @endsection
-
-@section('scripts')
-    <script !src="">
-
-    </script>
-
-
-@endsection

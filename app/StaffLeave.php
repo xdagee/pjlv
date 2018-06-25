@@ -3,10 +3,7 @@
 namespace App;
 
 
-use Illuminate\Database\Eloquent\Relations\Pivot;
-
-
-class StaffLeave extends Pivot
+class StaffLeave extends Model
 {
 
     public function leaveAction()

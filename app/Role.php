@@ -8,9 +8,4 @@ class Role extends Model
     {
     	return $this->hasMany(Staff::class);
 	}
-	
-    // public function users()
-    // {
-    //   return $this->belongsToMany(User::class);
-    // }
 }
