@@ -12,7 +12,7 @@
                 <h4 class="card-title"> Staffs </h4>
             </div>
             <div class="card-content table-responsive">
-                <table class="table table-hover">
+                <table class="table table-hover" id="staff-details-table">
                     <thead class="text-warning">
                         <th>#</th>
                         <th>Position</th>
@@ -20,41 +20,9 @@
                         <th>Gender</th>
                         <th>Salary</th>
                         <th>Country</th>
+
                     </thead>
-                    <tbody>
-                        <tr>
-                            <td>1</td>
-                            <th>Chief Technology Officer</th>
-                            <td>Dakota Rice</td>
-                            <td>Female</td>
-                            <td>$36,738</td>
-                            <td>Niger</td>
-                        </tr>
-                        <tr>
-                            <td>2</td>
-                            <th>Artificial Intelligence Engineer</th>
-                            <td>Minerva Hooper</td>
-                            <td>Female</td>
-                            <td>$23,789</td>
-                            <td>Curaçao</td>
-                        </tr>
-                        <tr>
-                            <td>3</td>
-                            <th>Chief Operating Officer</th>
-                            <td>Sage Rodriguez</td>
-                            <td>Female</td>
-                            <td>$56,142</td>
-                            <td>Netherlands</td>
-                        </tr>
-                        <tr>
-                            <td>4</td>
-                            <td>Artificial Intelligence Engineer</td>
-                            <td>Prince Gee</td>
-                            <td>Male</td>
-                            <td>$138,735</td>
-                            <td>Ghana, Accra</td>
-                        </tr>
-                    </tbody>
+
                 </table>
             </div>
         </div>
