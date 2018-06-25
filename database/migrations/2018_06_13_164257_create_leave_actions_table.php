@@ -17,9 +17,9 @@ class CreateLeaveActionsTable extends Migration
             $table->increments('id');
             $table->unsignedInteger('leave_id')->nullable($value = false);
             $table->unsignedInteger('actionby')->nullable($value = false);
-            $table->unsignedInteger('status_id')->nullable($value = false);
-            $table->dateTime('action_date')->nullable($value=false);
-            $table->string('action_reason')->nullable($value=false);
+            $table->unsignedInteger('status_id')->nullable($value = false)->default(1);
+            $table->dateTime('action_date')->nullable($value=false)->default(DB::raw('CURRENT_TIMESTAMP'));
+            $table->string('action_reason')->nullable($value=true);
             
 
 
