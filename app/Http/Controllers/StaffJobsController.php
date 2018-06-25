@@ -24,6 +24,8 @@ class StaffJobsController extends Controller
         //
     	$staffjobs = StaffJob::latest()->get();
         // json
-    	return $staffjob;
+    	return $staffjobs;
+    	// view
+    	return view ('staffjobs.index');
     }
 }
