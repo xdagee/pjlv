@@ -11,7 +11,7 @@ class Staff extends Model
 
 	public function leaveTypes()
 	{
-		return $this->belongsToMany(LeaveType::class, 'staff_leaves');
+		return $this->belongsToMany(LeaveType::class, 'staff_leaves')->withPivot('start_date','end_date','leave_days')->withTimestamps();
 	}
 
 	public function leaveAction()
@@ -33,13 +33,6 @@ class Staff extends Model
     	return $this->belongsTo(LeaveLevel::class);
     }
 
-    // public function newPivot(Model $parent, array $attributes, $table, $exists)
-    // {
-    //     if ($parent instanceof LeaveType) {
-    //         return new StaffLeave($parent, $attributes, $table, $exists);
-    //     }
-
-    //     return parent::newPivot($parent, $attributes, $table, $exists);
-    // }
+    
 }
 
