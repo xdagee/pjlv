@@ -29,9 +29,9 @@ Route::get('/staff/create', 'StaffController@create');
 
 Route::post('staff', 'StaffController@store');
 
-// Route::get('/staff/{staff}', 'StaffController@show');
+Route::get('/staff/{staff}', 'StaffController@show');
 
-Route::get('staff/{id}', 'ShowProfile' );
+Route::get('staff/{id}', 'ShowProfile');
 
 
 

@@ -109,6 +109,8 @@ class StaffController extends Controller
 
         // json
         return $staff;
+
+        // view
         // return view ('staff.show', compact('staff'));
 
     }
