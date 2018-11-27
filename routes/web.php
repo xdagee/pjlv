@@ -34,15 +34,11 @@ Route::get('/staff/profile', function(){ return view('staff.profile');});
 
 Route::get('/staff/{staff}', 'StaffController@show');
 
-<<<<<<< HEAD
 Route::get('staff/{id}', 'ShowProfile');
 
-=======
 Route::get('/staff/create', 'StaffController@create');
 
 Route::post('staff', 'StaffController@store');
->>>>>>> 262148d9f3548d588db0e30037e57ca23d80b414
-
 
 // jobs controller with all possible job options
 Route::get('/jobs/', 'JobsController@index');
