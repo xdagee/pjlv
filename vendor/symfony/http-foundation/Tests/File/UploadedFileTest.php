@@ -11,9 +11,10 @@
 
 namespace Symfony\Component\HttpFoundation\Tests\File;
 
+use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
-class UploadedFileTest extends \PHPUnit_Framework_TestCase
+class UploadedFileTest extends TestCase
 {
     protected function setUp()
     {
@@ -24,7 +25,7 @@ class UploadedFileTest extends \PHPUnit_Framework_TestCase
 
     public function testConstructWhenFileNotExists()
     {
-        $this->setExpectedException('Symfony\Component\HttpFoundation\File\Exception\FileNotFoundException');
+        $this->{method_exists($this, $_ = 'expectException') ? $_ : 'setExpectedException'}('Symfony\Component\HttpFoundation\File\Exception\FileNotFoundException');
 
         new UploadedFile(
             __DIR__.'/Fixtures/not_here',
@@ -45,7 +46,7 @@ class UploadedFileTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals('application/octet-stream', $file->getClientMimeType());
 
-        if (extension_loaded('fileinfo')) {
+        if (\extension_loaded('fileinfo')) {
             $this->assertEquals('image/gif', $file->getMimeType());
         }
     }
@@ -248,13 +249,13 @@ class UploadedFileTest extends \PHPUnit_Framework_TestCase
 
     public function uploadedFileErrorProvider()
     {
-        return array(
-            array(UPLOAD_ERR_INI_SIZE),
-            array(UPLOAD_ERR_FORM_SIZE),
-            array(UPLOAD_ERR_PARTIAL),
-            array(UPLOAD_ERR_NO_TMP_DIR),
-            array(UPLOAD_ERR_EXTENSION),
-        );
+        return [
+            [UPLOAD_ERR_INI_SIZE],
+            [UPLOAD_ERR_FORM_SIZE],
+            [UPLOAD_ERR_PARTIAL],
+            [UPLOAD_ERR_NO_TMP_DIR],
+            [UPLOAD_ERR_EXTENSION],
+        ];
     }
 
     public function testIsInvalidIfNotHttpUpload()

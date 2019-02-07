@@ -30,8 +30,8 @@ class ResponseCacheStrategy implements ResponseCacheStrategyInterface
 {
     private $cacheable = true;
     private $embeddedResponses = 0;
-    private $ttls = array();
-    private $maxAges = array();
+    private $ttls = [];
+    private $maxAges = [];
     private $isNotCacheableResponseEmbedded = false;
 
     /**
@@ -39,7 +39,7 @@ class ResponseCacheStrategy implements ResponseCacheStrategyInterface
      */
     public function add(Response $response)
     {
-        if ($response->isValidateable()) {
+        if (!$response->isFresh() || !$response->isCacheable()) {
             $this->cacheable = false;
         } else {
             $maxAge = $response->getMaxAge();
@@ -70,6 +70,9 @@ class ResponseCacheStrategy implements ResponseCacheStrategyInterface
         if ($response->isValidateable()) {
             $response->setEtag(null);
             $response->setLastModified(null);
+        }
+
+        if (!$response->isFresh() || !$response->isCacheable()) {
             $this->cacheable = false;
         }
 

@@ -11,9 +11,9 @@
 
 namespace Symfony\Component\Routing\Tests\Loader;
 
-use Symfony\Component\Routing\Loader\AnnotationFileLoader;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Loader\AnnotationFileLoader;
 
 class AnnotationFileLoaderTest extends AbstractAnnotationLoaderTest
 {
@@ -46,16 +46,36 @@ class AnnotationFileLoaderTest extends AbstractAnnotationLoaderTest
     }
 
     /**
+     * @expectedException \InvalidArgumentException
+     * @expectedExceptionMessage Did you forgot to add the "<?php" start tag at the beginning of the file?
+     */
+    public function testLoadFileWithoutStartTag()
+    {
+        $this->loader->load(__DIR__.'/../Fixtures/OtherAnnotatedClasses/NoStartTagClass.php');
+    }
+
+    /**
      * @requires PHP 5.6
      */
     public function testLoadVariadic()
     {
-        $route = new Route(array('path' => '/path/to/{id}'));
+        $route = new Route(['path' => '/path/to/{id}']);
         $this->reader->expects($this->once())->method('getClassAnnotation');
         $this->reader->expects($this->once())->method('getMethodAnnotations')
-            ->will($this->returnValue(array($route)));
+            ->will($this->returnValue([$route]));
 
         $this->loader->load(__DIR__.'/../Fixtures/OtherAnnotatedClasses/VariadicClass.php');
+    }
+
+    /**
+     * @requires PHP 7.0
+     */
+    public function testLoadAnonymousClass()
+    {
+        $this->reader->expects($this->never())->method('getClassAnnotation');
+        $this->reader->expects($this->never())->method('getMethodAnnotations');
+
+        $this->loader->load(__DIR__.'/../Fixtures/OtherAnnotatedClasses/AnonymousClassInTrait.php');
     }
 
     public function testSupports()

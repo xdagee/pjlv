@@ -11,15 +11,16 @@
 
 namespace Symfony\Component\HttpKernel\Tests\EventListener;
 
-use Symfony\Component\HttpKernel\EventListener\ResponseListener;
+use PHPUnit\Framework\TestCase;
+use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
+use Symfony\Component\HttpKernel\EventListener\ResponseListener;
+use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\HttpKernel\KernelEvents;
-use Symfony\Component\EventDispatcher\EventDispatcher;
 
-class ResponseListenerTest extends \PHPUnit_Framework_TestCase
+class ResponseListenerTest extends TestCase
 {
     private $dispatcher;
 
@@ -29,7 +30,7 @@ class ResponseListenerTest extends \PHPUnit_Framework_TestCase
     {
         $this->dispatcher = new EventDispatcher();
         $listener = new ResponseListener('UTF-8');
-        $this->dispatcher->addListener(KernelEvents::RESPONSE, array($listener, 'onKernelResponse'));
+        $this->dispatcher->addListener(KernelEvents::RESPONSE, [$listener, 'onKernelResponse']);
 
         $this->kernel = $this->getMockBuilder('Symfony\Component\HttpKernel\HttpKernelInterface')->getMock();
     }
@@ -53,7 +54,7 @@ class ResponseListenerTest extends \PHPUnit_Framework_TestCase
     public function testFilterSetsNonDefaultCharsetIfNotOverridden()
     {
         $listener = new ResponseListener('ISO-8859-15');
-        $this->dispatcher->addListener(KernelEvents::RESPONSE, array($listener, 'onKernelResponse'), 1);
+        $this->dispatcher->addListener(KernelEvents::RESPONSE, [$listener, 'onKernelResponse'], 1);
 
         $response = new Response('foo');
 
@@ -66,7 +67,7 @@ class ResponseListenerTest extends \PHPUnit_Framework_TestCase
     public function testFilterDoesNothingIfCharsetIsOverridden()
     {
         $listener = new ResponseListener('ISO-8859-15');
-        $this->dispatcher->addListener(KernelEvents::RESPONSE, array($listener, 'onKernelResponse'), 1);
+        $this->dispatcher->addListener(KernelEvents::RESPONSE, [$listener, 'onKernelResponse'], 1);
 
         $response = new Response('foo');
         $response->setCharset('ISO-8859-1');
@@ -80,7 +81,7 @@ class ResponseListenerTest extends \PHPUnit_Framework_TestCase
     public function testFiltersSetsNonDefaultCharsetIfNotOverriddenOnNonTextContentType()
     {
         $listener = new ResponseListener('ISO-8859-15');
-        $this->dispatcher->addListener(KernelEvents::RESPONSE, array($listener, 'onKernelResponse'), 1);
+        $this->dispatcher->addListener(KernelEvents::RESPONSE, [$listener, 'onKernelResponse'], 1);
 
         $response = new Response('foo');
         $request = Request::create('/');

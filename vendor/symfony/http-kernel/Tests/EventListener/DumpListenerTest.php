@@ -11,6 +11,7 @@
 
 namespace Symfony\Component\HttpKernel\Tests\EventListener;
 
+use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\ConsoleEvents;
 use Symfony\Component\HttpKernel\EventListener\DumpListener;
 use Symfony\Component\VarDumper\Cloner\ClonerInterface;
@@ -23,12 +24,12 @@ use Symfony\Component\VarDumper\VarDumper;
  *
  * @author Nicolas Grekas <p@tchwork.com>
  */
-class DumpListenerTest extends \PHPUnit_Framework_TestCase
+class DumpListenerTest extends TestCase
 {
     public function testSubscribedEvents()
     {
         $this->assertSame(
-            array(ConsoleEvents::COMMAND => array('configure', 1024)),
+            [ConsoleEvents::COMMAND => ['configure', 1024]],
             DumpListener::getSubscribedEvents()
         );
     }
@@ -67,7 +68,7 @@ class MockCloner implements ClonerInterface
 {
     public function cloneVar($var)
     {
-        return new Data(array($var.'-'));
+        return new Data([[$var.'-']]);
     }
 }
 
@@ -75,8 +76,6 @@ class MockDumper implements DataDumperInterface
 {
     public function dump(Data $data)
     {
-        $rawData = $data->getRawData();
-
-        echo '+'.$rawData[0];
+        echo '+'.$data->getValue();
     }
 }

@@ -11,10 +11,11 @@
 
 namespace Symfony\Component\Debug\Tests\FatalErrorHandler;
 
+use PHPUnit\Framework\TestCase;
 use Symfony\Component\Debug\Exception\FatalErrorException;
 use Symfony\Component\Debug\FatalErrorHandler\UndefinedMethodFatalErrorHandler;
 
-class UndefinedMethodFatalErrorHandlerTest extends \PHPUnit_Framework_TestCase
+class UndefinedMethodFatalErrorHandlerTest extends TestCase
 {
     /**
      * @dataProvider provideUndefinedMethodData
@@ -33,43 +34,43 @@ class UndefinedMethodFatalErrorHandlerTest extends \PHPUnit_Framework_TestCase
 
     public function provideUndefinedMethodData()
     {
-        return array(
-            array(
-                array(
+        return [
+            [
+                [
                     'type' => 1,
                     'line' => 12,
                     'file' => 'foo.php',
                     'message' => 'Call to undefined method SplObjectStorage::what()',
-                ),
+                ],
                 'Attempted to call an undefined method named "what" of class "SplObjectStorage".',
-            ),
-            array(
-                array(
+            ],
+            [
+                [
                     'type' => 1,
                     'line' => 12,
                     'file' => 'foo.php',
                     'message' => 'Call to undefined method SplObjectStorage::walid()',
-                ),
+                ],
                 "Attempted to call an undefined method named \"walid\" of class \"SplObjectStorage\".\nDid you mean to call \"valid\"?",
-            ),
-            array(
-                array(
+            ],
+            [
+                [
                     'type' => 1,
                     'line' => 12,
                     'file' => 'foo.php',
                     'message' => 'Call to undefined method SplObjectStorage::offsetFet()',
-                ),
+                ],
                 "Attempted to call an undefined method named \"offsetFet\" of class \"SplObjectStorage\".\nDid you mean to call e.g. \"offsetGet\", \"offsetSet\" or \"offsetUnset\"?",
-            ),
-            array(
-                array(
-                  'type' => 1,
-                  'message' => 'Call to undefined method class@anonymous::test()',
-                  'file' => '/home/possum/work/symfony/test.php',
-                  'line' => 11,
-                ),
+            ],
+            [
+                [
+                    'type' => 1,
+                    'message' => 'Call to undefined method class@anonymous::test()',
+                    'file' => '/home/possum/work/symfony/test.php',
+                    'line' => 11,
+                ],
                 'Attempted to call an undefined method named "test" of class "class@anonymous".',
-            ),
-        );
+            ],
+        ];
     }
 }

@@ -11,16 +11,17 @@
 
 namespace Symfony\Component\VarDumper\Tests\Test;
 
+use PHPUnit\Framework\TestCase;
 use Symfony\Component\VarDumper\Test\VarDumperTestTrait;
 
-class VarDumperTestTraitTest extends \PHPUnit_Framework_TestCase
+class VarDumperTestTraitTest extends TestCase
 {
     use VarDumperTestTrait;
 
     public function testItComparesLargeData()
     {
         $howMany = 700;
-        $data = array_fill_keys(range(0, $howMany), array('a', 'b', 'c', 'd'));
+        $data = array_fill_keys(range(0, $howMany), ['a', 'b', 'c', 'd']);
 
         $expected = sprintf("array:%d [\n", $howMany + 1);
         for ($i = 0; $i <= $howMany; ++$i) {

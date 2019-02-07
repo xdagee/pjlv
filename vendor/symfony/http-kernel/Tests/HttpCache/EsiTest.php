@@ -11,11 +11,12 @@
 
 namespace Symfony\Component\HttpKernel\Tests\HttpCache;
 
-use Symfony\Component\HttpKernel\HttpCache\Esi;
+use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\HttpCache\Esi;
 
-class EsiTest extends \PHPUnit_Framework_TestCase
+class EsiTest extends TestCase
 {
     public function testHasSurrogateEsiCapability()
     {
@@ -39,10 +40,10 @@ class EsiTest extends \PHPUnit_Framework_TestCase
 
         $request = Request::create('/');
         $esi->addSurrogateCapability($request);
-        $this->assertEquals('symfony2="ESI/1.0"', $request->headers->get('Surrogate-Capability'));
+        $this->assertEquals('symfony="ESI/1.0"', $request->headers->get('Surrogate-Capability'));
 
         $esi->addSurrogateCapability($request);
-        $this->assertEquals('symfony2="ESI/1.0", symfony2="ESI/1.0"', $request->headers->get('Surrogate-Capability'));
+        $this->assertEquals('symfony="ESI/1.0", symfony="ESI/1.0"', $request->headers->get('Surrogate-Capability'));
     }
 
     public function testAddSurrogateControl()
@@ -219,21 +220,21 @@ class EsiTest extends \PHPUnit_Framework_TestCase
         $response1 = new Response('foo');
         $response1->setStatusCode(404);
         $response2 = new Response('bar');
-        $cache = $this->getCache(Request::create('/'), array($response1, $response2));
+        $cache = $this->getCache(Request::create('/'), [$response1, $response2]);
         $this->assertEquals('bar', $esi->handle($cache, '/', '/alt', false));
     }
 
     protected function getCache($request, $response)
     {
-        $cache = $this->getMockBuilder('Symfony\Component\HttpKernel\HttpCache\HttpCache')->setMethods(array('getRequest', 'handle'))->disableOriginalConstructor()->getMock();
+        $cache = $this->getMockBuilder('Symfony\Component\HttpKernel\HttpCache\HttpCache')->setMethods(['getRequest', 'handle'])->disableOriginalConstructor()->getMock();
         $cache->expects($this->any())
               ->method('getRequest')
               ->will($this->returnValue($request))
         ;
-        if (is_array($response)) {
+        if (\is_array($response)) {
             $cache->expects($this->any())
                   ->method('handle')
-                  ->will(call_user_func_array(array($this, 'onConsecutiveCalls'), $response))
+                  ->will(\call_user_func_array([$this, 'onConsecutiveCalls'], $response))
             ;
         } else {
             $cache->expects($this->any())
