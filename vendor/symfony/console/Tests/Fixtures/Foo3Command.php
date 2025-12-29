@@ -6,7 +6,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class Foo3Command extends Command
 {
-    protected function configure()
+    protected function configure(): void
     {
         $this
             ->setName('foo3:bar')
@@ -14,7 +14,7 @@ class Foo3Command extends Command
         ;
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         try {
             try {
@@ -25,5 +25,7 @@ class Foo3Command extends Command
         } catch (\Exception $e) {
             throw new \Exception('Third exception <fg=blue;bg=red>comment</>', 404, $e);
         }
+
+        return 0;
     }
 }

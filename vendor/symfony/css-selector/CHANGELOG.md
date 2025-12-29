@@ -1,6 +1,22 @@
 CHANGELOG
 =========
 
+7.1
+---
+
+ * Add support for `:is()`
+ * Add support for `:where()`
+
+6.3
+---
+
+ * Add support for `:scope`
+
+4.4.0
+-----
+
+ * Added support for `*:only-of-type`
+
 2.8.0
 -----
 

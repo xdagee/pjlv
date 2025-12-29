@@ -4,40 +4,43 @@ namespace PhpParser\Node\Stmt;
 
 use PhpParser\Node;
 
-class If_ extends Node\Stmt
-{
+class If_ extends Node\Stmt {
     /** @var Node\Expr Condition expression */
-    public $cond;
+    public Node\Expr $cond;
     /** @var Node\Stmt[] Statements */
-    public $stmts;
+    public array $stmts;
     /** @var ElseIf_[] Elseif clauses */
-    public $elseifs;
+    public array $elseifs;
     /** @var null|Else_ Else clause */
-    public $else;
+    public ?Else_ $else;
 
     /**
      * Constructs an if node.
      *
-     * @param Node\Expr $cond       Condition
-     * @param array     $subNodes   Array of the following optional subnodes:
-     *                              'stmts'   => array(): Statements
-     *                              'elseifs' => array(): Elseif clauses
-     *                              'else'    => null   : Else clause
-     * @param array     $attributes Additional attributes
+     * @param Node\Expr $cond Condition
+     * @param array{
+     *     stmts?: Node\Stmt[],
+     *     elseifs?: ElseIf_[],
+     *     else?: Else_|null,
+     * } $subNodes Array of the following optional subnodes:
+     *             'stmts'   => array(): Statements
+     *             'elseifs' => array(): Elseif clauses
+     *             'else'    => null   : Else clause
+     * @param array<string, mixed> $attributes Additional attributes
      */
     public function __construct(Node\Expr $cond, array $subNodes = [], array $attributes = []) {
-        parent::__construct($attributes);
+        $this->attributes = $attributes;
         $this->cond = $cond;
         $this->stmts = $subNodes['stmts'] ?? [];
         $this->elseifs = $subNodes['elseifs'] ?? [];
         $this->else = $subNodes['else'] ?? null;
     }
 
-    public function getSubNodeNames() : array {
+    public function getSubNodeNames(): array {
         return ['cond', 'stmts', 'elseifs', 'else'];
     }
-    
-    public function getType() : string {
+
+    public function getType(): string {
         return 'Stmt_If';
     }
 }

@@ -22,7 +22,7 @@ class CasterTest extends TestCase
 {
     use VarDumperTestTrait;
 
-    private $referenceArray = [
+    private static array $referenceArray = [
         'null' => null,
         'empty' => false,
         'public' => 'pub',
@@ -38,15 +38,15 @@ class CasterTest extends TestCase
     public function testFilter($filter, $expectedDiff, $listedProperties = null)
     {
         if (null === $listedProperties) {
-            $filteredArray = Caster::filter($this->referenceArray, $filter);
+            $filteredArray = Caster::filter(self::$referenceArray, $filter);
         } else {
-            $filteredArray = Caster::filter($this->referenceArray, $filter, $listedProperties);
+            $filteredArray = Caster::filter(self::$referenceArray, $filter, $listedProperties);
         }
 
-        $this->assertSame($expectedDiff, array_diff_assoc($this->referenceArray, $filteredArray));
+        $this->assertSame($expectedDiff, array_diff_assoc(self::$referenceArray, $filteredArray));
     }
 
-    public function provideFilter()
+    public static function provideFilter()
     {
         return [
             [
@@ -126,7 +126,7 @@ class CasterTest extends TestCase
             ],
             [
                 Caster::EXCLUDE_NOT_IMPORTANT | Caster::EXCLUDE_VERBOSE,
-                $this->referenceArray,
+                self::$referenceArray,
                 ['public', "\0*\0protected"],
             ],
             [
@@ -151,9 +151,6 @@ class CasterTest extends TestCase
         ];
     }
 
-    /**
-     * @requires PHP 7.0
-     */
     public function testAnonymousClass()
     {
         $c = eval('return new class extends stdClass { private $foo = "foo"; };');
@@ -167,15 +164,53 @@ EOTXT
             , $c
         );
 
-        $c = eval('return new class { private $foo = "foo"; };');
+        $c = eval('return new class implements \Countable { private $foo = "foo"; public function count(): int { return 0; } };');
 
         $this->assertDumpMatchesFormat(
             <<<'EOTXT'
-@anonymous {
+Countable@anonymous {
   -foo: "foo"
 }
 EOTXT
             , $c
         );
     }
+
+    public function testTypeErrorInDebugInfo()
+    {
+        $this->assertDumpMatchesFormat('class@anonymous {}', new class {
+            public function __debugInfo(): array
+            {
+                return ['class' => \get_class(null)];
+            }
+        });
+    }
+
+    public function testClassHierarchy()
+    {
+        $this->assertDumpMatchesFormat(<<<'DUMP'
+            Symfony\Component\VarDumper\Tests\Caster\B {
+              +a: "a"
+              #b: "b"
+              -c: "c"
+              +d: "d"
+              #e: "e"
+              -f: "f"
+            }
+            DUMP, new B());
+    }
+}
+
+class A
+{
+    public $a = 'a';
+    protected $b = 'b';
+    private $c = 'c';
+}
+
+class B extends A
+{
+    public $d = 'd';
+    protected $e = 'e';
+    private $f = 'f';
 }

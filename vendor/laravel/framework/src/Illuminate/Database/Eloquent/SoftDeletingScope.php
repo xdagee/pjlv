@@ -7,9 +7,9 @@ class SoftDeletingScope implements Scope
     /**
      * All of the extensions to be added to the builder.
      *
-     * @var array
+     * @var string[]
      */
-    protected $extensions = ['Restore', 'WithTrashed', 'WithoutTrashed', 'OnlyTrashed'];
+    protected $extensions = ['Restore', 'RestoreOrCreate', 'CreateOrRestore', 'WithTrashed', 'WithoutTrashed', 'OnlyTrashed'];
 
     /**
      * Apply the scope to a given Eloquent query builder.
@@ -75,6 +75,40 @@ class SoftDeletingScope implements Scope
     }
 
     /**
+     * Add the restore-or-create extension to the builder.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder  $builder
+     * @return void
+     */
+    protected function addRestoreOrCreate(Builder $builder)
+    {
+        $builder->macro('restoreOrCreate', function (Builder $builder, array $attributes = [], array $values = []) {
+            $builder->withTrashed();
+
+            return tap($builder->firstOrCreate($attributes, $values), function ($instance) {
+                $instance->restore();
+            });
+        });
+    }
+
+    /**
+     * Add the create-or-restore extension to the builder.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder  $builder
+     * @return void
+     */
+    protected function addCreateOrRestore(Builder $builder)
+    {
+        $builder->macro('createOrRestore', function (Builder $builder, array $attributes = [], array $values = []) {
+            $builder->withTrashed();
+
+            return tap($builder->createOrFirst($attributes, $values), function ($instance) {
+                $instance->restore();
+            });
+        });
+    }
+
+    /**
      * Add the with-trashed extension to the builder.
      *
      * @param  \Illuminate\Database\Eloquent\Builder  $builder
@@ -82,7 +116,11 @@ class SoftDeletingScope implements Scope
      */
     protected function addWithTrashed(Builder $builder)
     {
-        $builder->macro('withTrashed', function (Builder $builder) {
+        $builder->macro('withTrashed', function (Builder $builder, $withTrashed = true) {
+            if (! $withTrashed) {
+                return $builder->withoutTrashed();
+            }
+
             return $builder->withoutGlobalScope($this);
         });
     }

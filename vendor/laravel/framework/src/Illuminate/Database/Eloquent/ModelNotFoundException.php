@@ -2,35 +2,39 @@
 
 namespace Illuminate\Database\Eloquent;
 
-use RuntimeException;
+use Illuminate\Database\RecordsNotFoundException;
+use Illuminate\Support\Arr;
 
-class ModelNotFoundException extends RuntimeException
+/**
+ * @template TModel of \Illuminate\Database\Eloquent\Model
+ */
+class ModelNotFoundException extends RecordsNotFoundException
 {
     /**
      * Name of the affected Eloquent model.
      *
-     * @var string
+     * @var class-string<TModel>
      */
     protected $model;
 
     /**
      * The affected model IDs.
      *
-     * @var int|array
+     * @var array<int, int|string>
      */
     protected $ids;
 
     /**
      * Set the affected Eloquent model and instance ids.
      *
-     * @param  string  $model
-     * @param  int|array  $ids
+     * @param  class-string<TModel>  $model
+     * @param  array<int, int|string>|int|string  $ids
      * @return $this
      */
     public function setModel($model, $ids = [])
     {
         $this->model = $model;
-        $this->ids = array_wrap($ids);
+        $this->ids = Arr::wrap($ids);
 
         $this->message = "No query results for model [{$model}]";
 
@@ -46,7 +50,7 @@ class ModelNotFoundException extends RuntimeException
     /**
      * Get the affected Eloquent model.
      *
-     * @return string
+     * @return class-string<TModel>
      */
     public function getModel()
     {
@@ -56,7 +60,7 @@ class ModelNotFoundException extends RuntimeException
     /**
      * Get the affected Eloquent model IDs.
      *
-     * @return int|array
+     * @return array<int, int|string>
      */
     public function getIds()
     {

@@ -2,10 +2,12 @@
 
 namespace Illuminate\Foundation\Console;
 
-use RuntimeException;
 use Illuminate\Console\Command;
 use Illuminate\Filesystem\Filesystem;
+use RuntimeException;
+use Symfony\Component\Console\Attribute\AsCommand;
 
+#[AsCommand(name: 'view:clear')]
 class ViewClearCommand extends Command
 {
     /**
@@ -46,8 +48,10 @@ class ViewClearCommand extends Command
      * Execute the console command.
      *
      * @return void
+     *
+     * @throws \RuntimeException
      */
-    public function fire()
+    public function handle()
     {
         $path = $this->laravel['config']['view.compiled'];
 
@@ -55,10 +59,14 @@ class ViewClearCommand extends Command
             throw new RuntimeException('View path not found.');
         }
 
+        $this->laravel['view.engine.resolver']
+            ->resolve('blade')
+            ->forgetCompiledOrNotExpired();
+
         foreach ($this->files->glob("{$path}/*") as $view) {
             $this->files->delete($view);
         }
 
-        $this->info('Compiled views cleared!');
+        $this->components->info('Compiled views cleared successfully.');
     }
 }

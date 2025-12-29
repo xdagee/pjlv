@@ -1,27 +1,23 @@
 <?php
 
-namespace DummyNamespace;
+namespace {{ namespace }};
 
 use Illuminate\Support\ServiceProvider;
 
-class DummyClass extends ServiceProvider
+class {{ class }} extends ServiceProvider
 {
     /**
-     * Bootstrap the application services.
-     *
-     * @return void
+     * Register services.
      */
-    public function boot()
+    public function register(): void
     {
         //
     }
 
     /**
-     * Register the application services.
-     *
-     * @return void
+     * Bootstrap services.
      */
-    public function register()
+    public function boot(): void
     {
         //
     }

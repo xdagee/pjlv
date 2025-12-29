@@ -23,83 +23,43 @@ namespace Symfony\Component\CssSelector\Parser;
  */
 class Reader
 {
-    /**
-     * @var string
-     */
-    private $source;
+    private int $length;
+    private int $position = 0;
 
-    /**
-     * @var int
-     */
-    private $length;
-
-    /**
-     * @var int
-     */
-    private $position = 0;
-
-    /**
-     * @param string $source
-     */
-    public function __construct($source)
-    {
-        $this->source = $source;
-        $this->length = strlen($source);
+    public function __construct(
+        private string $source,
+    ) {
+        $this->length = \strlen($source);
     }
 
-    /**
-     * @return bool
-     */
-    public function isEOF()
+    public function isEOF(): bool
     {
         return $this->position >= $this->length;
     }
 
-    /**
-     * @return int
-     */
-    public function getPosition()
+    public function getPosition(): int
     {
         return $this->position;
     }
 
-    /**
-     * @return int
-     */
-    public function getRemainingLength()
+    public function getRemainingLength(): int
     {
         return $this->length - $this->position;
     }
 
-    /**
-     * @param int $length
-     * @param int $offset
-     *
-     * @return string
-     */
-    public function getSubstring($length, $offset = 0)
+    public function getSubstring(int $length, int $offset = 0): string
     {
         return substr($this->source, $this->position + $offset, $length);
     }
 
-    /**
-     * @param string $string
-     *
-     * @return int
-     */
-    public function getOffset($string)
+    public function getOffset(string $string): int|false
     {
         $position = strpos($this->source, $string, $this->position);
 
         return false === $position ? false : $position - $this->position;
     }
 
-    /**
-     * @param string $pattern
-     *
-     * @return bool
-     */
-    public function findPattern($pattern)
+    public function findPattern(string $pattern): array|false
     {
         $source = substr($this->source, $this->position);
 
@@ -110,15 +70,12 @@ class Reader
         return false;
     }
 
-    /**
-     * @param int $length
-     */
-    public function moveForward($length)
+    public function moveForward(int $length): void
     {
         $this->position += $length;
     }
 
-    public function moveToEnd()
+    public function moveToEnd(): void
     {
         $this->position = $this->length;
     }

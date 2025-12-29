@@ -6,10 +6,10 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class FooSubnamespaced1Command extends Command
 {
-    public $input;
-    public $output;
+    public InputInterface $input;
+    public OutputInterface $output;
 
-    protected function configure()
+    protected function configure(): void
     {
         $this
             ->setName('foo:bar:baz')
@@ -18,9 +18,11 @@ class FooSubnamespaced1Command extends Command
         ;
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $this->input = $input;
         $this->output = $output;
+
+        return 0;
     }
 }

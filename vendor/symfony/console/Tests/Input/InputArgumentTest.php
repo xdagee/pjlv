@@ -12,6 +12,10 @@
 namespace Symfony\Component\Console\Tests\Input;
 
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\Console\Completion\CompletionInput;
+use Symfony\Component\Console\Completion\CompletionSuggestions;
+use Symfony\Component\Console\Completion\Suggestion;
+use Symfony\Component\Console\Exception\LogicException;
 use Symfony\Component\Console\Input\InputArgument;
 
 class InputArgumentTest extends TestCase
@@ -37,27 +41,12 @@ class InputArgumentTest extends TestCase
         $this->assertTrue($argument->isRequired(), '__construct() can take "InputArgument::REQUIRED" as its mode');
     }
 
-    /**
-     * @dataProvider provideInvalidModes
-     */
-    public function testInvalidModes($mode)
+    public function testInvalidModes()
     {
-        if (method_exists($this, 'expectException')) {
-            $this->expectException('InvalidArgumentException');
-            $this->expectExceptionMessage(sprintf('Argument mode "%s" is not valid.', $mode));
-        } else {
-            $this->setExpectedException('InvalidArgumentException', sprintf('Argument mode "%s" is not valid.', $mode));
-        }
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Argument mode "-1" is not valid.');
 
-        new InputArgument('foo', $mode);
-    }
-
-    public function provideInvalidModes()
-    {
-        return [
-            ['ANOTHER_ONE'],
-            [-1],
-        ];
+        new InputArgument('foo', '-1');
     }
 
     public function testIsArray()
@@ -67,7 +56,7 @@ class InputArgumentTest extends TestCase
         $argument = new InputArgument('foo', InputArgument::OPTIONAL | InputArgument::IS_ARRAY);
         $this->assertTrue($argument->isArray(), '->isArray() returns true if the argument can be an array');
         $argument = new InputArgument('foo', InputArgument::OPTIONAL);
-        $this->assertFalse($argument->isArray(), '->isArray() returns false if the argument can not be an array');
+        $this->assertFalse($argument->isArray(), '->isArray() returns false if the argument cannot be an array');
     }
 
     public function testGetDescription()
@@ -95,23 +84,63 @@ class InputArgumentTest extends TestCase
         $this->assertEquals([1, 2], $argument->getDefault(), '->setDefault() changes the default value');
     }
 
-    /**
-     * @expectedException        \LogicException
-     * @expectedExceptionMessage Cannot set a default value except for InputArgument::OPTIONAL mode.
-     */
     public function testSetDefaultWithRequiredArgument()
     {
         $argument = new InputArgument('foo', InputArgument::REQUIRED);
+
+        $this->expectException(\LogicException::class);
+        $this->expectExceptionMessage('Cannot set a default value except for InputArgument::OPTIONAL mode.');
+
         $argument->setDefault('default');
     }
 
-    /**
-     * @expectedException        \LogicException
-     * @expectedExceptionMessage A default value for an array argument must be an array.
-     */
+    public function testSetDefaultWithRequiredArrayArgument()
+    {
+        $argument = new InputArgument('foo', InputArgument::REQUIRED | InputArgument::IS_ARRAY);
+
+        $this->expectException(\LogicException::class);
+        $this->expectExceptionMessage('Cannot set a default value except for InputArgument::OPTIONAL mode.');
+
+        $argument->setDefault([]);
+    }
+
     public function testSetDefaultWithArrayArgument()
     {
         $argument = new InputArgument('foo', InputArgument::IS_ARRAY);
+
+        $this->expectException(\LogicException::class);
+        $this->expectExceptionMessage('A default value for an array argument must be an array.');
+
         $argument->setDefault('default');
+    }
+
+    public function testCompleteArray()
+    {
+        $values = ['foo', 'bar'];
+        $argument = new InputArgument('foo', null, '', null, $values);
+        $this->assertTrue($argument->hasCompletion());
+        $suggestions = new CompletionSuggestions();
+        $argument->complete(new CompletionInput(), $suggestions);
+        $this->assertSame($values, array_map(fn (Suggestion $suggestion) => $suggestion->getValue(), $suggestions->getValueSuggestions()));
+    }
+
+    public function testCompleteClosure()
+    {
+        $values = ['foo', 'bar'];
+        $argument = new InputArgument('foo', null, '', null, fn (CompletionInput $input): array => $values);
+        $this->assertTrue($argument->hasCompletion());
+        $suggestions = new CompletionSuggestions();
+        $argument->complete(new CompletionInput(), $suggestions);
+        $this->assertSame($values, array_map(fn (Suggestion $suggestion) => $suggestion->getValue(), $suggestions->getValueSuggestions()));
+    }
+
+    public function testCompleteClosureReturnIncorrectType()
+    {
+        $argument = new InputArgument('foo', InputArgument::OPTIONAL, '', null, fn (CompletionInput $input) => 'invalid');
+
+        $this->expectException(LogicException::class);
+        $this->expectExceptionMessage('Closure for argument "foo" must return an array. Got "string".');
+
+        $argument->complete(new CompletionInput(), new CompletionSuggestions());
     }
 }

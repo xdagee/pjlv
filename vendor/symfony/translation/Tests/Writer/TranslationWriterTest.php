@@ -13,6 +13,8 @@ namespace Symfony\Component\Translation\Tests\Writer;
 
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Translation\Dumper\DumperInterface;
+use Symfony\Component\Translation\Exception\InvalidArgumentException;
+use Symfony\Component\Translation\Exception\RuntimeException;
 use Symfony\Component\Translation\MessageCatalogue;
 use Symfony\Component\Translation\Writer\TranslationWriter;
 
@@ -20,7 +22,7 @@ class TranslationWriterTest extends TestCase
 {
     public function testWrite()
     {
-        $dumper = $this->getMockBuilder('Symfony\Component\Translation\Dumper\DumperInterface')->getMock();
+        $dumper = $this->createMock(DumperInterface::class);
         $dumper
             ->expects($this->once())
             ->method('dump');
@@ -30,40 +32,35 @@ class TranslationWriterTest extends TestCase
         $writer->write(new MessageCatalogue('en'), 'test');
     }
 
-    /**
-     * @group legacy
-     */
-    public function testDisableBackup()
+    public function testGetFormats()
     {
-        $nonBackupDumper = new NonBackupDumper();
-        $backupDumper = new BackupDumper();
-
         $writer = new TranslationWriter();
-        $writer->addDumper('non_backup', $nonBackupDumper);
-        $writer->addDumper('backup', $backupDumper);
-        $writer->disableBackup();
+        $writer->addDumper('foo', $this->createMock(DumperInterface::class));
+        $writer->addDumper('bar', $this->createMock(DumperInterface::class));
 
-        $this->assertFalse($backupDumper->backup, 'backup can be disabled if setBackup() method does exist');
-    }
-}
-
-class NonBackupDumper implements DumperInterface
-{
-    public function dump(MessageCatalogue $messages, $options = [])
-    {
-    }
-}
-
-class BackupDumper implements DumperInterface
-{
-    public $backup = true;
-
-    public function dump(MessageCatalogue $messages, $options = [])
-    {
+        $this->assertEquals(['foo', 'bar'], $writer->getFormats());
     }
 
-    public function setBackup($backup)
+    public function testFormatIsNotSupported()
     {
-        $this->backup = $backup;
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('There is no dumper associated with format "foo".');
+        $writer = new TranslationWriter();
+
+        $writer->write(new MessageCatalogue('en'), 'foo');
+    }
+
+    public function testUnwritableDirectory()
+    {
+        $writer = new TranslationWriter();
+        $writer->addDumper('foo', $this->createMock(DumperInterface::class));
+
+        $path = tempnam(sys_get_temp_dir(), '');
+        file_put_contents($path, '');
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage(\sprintf('Translation Writer was not able to create directory "%s".', $path));
+
+        $writer->write(new MessageCatalogue('en'), 'foo', ['path' => $path]);
     }
 }

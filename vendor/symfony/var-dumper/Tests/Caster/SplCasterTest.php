@@ -21,7 +21,7 @@ class SplCasterTest extends TestCase
 {
     use VarDumperTestTrait;
 
-    public function getCastFileInfoTests()
+    public static function getCastFileInfoTests()
     {
         return [
             [__FILE__, <<<'EOTXT'
@@ -50,12 +50,12 @@ SplFileInfo {
 %A}
 EOTXT
             ],
-            ['https://google.com/about', <<<'EOTXT'
+            ['http://example.com/about', <<<'EOTXT'
 SplFileInfo {
-%Apath: "https://google.com"
+%Apath: "http://example.com"
   filename: "about"
   basename: "about"
-  pathname: "https://google.com/about"
+  pathname: "http://example.com/about"
   extension: ""
   realPath: false
 %A}
@@ -104,7 +104,7 @@ SplFileObject {
   flags: DROP_NEW_LINE|SKIP_EMPTY
   maxLineLen: 0
   fstat: array:26 [
-    "dev" => %d
+    "dev" => %i
     "ino" => %i
     "nlink" => %d
     "rdev" => 0
@@ -135,7 +135,7 @@ EOTXT;
         $this->assertDumpMatchesFormat($dump, $var);
     }
 
-    public function provideCastSplDoublyLinkedList()
+    public static function provideCastSplDoublyLinkedList()
     {
         return [
             [\SplDoublyLinkedList::IT_MODE_FIFO, 'IT_MODE_FIFO | IT_MODE_KEEP'],
@@ -148,7 +148,7 @@ EOTXT;
     public function testCastObjectStorageIsntModified()
     {
         $var = new \SplObjectStorage();
-        $var->attach(new \stdClass());
+        $var[new \stdClass()] = null;
         $var->rewind();
         $current = $var->current();
 
@@ -159,28 +159,27 @@ EOTXT;
     public function testCastObjectStorageDumpsInfo()
     {
         $var = new \SplObjectStorage();
-        $var->attach(new \stdClass(), new \DateTime());
+        $var[new \stdClass()] = new \DateTimeImmutable();
 
-        $this->assertDumpMatchesFormat('%ADateTime%A', $var);
+        $this->assertDumpMatchesFormat('%ADateTimeImmutable%A', $var);
     }
 
     public function testCastArrayObject()
     {
-        if (\defined('HHVM_VERSION')) {
-            $this->markTestSkipped('HHVM as different internal details.');
-        }
-        $var = new \ArrayObject([123]);
+        $var = new
+            #[\AllowDynamicProperties]
+            class([123]) extends \ArrayObject {};
         $var->foo = 234;
 
         $expected = <<<EOTXT
-ArrayObject {
+ArrayObject@anonymous {
   +"foo": 234
-  flag::STD_PROP_LIST: false
-  flag::ARRAY_AS_PROPS: false
-  iteratorClass: "ArrayIterator"
   storage: array:1 [
     0 => 123
   ]
+  flag::STD_PROP_LIST: false
+  flag::ARRAY_AS_PROPS: false
+  iteratorClass: "ArrayIterator"
 }
 EOTXT;
         $this->assertDumpEquals($expected, $var);
@@ -188,21 +187,50 @@ EOTXT;
 
     public function testArrayIterator()
     {
-        if (\defined('HHVM_VERSION')) {
-            $this->markTestSkipped('HHVM as different internal details.');
-        }
         $var = new MyArrayIterator([234]);
 
         $expected = <<<EOTXT
 Symfony\Component\VarDumper\Tests\Caster\MyArrayIterator {
   -foo: 123
-  flag::STD_PROP_LIST: false
-  flag::ARRAY_AS_PROPS: false
   storage: array:1 [
     0 => 234
   ]
+  flag::STD_PROP_LIST: false
+  flag::ARRAY_AS_PROPS: false
 }
 EOTXT;
+        $this->assertDumpEquals($expected, $var);
+    }
+
+    public function testBadSplFileInfo()
+    {
+        $var = new BadSplFileInfo();
+
+        $expected = <<<EOTXT
+Symfony\Component\VarDumper\Tests\Caster\BadSplFileInfo {
+  ⚠: "The parent constructor was not called: the object is in an invalid state"
+}
+EOTXT;
+        $this->assertDumpEquals($expected, $var);
+    }
+
+    public function testWeakMap()
+    {
+        $var = new \WeakMap();
+        $obj = new \stdClass();
+        $var[$obj] = 123;
+
+        $expected = <<<EOTXT
+            WeakMap {
+              map: array:1 [
+                0 => {
+                  object: {}
+                  data: 123
+                }
+              ]
+            }
+            EOTXT;
+
         $this->assertDumpEquals($expected, $var);
     }
 }
@@ -210,4 +238,11 @@ EOTXT;
 class MyArrayIterator extends \ArrayIterator
 {
     private $foo = 123;
+}
+
+class BadSplFileInfo extends \SplFileInfo
+{
+    public function __construct()
+    {
+    }
 }

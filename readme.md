@@ -1,79 +1,196 @@
-# pjlv
-an employee leave management system.
+# PJLV - Employee Leave Management System
 
-# getting started
-in other to get pjlv running on your local enviroment, you have to get the following prerequisites installed
+A Laravel 10 based employee leave management system for organizations to streamline leave requests, approvals, and tracking.
 
-php 7.1.9 or upwards https://windows.php.net/download#php-7.1
+## Features
 
-composer 1.6.3 or upwards https://getcomposer.org/download/
+### Core Features
+- **Staff Management** - Create, view, update, and deactivate employee records
+- **Leave Requests** - Apply for leave with automatic day calculation and balance checking
+- **Approval Workflow** - Multi-level approval (Supervisor → HR → Director) with email notifications
+- **Role-Based Access** - Admin, HR, DG, Director, Normal employee roles with hierarchy
 
-git 2.13.2 or upwards https://git-scm.com/downloads/
+### Dashboard
+- Pending leave requests count
+- Staff on leave today
+- Personal leave balance
+- Upcoming holidays (next 30 days)
+- Recent leave history
 
-mysql 5.7.19 or upwards https://dev.mysql.com/downloads/
+### Calendar
+- Interactive FullCalendar.js integration
+- Approved leaves displayed as events
+- Public holidays highlighted
+- Color-coded by leave type
 
-# installing
-1. clone the project to your local enviroment using git*
+### Reports
+- Leave statistics by type
+- Monthly trend charts (Chart.js)
+- Top leave takers list
+- CSV export functionality
 
-`git clone https://codehub.aiti-kace.com.gh/princeba/pjlv.git`
+### Notifications
+- Email notifications for leave submissions
+- Approval/rejection emails to employees
+- In-app notification system (bell icon)
 
+## Requirements
 
-2. change directory to the pjlv*
+- PHP 8.1 or higher
+- Composer 2.x
+- MySQL 5.7+ or SQLite
+- Node.js (optional, for frontend assets)
 
-`cd pjlv`
+## Installation
 
+```bash
+# Clone the repository
+git clone https://github.com/your-org/pjlv.git
+cd pjlv
 
-3. run composer to install the various dependences*
+# Install dependencies
+composer install
 
-`composer install`
+# Configure environment
+cp .env.example .env
 
+# Generate application key
+php artisan key:generate
 
-4. set up your local enviroment
+# Configure database in .env
+# DB_CONNECTION=mysql
+# DB_DATABASE=pjlv
+# DB_USERNAME=root
+# DB_PASSWORD=
 
-`rename .env.example file to .env`
+# Run migrations and seeders
+php artisan migrate --seed
 
+# Start server
+php artisan serve
+```
 
-4.1 set up your database
+Open http://localhost:8000 in your browser.
 
-open .env file in your favourite text editor and configure your database to match your credentials*
+## Default Users
 
-DB_DATABASE="database_name"
+| Role | Email | Password |
+|------|-------|----------|
+| Admin | admin@admin.com | adminpass |
+| HR | hr@company.com | hrpass123 |
+| Employee | john.doe@company.com | userpass123 |
 
-DB_USERNAME="database_username"
+## User Roles & Permissions
 
-DB_PASSWORD="database_password"
+| Role | Permissions |
+|------|-------------|
+| **Admin** | Full access - manage staff, jobs, leaves, settings, leave types |
+| **HR** | Staff management, leave approval, reports, exports |
+| **DG** | Approve/reject leaves, view reports |
+| **Director** | Approve/reject leaves |
+| **Normal** | View own leaves, apply for leave |
 
+## Leave Workflow
 
-5. migrate the changes to your database*
+```
+Employee Applies → Pending → Supervisor Reviews → Recommended → HR Approves → Approved
+                                    ↓                              ↓
+                                 Rejected                     Disapproved
+                                    
+Employee can Cancel pending requests at any time.
+```
 
-`php artisan migrate --seed`
+### Leave Statuses
+1. **Unattended** - New request, awaiting action
+2. **Recommended** - Supervisor approved, awaiting HR
+3. **Approved** - Fully approved, leave granted
+4. **Disapproved** - Rejected by HR/Director
+5. **Rejected** - Rejected by supervisor
+6. **Cancelled** - Cancelled by employee
 
+## Project Structure
 
-6. generate an application key, required by laravel framework*
+```
+pjlv/
+├── app/
+│   ├── Http/
+│   │   ├── Controllers/     # Request handlers
+│   │   ├── Middleware/      # CheckRole, CheckPermission
+│   │   └── Requests/        # Form validation classes
+│   ├── Mail/                # Email notification classes
+│   ├── Services/            # LeaveBalanceService
+│   └── [Models]             # Eloquent models
+├── database/
+│   ├── migrations/          # Database schema
+│   └── seeders/             # Sample data (Laravel 10 format)
+├── resources/views/
+│   ├── emails/              # Email templates
+│   ├── leaves/              # Leave CRUD views
+│   └── [dashboard, calendar, reports]
+└── routes/
+    └── web.php              # Route definitions
+```
 
-`php artisan key:generate`
+## Key Routes
 
+### Authenticated Routes (All Users)
+| Method | URI | Description |
+|--------|-----|-------------|
+| GET | /dashboard | Dashboard with statistics |
+| GET | /calendar | Interactive leave calendar |
+| GET | /calendar/events | Calendar events API |
+| GET | /leaves | List leave requests |
+| GET | /leaves/apply | Apply for leave form |
+| POST | /leaves | Submit leave request |
+| POST | /leaves/{id}/cancel | Cancel own request |
 
-# running
-after installing and configuring, you are now set to run the project*
+### HR/Admin Routes
+| Method | URI | Description |
+|--------|-----|-------------|
+| GET | /staff | List all staff |
+| GET | /reports | Leave reports & analytics |
+| GET | /reports/export | Export CSV report |
+| PUT | /leaves/{id} | Approve/reject leave |
 
-`php artisan serve`
+### Admin Only Routes
+| Method | URI | Description |
+|--------|-----|-------------|
+| GET | /jobs | Manage job titles |
+| GET | /leavetypes | Manage leave types |
 
-visit your browser on http://localhost:8000
+## Email Configuration
 
-boom! boom!! boom!!! 
-enjoy :)
+Update `.env` for email notifications:
 
+```env
+MAIL_MAILER=smtp
+MAIL_HOST=smtp.example.com
+MAIL_PORT=587
+MAIL_USERNAME=your_username
+MAIL_PASSWORD=your_password
+MAIL_FROM_ADDRESS=noreply@yourcompany.com
+MAIL_FROM_NAME="Leave Management System"
+```
 
-# credits
-[dorothy]
-[mighty]
-[mawuli](https://codehub.aiti-kace.com.gh/mawuli)
-[masare](https://codehub.aiti-kace.com.gh/masare)
-[owuraku](https://codehub.aiti-kace.com.gh/owuraku)
-[princeba](https://codehub.aiti-kace.com.gh/princeba)
+## Running Tests
 
-# source
-Laravel framework https://laravel.com/
+```bash
+# Run all tests
+php artisan test
 
-Template by creativetim material dashboard https://www.creative-tim.com/product/material-dashboard
+# Run specific test file
+php artisan test tests/Unit/StaffTest.php
+```
+
+## Tech Stack
+
+- **Backend:** Laravel 10.x
+- **Database:** MySQL / SQLite
+- **Frontend:** Blade Templates, Material Dashboard
+- **Calendar:** FullCalendar.js 5.x
+- **Charts:** Chart.js
+- **Auth:** Laravel UI
+
+## License
+
+This project is open-sourced software licensed under the [MIT license](LICENSE).

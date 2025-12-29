@@ -2,17 +2,13 @@
 
 namespace Illuminate\Validation;
 
+use Illuminate\Contracts\Support\DeferrableProvider;
+use Illuminate\Contracts\Validation\UncompromisedVerifier;
+use Illuminate\Http\Client\Factory as HttpFactory;
 use Illuminate\Support\ServiceProvider;
 
-class ValidationServiceProvider extends ServiceProvider
+class ValidationServiceProvider extends ServiceProvider implements DeferrableProvider
 {
-    /**
-     * Indicates if loading of the provider is deferred.
-     *
-     * @var bool
-     */
-    protected $defer = true;
-
     /**
      * Register the service provider.
      *
@@ -21,7 +17,7 @@ class ValidationServiceProvider extends ServiceProvider
     public function register()
     {
         $this->registerPresenceVerifier();
-
+        $this->registerUncompromisedVerifier();
         $this->registerValidationFactory();
     }
 
@@ -59,14 +55,24 @@ class ValidationServiceProvider extends ServiceProvider
     }
 
     /**
+     * Register the uncompromised password verifier.
+     *
+     * @return void
+     */
+    protected function registerUncompromisedVerifier()
+    {
+        $this->app->singleton(UncompromisedVerifier::class, function ($app) {
+            return new NotPwnedVerifier($app[HttpFactory::class]);
+        });
+    }
+
+    /**
      * Get the services provided by the provider.
      *
      * @return array
      */
     public function provides()
     {
-        return [
-            'validator', 'validation.presence',
-        ];
+        return ['validator', 'validation.presence', UncompromisedVerifier::class];
     }
 }

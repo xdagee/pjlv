@@ -1,102 +1,121 @@
 <?php
 
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\StaffController;
+use App\Http\Controllers\StaffLeavesController;
+use App\Http\Controllers\LeaveTypesController;
+use App\Http\Controllers\LeaveStatusesController;
+use App\Http\Controllers\LeaveLevelsController;
+use App\Http\Controllers\LeaveActionsController;
+use App\Http\Controllers\JobsController;
+use App\Http\Controllers\CalendarController;
+use App\Http\Controllers\ReportsController;
+use App\Http\Controllers\NotificationController;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
 |--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider within a group which
-| contains the "web" middleware group. Now create something great!
-|
 */
 
 Route::get('/', function () {
-	// landing page...
-    return view('welcome');
+	return view('welcome');
 });
 
 Auth::routes();
 
-Route::get('/dashboard', 'DashboardController@index');
+/*
+|--------------------------------------------------------------------------
+| Authenticated Routes (All logged-in users)
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth'])->group(function () {
 
+	// Dashboard
+	Route::get('/dashboard', [DashboardController::class, 'index']);
+	Route::get('/home', [DashboardController::class, 'index']); // Alias
 
-Route::get('/staff/create', function(){ return view('staffs.create');});
-
-// staff controller with all the possible methods
-Route::get('/staff/',function (){
-    return view('staff.index');
-} );
-
-Route::get('/staff/data', 'StaffController@index');
-
-Route::get('/staff/profile', function(){ return view('staff.profile');});
-
-Route::get('/staff/{staff}', 'StaffController@show');
-
-Route::get('staff/{id}', 'ShowProfile');
-
-Route::get('/staff/create', 'StaffController@create');
-
-Route::post('staff', 'StaffController@store');
-
-// jobs controller with all possible job options
-Route::get('/jobs/', 'JobsController@index');
-
-Route::get('/jobs/create', 'JobsController@create');
-
-Route::post('jobs', 'JobsController@store');
-
-Route::get('/jobs/{job}', 'JobsController@show');
-
-
-
-// leave controller and it's eqivallent methods
-Route::get('/leaves/', 'StaffLeavesController@index');
-
-Route::get('/leaves/apply', 'StaffLeavesController@create');
-
-Route::get('/apply', function () {
-	return view('leaves.apply');
+	// User Profile
+	Route::get('/staff/profile', function () {
+		return view('staff.profile');
 	});
 
-Route::post('leaves', 'StaffLeavesController@store');
+	// Calendar
+	Route::get('/calendar', [CalendarController::class, 'index']);
+	Route::get('/calendar/events', [CalendarController::class, 'events']);
 
-Route::get('/leaves/{staffleave}', 'StaffLeavesController@show');
+	// Leave requests - all users can apply and view their own
+	Route::get('/leaves', [StaffLeavesController::class, 'index']);
+	Route::get('/leaves/apply', [StaffLeavesController::class, 'create']);
+	Route::post('/leaves', [StaffLeavesController::class, 'store']);
+	Route::get('/leaves/{staffleave}', [StaffLeavesController::class, 'show']);
+	Route::post('/leaves/{staffleave}/cancel', [StaffLeavesController::class, 'cancel']);
 
+	// Reference data - all users can view
+	Route::get('/leavetypes', [LeaveTypesController::class, 'index']);
+	Route::get('/leavetypes/{leavetype}', [LeaveTypesController::class, 'show']);
+	Route::get('/leavestatuses', [LeaveStatusesController::class, 'index']);
+	Route::get('/leavestatuses/{leavestatus}', [LeaveStatusesController::class, 'show']);
+	Route::get('/leavelevels', [LeaveLevelsController::class, 'index']);
+	Route::get('/leavelevels/{leavelevel}', [LeaveLevelsController::class, 'show']);
+});
 
+/*
+|--------------------------------------------------------------------------
+| HR/Admin Routes (Staff Management)
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth', 'role:hr'])->group(function () {
 
-// leave types controller and it's eqivallent methods
-Route::get('/leavetypes/', 'LeaveTypesController@index');
+	// Staff management
+	Route::get('/staff', function () {
+		return view('staff.index');
+	});
+	Route::get('/staff/data', [StaffController::class, 'index']);
+	Route::get('/staff/create', [StaffController::class, 'create']);
+	Route::post('/staff', [StaffController::class, 'store']);
+	Route::get('/staff/{staff}', [StaffController::class, 'show']);
+	Route::put('/staff/{staff}', [StaffController::class, 'update']);
+	Route::delete('/staff/{staff}', [StaffController::class, 'destroy']);
 
-Route::get('/leavetypes/{leavetype}', 'LeaveTypesController@show');
+	// Leave management (approve/reject)
+	Route::get('/leaves/{staffleave}/edit', [StaffLeavesController::class, 'edit']);
+	Route::put('/leaves/{staffleave}', [StaffLeavesController::class, 'update']);
+	Route::delete('/leaves/{staffleave}', [StaffLeavesController::class, 'destroy']);
 
+	// Leave actions
+	Route::get('/leaveactions', [LeaveActionsController::class, 'index']);
+	Route::get('/leaveactions/create', [LeaveActionsController::class, 'create']);
+	Route::post('/leaveactions', [LeaveActionsController::class, 'store']);
+	Route::get('/leaveactions/{leaveaction}', [LeaveActionsController::class, 'show']);
 
+	// Reports
+	Route::get('/reports', [ReportsController::class, 'index']);
+	Route::get('/reports/export', [ReportsController::class, 'export']);
+});
 
-// leave types controller and it's eqivallent methods
-Route::get('/leavestatuses/', 'LeaveStatusesController@index');
+/*
+|--------------------------------------------------------------------------
+| Admin Only Routes
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth', 'role:admin'])->group(function () {
 
-Route::get('/leavestatuses/{leavestatus}', 'LeaveStatusesController@show');
+	// Job management
+	Route::get('/jobs', [JobsController::class, 'index']);
+	Route::get('/jobs/create', [JobsController::class, 'create']);
+	Route::post('/jobs', [JobsController::class, 'store']);
+	Route::get('/jobs/{job}', [JobsController::class, 'show']);
+	Route::get('/jobs/{job}/edit', [JobsController::class, 'edit']);
+	Route::put('/jobs/{job}', [JobsController::class, 'update']);
+	Route::delete('/jobs/{job}', [JobsController::class, 'destroy']);
 
-
-
-// leave types controller and it's eqivallent methods
-Route::get('/leaveactions/', 'LeaveActionsController@index');
-
-Route::get('/leaveactions/{leaveaction}', 'LeaveActionsController@show');
-
-
-// leave types controller and it's eqivallent methods
-Route::get('/leavelevels/', 'LeaveLevelsController@index');
-
-Route::get('/leavelevels/{leavelevel}', 'LeaveLevelsController@show');
-
-
-
-// calender controller and it's eqivallents...
-Route::get('/calendar', 'CalendarController@index');
-
-
-
-// reports
-Route::get('/reports', 'ReportsController@index');
+	// Leave Types CRUD (Admin only)
+	Route::get('/leavetypes/create', [LeaveTypesController::class, 'create']);
+	Route::post('/leavetypes', [LeaveTypesController::class, 'store']);
+	Route::get('/leavetypes/{leavetype}/edit', [LeaveTypesController::class, 'edit']);
+	Route::put('/leavetypes/{leavetype}', [LeaveTypesController::class, 'update']);
+	Route::delete('/leavetypes/{leavetype}', [LeaveTypesController::class, 'destroy']);
+});

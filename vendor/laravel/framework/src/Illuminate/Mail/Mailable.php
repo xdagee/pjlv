@@ -2,18 +2,44 @@
 
 namespace Illuminate\Mail;
 
+use Illuminate\Config\Repository as ConfigRepository;
+use Illuminate\Container\Container;
+use Illuminate\Contracts\Filesystem\Factory as FilesystemFactory;
+use Illuminate\Contracts\Mail\Attachable;
+use Illuminate\Contracts\Mail\Factory as MailFactory;
+use Illuminate\Contracts\Mail\Mailable as MailableContract;
+use Illuminate\Contracts\Queue\Factory as Queue;
+use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Contracts\Support\Renderable;
+use Illuminate\Contracts\Translation\HasLocalePreference;
+use Illuminate\Support\Collection;
+use Illuminate\Support\HtmlString;
+use Illuminate\Support\Str;
+use Illuminate\Support\Traits\Conditionable;
+use Illuminate\Support\Traits\ForwardsCalls;
+use Illuminate\Support\Traits\Localizable;
+use Illuminate\Support\Traits\Macroable;
+use Illuminate\Testing\Constraints\SeeInOrder;
+use PHPUnit\Framework\Assert as PHPUnit;
 use ReflectionClass;
 use ReflectionProperty;
-use BadMethodCallException;
-use Illuminate\Support\Str;
-use Illuminate\Support\Collection;
-use Illuminate\Container\Container;
-use Illuminate\Contracts\Queue\Factory as Queue;
-use Illuminate\Contracts\Mail\Mailer as MailerContract;
-use Illuminate\Contracts\Mail\Mailable as MailableContract;
+use Symfony\Component\Mailer\Header\MetadataHeader;
+use Symfony\Component\Mailer\Header\TagHeader;
+use Symfony\Component\Mime\Address;
 
-class Mailable implements MailableContract
+class Mailable implements MailableContract, Renderable
 {
+    use Conditionable, ForwardsCalls, Localizable, Macroable {
+        __call as macroCall;
+    }
+
+    /**
+     * The locale of the message.
+     *
+     * @var string
+     */
+    public $locale;
+
     /**
      * The person the message is from.
      *
@@ -61,7 +87,14 @@ class Mailable implements MailableContract
      *
      * @var string
      */
-    protected $markdown;
+    public $markdown;
+
+    /**
+     * The HTML to use for the message.
+     *
+     * @var string
+     */
+    protected $html;
 
     /**
      * The view to use for the message.
@@ -99,6 +132,27 @@ class Mailable implements MailableContract
     public $rawAttachments = [];
 
     /**
+     * The attachments from a storage disk.
+     *
+     * @var array
+     */
+    public $diskAttachments = [];
+
+    /**
+     * The tags for the message.
+     *
+     * @var array
+     */
+    protected $tags = [];
+
+    /**
+     * The metadata for the message.
+     *
+     * @var array
+     */
+    protected $metadata = [];
+
+    /**
      * The callbacks for the message.
      *
      * @var array
@@ -106,21 +160,57 @@ class Mailable implements MailableContract
     public $callbacks = [];
 
     /**
+     * The name of the theme that should be used when formatting the message.
+     *
+     * @var string|null
+     */
+    public $theme;
+
+    /**
+     * The name of the mailer that should send the message.
+     *
+     * @var string
+     */
+    public $mailer;
+
+    /**
+     * The rendered mailable views for testing / assertions.
+     *
+     * @var array
+     */
+    protected $assertionableRenderStrings;
+
+    /**
+     * The callback that should be invoked while building the view data.
+     *
+     * @var callable
+     */
+    public static $viewDataCallback;
+
+    /**
      * Send the message using the given mailer.
      *
-     * @param  \Illuminate\Contracts\Mail\Mailer  $mailer
-     * @return void
+     * @param  \Illuminate\Contracts\Mail\Factory|\Illuminate\Contracts\Mail\Mailer  $mailer
+     * @return \Illuminate\Mail\SentMessage|null
      */
-    public function send(MailerContract $mailer)
+    public function send($mailer)
     {
-        Container::getInstance()->call([$this, 'build']);
+        return $this->withLocale($this->locale, function () use ($mailer) {
+            $this->prepareMailableForDelivery();
 
-        $mailer->send($this->buildView(), $this->buildViewData(), function ($message) {
-            $this->buildFrom($message)
-                 ->buildRecipients($message)
-                 ->buildSubject($message)
-                 ->buildAttachments($message)
-                 ->runCallbacks($message);
+            $mailer = $mailer instanceof MailFactory
+                            ? $mailer->mailer($this->mailer)
+                            : $mailer;
+
+            return $mailer->send($this->buildView(), $this->buildViewData(), function ($message) {
+                $this->buildFrom($message)
+                     ->buildRecipients($message)
+                     ->buildSubject($message)
+                     ->buildTags($message)
+                     ->buildMetadata($message)
+                     ->runCallbacks($message)
+                     ->buildAttachments($message);
+            });
         });
     }
 
@@ -132,7 +222,7 @@ class Mailable implements MailableContract
      */
     public function queue(Queue $queue)
     {
-        if (property_exists($this, 'delay')) {
+        if (isset($this->delay)) {
             return $this->later($this->delay, $queue);
         }
 
@@ -141,15 +231,15 @@ class Mailable implements MailableContract
         $queueName = property_exists($this, 'queue') ? $this->queue : null;
 
         return $queue->connection($connection)->pushOn(
-            $queueName ?: null, new SendQueuedMailable($this)
+            $queueName ?: null, $this->newQueuedJob()
         );
     }
 
     /**
-     * Deliver the queued message after the given delay.
+     * Deliver the queued message after (n) seconds.
      *
-     * @param  \DateTime|int  $delay
-     * @param  Queue  $queue
+     * @param  \DateTimeInterface|\DateInterval|int  $delay
+     * @param  \Illuminate\Contracts\Queue\Factory  $queue
      * @return mixed
      */
     public function later($delay, Queue $queue)
@@ -159,17 +249,58 @@ class Mailable implements MailableContract
         $queueName = property_exists($this, 'queue') ? $this->queue : null;
 
         return $queue->connection($connection)->laterOn(
-            $queueName ?: null, $delay, new SendQueuedMailable($this)
+            $queueName ?: null, $delay, $this->newQueuedJob()
         );
+    }
+
+    /**
+     * Make the queued mailable job instance.
+     *
+     * @return mixed
+     */
+    protected function newQueuedJob()
+    {
+        return Container::getInstance()->make(SendQueuedMailable::class, ['mailable' => $this])
+                    ->through(array_merge(
+                        method_exists($this, 'middleware') ? $this->middleware() : [],
+                        $this->middleware ?? []
+                    ));
+    }
+
+    /**
+     * Render the mailable into a view.
+     *
+     * @return string
+     *
+     * @throws \ReflectionException
+     */
+    public function render()
+    {
+        return $this->withLocale($this->locale, function () {
+            $this->prepareMailableForDelivery();
+
+            return Container::getInstance()->make('mailer')->render(
+                $this->buildView(), $this->buildViewData()
+            );
+        });
     }
 
     /**
      * Build the view for the message.
      *
      * @return array|string
+     *
+     * @throws \ReflectionException
      */
     protected function buildView()
     {
+        if (isset($this->html)) {
+            return array_filter([
+                'html' => new HtmlString($this->html),
+                'text' => $this->textView ?? null,
+            ]);
+        }
+
         if (isset($this->markdown)) {
             return $this->buildMarkdownView();
         }
@@ -187,16 +318,16 @@ class Mailable implements MailableContract
      * Build the Markdown view for the message.
      *
      * @return array
+     *
+     * @throws \ReflectionException
      */
     protected function buildMarkdownView()
     {
-        $markdown = Container::getInstance()->make(Markdown::class);
-
         $data = $this->buildViewData();
 
         return [
-            'html' => $markdown->render($this->markdown, $data),
-            'text' => $this->buildMarkdownText($markdown, $data),
+            'html' => $this->buildMarkdownHtml($data),
+            'text' => $this->buildMarkdownText($data),
         ];
     }
 
@@ -204,13 +335,19 @@ class Mailable implements MailableContract
      * Build the view data for the message.
      *
      * @return array
+     *
+     * @throws \ReflectionException
      */
     public function buildViewData()
     {
         $data = $this->viewData;
 
+        if (static::$viewDataCallback) {
+            $data = array_merge($data, call_user_func(static::$viewDataCallback, $this));
+        }
+
         foreach ((new ReflectionClass($this))->getProperties(ReflectionProperty::IS_PUBLIC) as $property) {
-            if ($property->getDeclaringClass()->getName() != self::class) {
+            if ($property->isInitialized($this) && $property->getDeclaringClass()->getName() !== self::class) {
                 $data[$property->getName()] = $property->getValue($this);
             }
         }
@@ -219,17 +356,53 @@ class Mailable implements MailableContract
     }
 
     /**
+     * Build the HTML view for a Markdown message.
+     *
+     * @param  array  $viewData
+     * @return \Closure
+     */
+    protected function buildMarkdownHtml($viewData)
+    {
+        return fn ($data) => $this->markdownRenderer()->render(
+            $this->markdown,
+            array_merge($data, $viewData),
+        );
+    }
+
+    /**
      * Build the text view for a Markdown message.
      *
-     * @param  \Illuminate\Mail\Markdown  $markdown
-     * @param  array  $data
-     * @return string
+     * @param  array  $viewData
+     * @return \Closure
      */
-    protected function buildMarkdownText($markdown, $data)
+    protected function buildMarkdownText($viewData)
     {
-        return isset($this->textView)
-                ? $this->textView
-                : $markdown->renderText($this->markdown, $data);
+        return function ($data) use ($viewData) {
+            if (isset($data['message'])) {
+                $data = array_merge($data, [
+                    'message' => new TextMessage($data['message']),
+                ]);
+            }
+
+            return $this->textView ?? $this->markdownRenderer()->renderText(
+                $this->markdown,
+                array_merge($data, $viewData)
+            );
+        };
+    }
+
+    /**
+     * Resolves a Markdown instance with the mail's theme.
+     *
+     * @return \Illuminate\Mail\Markdown
+     */
+    protected function markdownRenderer()
+    {
+        return tap(Container::getInstance()->make(Markdown::class), function ($markdown) {
+            $markdown->theme($this->theme ?: Container::getInstance()->get(ConfigRepository::class)->get(
+                'mail.markdown.theme', 'default')
+            );
+        });
     }
 
     /**
@@ -299,6 +472,63 @@ class Mailable implements MailableContract
             );
         }
 
+        $this->buildDiskAttachments($message);
+
+        return $this;
+    }
+
+    /**
+     * Add all of the disk attachments to the message.
+     *
+     * @param  \Illuminate\Mail\Message  $message
+     * @return void
+     */
+    protected function buildDiskAttachments($message)
+    {
+        foreach ($this->diskAttachments as $attachment) {
+            $storage = Container::getInstance()->make(
+                FilesystemFactory::class
+            )->disk($attachment['disk']);
+
+            $message->attachData(
+                $storage->get($attachment['path']),
+                $attachment['name'] ?? basename($attachment['path']),
+                array_merge(['mime' => $storage->mimeType($attachment['path'])], $attachment['options'])
+            );
+        }
+    }
+
+    /**
+     * Add all defined tags to the message.
+     *
+     * @param  \Illuminate\Mail\Message  $message
+     * @return $this
+     */
+    protected function buildTags($message)
+    {
+        if ($this->tags) {
+            foreach ($this->tags as $tag) {
+                $message->getHeaders()->add(new TagHeader($tag));
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * Add all defined metadata to the message.
+     *
+     * @param  \Illuminate\Mail\Message  $message
+     * @return $this
+     */
+    protected function buildMetadata($message)
+    {
+        if ($this->metadata) {
+            foreach ($this->metadata as $key => $value) {
+                $message->getHeaders()->add(new MetadataHeader($key, $value));
+            }
+        }
+
         return $this;
     }
 
@@ -311,8 +541,21 @@ class Mailable implements MailableContract
     protected function runCallbacks($message)
     {
         foreach ($this->callbacks as $callback) {
-            $callback($message->getSwiftMessage());
+            $callback($message->getSymfonyMessage());
         }
+
+        return $this;
+    }
+
+    /**
+     * Set the locale of the message.
+     *
+     * @param  string  $locale
+     * @return $this
+     */
+    public function locale($locale)
+    {
+        $this->locale = $locale;
 
         return $this;
     }
@@ -328,7 +571,7 @@ class Mailable implements MailableContract
     public function priority($level = 3)
     {
         $this->callbacks[] = function ($message) use ($level) {
-            $message->setPriority($level);
+            $message->priority($level);
         };
 
         return $this;
@@ -367,6 +610,10 @@ class Mailable implements MailableContract
      */
     public function to($address, $name = null)
     {
+        if (! $this->locale && $address instanceof HasLocalePreference) {
+            $this->locale($address->preferredLocale());
+        }
+
         return $this->setAddress($address, $name, 'to');
     }
 
@@ -443,6 +690,18 @@ class Mailable implements MailableContract
     }
 
     /**
+     * Determine if the given replyTo is set on the mailable.
+     *
+     * @param  object|array|string  $address
+     * @param  string|null  $name
+     * @return bool
+     */
+    public function hasReplyTo($address, $name = null)
+    {
+        return $this->hasRecipient($address, $name, 'replyTo');
+    }
+
+    /**
      * Set the recipients of the message.
      *
      * All recipients are stored internally as [['name' => ?, 'address' => ?]]
@@ -454,14 +713,25 @@ class Mailable implements MailableContract
      */
     protected function setAddress($address, $name = null, $property = 'to')
     {
+        if (empty($address)) {
+            return $this;
+        }
+
         foreach ($this->addressesToArray($address, $name) as $recipient) {
             $recipient = $this->normalizeRecipient($recipient);
 
             $this->{$property}[] = [
-                'name' => isset($recipient->name) ? $recipient->name : null,
+                'name' => $recipient->name ?? null,
                 'address' => $recipient->email,
             ];
         }
+
+        $this->{$property} = collect($this->{$property})
+            ->reverse()
+            ->unique('address')
+            ->reverse()
+            ->values()
+            ->all();
 
         return $this;
     }
@@ -491,9 +761,19 @@ class Mailable implements MailableContract
     protected function normalizeRecipient($recipient)
     {
         if (is_array($recipient)) {
+            if (array_values($recipient) === $recipient) {
+                return (object) array_map(function ($email) {
+                    return compact('email');
+                }, $recipient);
+            }
+
             return (object) $recipient;
         } elseif (is_string($recipient)) {
             return (object) ['email' => $recipient];
+        } elseif ($recipient instanceof Address) {
+            return (object) ['email' => $recipient->getAddress(), 'name' => $recipient->getName()];
+        } elseif ($recipient instanceof Mailables\Address) {
+            return (object) ['email' => $recipient->address, 'name' => $recipient->name];
         }
 
         return $recipient;
@@ -509,22 +789,49 @@ class Mailable implements MailableContract
      */
     protected function hasRecipient($address, $name = null, $property = 'to')
     {
+        if (empty($address)) {
+            return false;
+        }
+
         $expected = $this->normalizeRecipient(
             $this->addressesToArray($address, $name)[0]
         );
 
         $expected = [
-            'name' => isset($expected->name) ? $expected->name : null,
+            'name' => $expected->name ?? null,
             'address' => $expected->email,
         ];
+
+        if ($this->hasEnvelopeRecipient($expected['address'], $expected['name'], $property)) {
+            return true;
+        }
 
         return collect($this->{$property})->contains(function ($actual) use ($expected) {
             if (! isset($expected['name'])) {
                 return $actual['address'] == $expected['address'];
-            } else {
-                return $actual == $expected;
             }
+
+            return $actual == $expected;
         });
+    }
+
+    /**
+     * Determine if the mailable "envelope" method defines a recipient.
+     *
+     * @param  string  $address
+     * @param  string|null  $name
+     * @param  string  $property
+     * @return bool
+     */
+    private function hasEnvelopeRecipient($address, $name, $property)
+    {
+        return method_exists($this, 'envelope') && match ($property) {
+            'from' => $this->envelope()->isFrom($address, $name),
+            'to' => $this->envelope()->hasTo($address, $name),
+            'cc' => $this->envelope()->hasCc($address, $name),
+            'bcc' => $this->envelope()->hasBcc($address, $name),
+            'replyTo' => $this->envelope()->hasReplyTo($address, $name),
+        };
     }
 
     /**
@@ -538,6 +845,18 @@ class Mailable implements MailableContract
         $this->subject = $subject;
 
         return $this;
+    }
+
+    /**
+     * Determine if the mailable has the given subject.
+     *
+     * @param  string  $subject
+     * @return bool
+     */
+    public function hasSubject($subject)
+    {
+        return $this->subject === $subject ||
+               (method_exists($this, 'envelope') && $this->envelope()->hasSubject($subject));
     }
 
     /**
@@ -571,6 +890,19 @@ class Mailable implements MailableContract
     }
 
     /**
+     * Set the rendered HTML content for the message.
+     *
+     * @param  string  $html
+     * @return $this
+     */
+    public function html($html)
+    {
+        $this->html = $html;
+
+        return $this;
+    }
+
+    /**
      * Set the plain text view for the message.
      *
      * @param  string  $textView
@@ -589,7 +921,7 @@ class Mailable implements MailableContract
      * Set the view data for the message.
      *
      * @param  string|array  $key
-     * @param  mixed   $value
+     * @param  mixed  $value
      * @return $this
      */
     public function with($key, $value = null)
@@ -606,15 +938,173 @@ class Mailable implements MailableContract
     /**
      * Attach a file to the message.
      *
-     * @param  string  $file
+     * @param  string|\Illuminate\Contracts\Mail\Attachable|\Illuminate\Mail\Attachment  $file
      * @param  array  $options
      * @return $this
      */
     public function attach($file, array $options = [])
     {
-        $this->attachments[] = compact('file', 'options');
+        if ($file instanceof Attachable) {
+            $file = $file->toMailAttachment();
+        }
+
+        if ($file instanceof Attachment) {
+            return $file->attachTo($this, $options);
+        }
+
+        $this->attachments = collect($this->attachments)
+                    ->push(compact('file', 'options'))
+                    ->unique('file')
+                    ->all();
 
         return $this;
+    }
+
+    /**
+     * Attach multiple files to the message.
+     *
+     * @param  array  $files
+     * @return $this
+     */
+    public function attachMany($files)
+    {
+        foreach ($files as $file => $options) {
+            if (is_int($file)) {
+                $this->attach($options);
+            } else {
+                $this->attach($file, $options);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * Determine if the mailable has the given attachment.
+     *
+     * @param  string|\Illuminate\Contracts\Mail\Attachable|\Illuminate\Mail\Attachment  $file
+     * @param  array  $options
+     * @return bool
+     */
+    public function hasAttachment($file, array $options = [])
+    {
+        if ($file instanceof Attachable) {
+            $file = $file->toMailAttachment();
+        }
+
+        if ($file instanceof Attachment && $this->hasEnvelopeAttachment($file, $options)) {
+            return true;
+        }
+
+        if ($file instanceof Attachment) {
+            $parts = $file->attachWith(
+                fn ($path) => [$path, [
+                    'as' => $options['as'] ?? $file->as,
+                    'mime' => $options['mime'] ?? $file->mime,
+                ]],
+                fn ($data) => $this->hasAttachedData($data(), $options['as'] ?? $file->as, ['mime' => $options['mime'] ?? $file->mime])
+            );
+
+            if ($parts === true) {
+                return true;
+            }
+
+            [$file, $options] = $parts === false
+                ? [null, []]
+                : $parts;
+        }
+
+        return collect($this->attachments)->contains(
+            fn ($attachment) => $attachment['file'] === $file && array_filter($attachment['options']) === array_filter($options)
+        );
+    }
+
+    /**
+     * Determine if the mailable has the given envelope attachment.
+     *
+     * @param  \Illuminate\Mail\Attachment  $attachment
+     * @param  array  $options
+     * @return bool
+     */
+    private function hasEnvelopeAttachment($attachment, $options = [])
+    {
+        if (! method_exists($this, 'envelope')) {
+            return false;
+        }
+
+        $attachments = $this->attachments();
+
+        return Collection::make(is_object($attachments) ? [$attachments] : $attachments)
+                ->map(fn ($attached) => $attached instanceof Attachable ? $attached->toMailAttachment() : $attached)
+                ->contains(fn ($attached) => $attached->isEquivalent($attachment, $options));
+    }
+
+    /**
+     * Attach a file to the message from storage.
+     *
+     * @param  string  $path
+     * @param  string|null  $name
+     * @param  array  $options
+     * @return $this
+     */
+    public function attachFromStorage($path, $name = null, array $options = [])
+    {
+        return $this->attachFromStorageDisk(null, $path, $name, $options);
+    }
+
+    /**
+     * Attach a file to the message from storage.
+     *
+     * @param  string  $disk
+     * @param  string  $path
+     * @param  string|null  $name
+     * @param  array  $options
+     * @return $this
+     */
+    public function attachFromStorageDisk($disk, $path, $name = null, array $options = [])
+    {
+        $this->diskAttachments = collect($this->diskAttachments)->push([
+            'disk' => $disk,
+            'path' => $path,
+            'name' => $name ?? basename($path),
+            'options' => $options,
+        ])->unique(function ($file) {
+            return $file['name'].$file['disk'].$file['path'];
+        })->all();
+
+        return $this;
+    }
+
+    /**
+     * Determine if the mailable has the given attachment from storage.
+     *
+     * @param  string  $path
+     * @param  string|null  $name
+     * @param  array  $options
+     * @return bool
+     */
+    public function hasAttachmentFromStorage($path, $name = null, array $options = [])
+    {
+        return $this->hasAttachmentFromStorageDisk(null, $path, $name, $options);
+    }
+
+    /**
+     * Determine if the mailable has the given attachment from a specific storage disk.
+     *
+     * @param  string  $disk
+     * @param  string  $path
+     * @param  string|null  $name
+     * @param  array  $options
+     * @return bool
+     */
+    public function hasAttachmentFromStorageDisk($disk, $path, $name = null, array $options = [])
+    {
+        return collect($this->diskAttachments)->contains(
+            fn ($attachment) => $attachment['disk'] === $disk
+                && $attachment['path'] === $path
+                && $attachment['name'] === ($name ?? basename($path))
+                && $attachment['options'] === $options
+        );
     }
 
     /**
@@ -627,18 +1117,669 @@ class Mailable implements MailableContract
      */
     public function attachData($data, $name, array $options = [])
     {
-        $this->rawAttachments[] = compact('data', 'name', 'options');
+        $this->rawAttachments = collect($this->rawAttachments)
+                ->push(compact('data', 'name', 'options'))
+                ->unique(function ($file) {
+                    return $file['name'].$file['data'];
+                })->all();
 
         return $this;
     }
 
     /**
-     * Register a callback to be called with the Swift message instance.
+     * Determine if the mailable has the given data as an attachment.
+     *
+     * @param  string  $data
+     * @param  string  $name
+     * @param  array  $options
+     * @return bool
+     */
+    public function hasAttachedData($data, $name, array $options = [])
+    {
+        return collect($this->rawAttachments)->contains(
+            fn ($attachment) => $attachment['data'] === $data
+                && $attachment['name'] === $name
+                && array_filter($attachment['options']) === array_filter($options)
+        );
+    }
+
+    /**
+     * Add a tag header to the message when supported by the underlying transport.
+     *
+     * @param  string  $value
+     * @return $this
+     */
+    public function tag($value)
+    {
+        array_push($this->tags, $value);
+
+        return $this;
+    }
+
+    /**
+     * Determine if the mailable has the given tag.
+     *
+     * @param  string  $value
+     * @return bool
+     */
+    public function hasTag($value)
+    {
+        return in_array($value, $this->tags) ||
+               (method_exists($this, 'envelope') && in_array($value, $this->envelope()->tags));
+    }
+
+    /**
+     * Add a metadata header to the message when supported by the underlying transport.
+     *
+     * @param  string  $key
+     * @param  string  $value
+     * @return $this
+     */
+    public function metadata($key, $value)
+    {
+        $this->metadata[$key] = $value;
+
+        return $this;
+    }
+
+    /**
+     * Determine if the mailable has the given metadata.
+     *
+     * @param  string  $key
+     * @param  string  $value
+     * @return bool
+     */
+    public function hasMetadata($key, $value)
+    {
+        return (isset($this->metadata[$key]) && $this->metadata[$key] === $value) ||
+               (method_exists($this, 'envelope') && $this->envelope()->hasMetadata($key, $value));
+    }
+
+    /**
+     * Assert that the mailable is from the given address.
+     *
+     * @param  object|array|string  $address
+     * @param  string|null  $name
+     * @return $this
+     */
+    public function assertFrom($address, $name = null)
+    {
+        $this->renderForAssertions();
+
+        $recipient = $this->formatAssertionRecipient($address, $name);
+
+        PHPUnit::assertTrue(
+            $this->hasFrom($address, $name),
+            "Email was not from expected address [{$recipient}]."
+        );
+
+        return $this;
+    }
+
+    /**
+     * Assert that the mailable has the given recipient.
+     *
+     * @param  object|array|string  $address
+     * @param  string|null  $name
+     * @return $this
+     */
+    public function assertTo($address, $name = null)
+    {
+        $this->renderForAssertions();
+
+        $recipient = $this->formatAssertionRecipient($address, $name);
+
+        PHPUnit::assertTrue(
+            $this->hasTo($address, $name),
+            "Did not see expected recipient [{$recipient}] in email 'to' recipients."
+        );
+
+        return $this;
+    }
+
+    /**
+     * Assert that the mailable has the given recipient.
+     *
+     * @param  object|array|string  $address
+     * @param  string|null  $name
+     * @return $this
+     */
+    public function assertHasTo($address, $name = null)
+    {
+        return $this->assertTo($address, $name);
+    }
+
+    /**
+     * Assert that the mailable has the given recipient.
+     *
+     * @param  object|array|string  $address
+     * @param  string|null  $name
+     * @return $this
+     */
+    public function assertHasCc($address, $name = null)
+    {
+        $this->renderForAssertions();
+
+        $recipient = $this->formatAssertionRecipient($address, $name);
+
+        PHPUnit::assertTrue(
+            $this->hasCc($address, $name),
+            "Did not see expected recipient [{$recipient}] in email 'cc' recipients."
+        );
+
+        return $this;
+    }
+
+    /**
+     * Assert that the mailable has the given recipient.
+     *
+     * @param  object|array|string  $address
+     * @param  string|null  $name
+     * @return $this
+     */
+    public function assertHasBcc($address, $name = null)
+    {
+        $this->renderForAssertions();
+
+        $recipient = $this->formatAssertionRecipient($address, $name);
+
+        PHPUnit::assertTrue(
+            $this->hasBcc($address, $name),
+            "Did not see expected recipient [{$recipient}] in email 'bcc' recipients."
+        );
+
+        return $this;
+    }
+
+    /**
+     * Assert that the mailable has the given "reply to" address.
+     *
+     * @param  object|array|string  $address
+     * @param  string|null  $name
+     * @return $this
+     */
+    public function assertHasReplyTo($address, $name = null)
+    {
+        $this->renderForAssertions();
+
+        $replyTo = $this->formatAssertionRecipient($address, $name);
+
+        PHPUnit::assertTrue(
+            $this->hasReplyTo($address, $name),
+            "Did not see expected address [{$replyTo}] as email 'reply to' recipient."
+        );
+
+        return $this;
+    }
+
+    /**
+     * Format the mailable recipient for display in an assertion message.
+     *
+     * @param  object|array|string  $address
+     * @param  string|null  $name
+     * @return string
+     */
+    private function formatAssertionRecipient($address, $name = null)
+    {
+        if (! is_string($address)) {
+            $address = json_encode($address);
+        }
+
+        if (filled($name)) {
+            $address .= ' ('.$name.')';
+        }
+
+        return $address;
+    }
+
+    /**
+     * Assert that the mailable has the given subject.
+     *
+     * @param  string  $subject
+     * @return $this
+     */
+    public function assertHasSubject($subject)
+    {
+        $this->renderForAssertions();
+
+        PHPUnit::assertTrue(
+            $this->hasSubject($subject),
+            "Did not see expected text [{$subject}] in email subject."
+        );
+
+        return $this;
+    }
+
+    /**
+     * Assert that the given text is present in the HTML email body.
+     *
+     * @param  string  $string
+     * @param  bool  $escape
+     * @return $this
+     */
+    public function assertSeeInHtml($string, $escape = true)
+    {
+        $string = $escape ? e($string) : $string;
+
+        [$html, $text] = $this->renderForAssertions();
+
+        PHPUnit::assertStringContainsString(
+            $string,
+            $html,
+            "Did not see expected text [{$string}] within email body."
+        );
+
+        return $this;
+    }
+
+    /**
+     * Assert that the given text is not present in the HTML email body.
+     *
+     * @param  string  $string
+     * @param  bool  $escape
+     * @return $this
+     */
+    public function assertDontSeeInHtml($string, $escape = true)
+    {
+        $string = $escape ? e($string) : $string;
+
+        [$html, $text] = $this->renderForAssertions();
+
+        PHPUnit::assertStringNotContainsString(
+            $string,
+            $html,
+            "Saw unexpected text [{$string}] within email body."
+        );
+
+        return $this;
+    }
+
+    /**
+     * Assert that the given text strings are present in order in the HTML email body.
+     *
+     * @param  array  $strings
+     * @param  bool  $escape
+     * @return $this
+     */
+    public function assertSeeInOrderInHtml($strings, $escape = true)
+    {
+        $strings = $escape ? array_map('e', $strings) : $strings;
+
+        [$html, $text] = $this->renderForAssertions();
+
+        PHPUnit::assertThat($strings, new SeeInOrder($html));
+
+        return $this;
+    }
+
+    /**
+     * Assert that the given text is present in the plain-text email body.
+     *
+     * @param  string  $string
+     * @return $this
+     */
+    public function assertSeeInText($string)
+    {
+        [$html, $text] = $this->renderForAssertions();
+
+        PHPUnit::assertStringContainsString(
+            $string,
+            $text,
+            "Did not see expected text [{$string}] within text email body."
+        );
+
+        return $this;
+    }
+
+    /**
+     * Assert that the given text is not present in the plain-text email body.
+     *
+     * @param  string  $string
+     * @return $this
+     */
+    public function assertDontSeeInText($string)
+    {
+        [$html, $text] = $this->renderForAssertions();
+
+        PHPUnit::assertStringNotContainsString(
+            $string,
+            $text,
+            "Saw unexpected text [{$string}] within text email body."
+        );
+
+        return $this;
+    }
+
+    /**
+     * Assert that the given text strings are present in order in the plain-text email body.
+     *
+     * @param  array  $strings
+     * @return $this
+     */
+    public function assertSeeInOrderInText($strings)
+    {
+        [$html, $text] = $this->renderForAssertions();
+
+        PHPUnit::assertThat($strings, new SeeInOrder($text));
+
+        return $this;
+    }
+
+    /**
+     * Assert the mailable has the given attachment.
+     *
+     * @param  string|\Illuminate\Contracts\Mail\Attachable|\Illuminate\Mail\Attachment  $file
+     * @param  array  $options
+     * @return $this
+     */
+    public function assertHasAttachment($file, array $options = [])
+    {
+        $this->renderForAssertions();
+
+        PHPUnit::assertTrue(
+            $this->hasAttachment($file, $options),
+            'Did not find the expected attachment.'
+        );
+
+        return $this;
+    }
+
+    /**
+     * Assert the mailable has the given data as an attachment.
+     *
+     * @param  string  $data
+     * @param  string  $name
+     * @param  array  $options
+     * @return $this
+     */
+    public function assertHasAttachedData($data, $name, array $options = [])
+    {
+        $this->renderForAssertions();
+
+        PHPUnit::assertTrue(
+            $this->hasAttachedData($data, $name, $options),
+            'Did not find the expected attachment.'
+        );
+
+        return $this;
+    }
+
+    /**
+     * Assert the mailable has the given attachment from storage.
+     *
+     * @param  string  $path
+     * @param  string|null  $name
+     * @param  array  $options
+     * @return $this
+     */
+    public function assertHasAttachmentFromStorage($path, $name = null, array $options = [])
+    {
+        $this->renderForAssertions();
+
+        PHPUnit::assertTrue(
+            $this->hasAttachmentFromStorage($path, $name, $options),
+            'Did not find the expected attachment.'
+        );
+
+        return $this;
+    }
+
+    /**
+     * Assert the mailable has the given attachment from a specific storage disk.
+     *
+     * @param  string  $disk
+     * @param  string  $path
+     * @param  string|null  $name
+     * @param  array  $options
+     * @return $this
+     */
+    public function assertHasAttachmentFromStorageDisk($disk, $path, $name = null, array $options = [])
+    {
+        $this->renderForAssertions();
+
+        PHPUnit::assertTrue(
+            $this->hasAttachmentFromStorageDisk($disk, $path, $name, $options),
+            'Did not find the expected attachment.'
+        );
+
+        return $this;
+    }
+
+    /**
+     * Assert that the mailable has the given tag.
+     *
+     * @param  string  $tag
+     * @return $this
+     */
+    public function assertHasTag($tag)
+    {
+        $this->renderForAssertions();
+
+        PHPUnit::assertTrue(
+            $this->hasTag($tag),
+            "Did not see expected tag [{$tag}] in email tags."
+        );
+
+        return $this;
+    }
+
+    /**
+     * Assert that the mailable has the given metadata.
+     *
+     * @param  string  $key
+     * @param  string  $value
+     * @return $this
+     */
+    public function assertHasMetadata($key, $value)
+    {
+        $this->renderForAssertions();
+
+        PHPUnit::assertTrue(
+            $this->hasMetadata($key, $value),
+            "Did not see expected key [{$key}] and value [{$value}] in email metadata."
+        );
+
+        return $this;
+    }
+
+    /**
+     * Render the HTML and plain-text version of the mailable into views for assertions.
+     *
+     * @return array
+     *
+     * @throws \ReflectionException
+     */
+    protected function renderForAssertions()
+    {
+        if ($this->assertionableRenderStrings) {
+            return $this->assertionableRenderStrings;
+        }
+
+        return $this->assertionableRenderStrings = $this->withLocale($this->locale, function () {
+            $this->prepareMailableForDelivery();
+
+            $html = Container::getInstance()->make('mailer')->render(
+                $view = $this->buildView(), $this->buildViewData()
+            );
+
+            if (is_array($view) && isset($view[1])) {
+                $text = $view[1];
+            }
+
+            $text ??= $view['text'] ?? '';
+
+            if (! empty($text) && ! $text instanceof Htmlable) {
+                $text = Container::getInstance()->make('mailer')->render(
+                    $text, $this->buildViewData()
+                );
+            }
+
+            return [(string) $html, (string) $text];
+        });
+    }
+
+    /**
+     * Prepare the mailable instance for delivery.
+     *
+     * @return void
+     */
+    protected function prepareMailableForDelivery()
+    {
+        if (method_exists($this, 'build')) {
+            Container::getInstance()->call([$this, 'build']);
+        }
+
+        $this->ensureHeadersAreHydrated();
+        $this->ensureEnvelopeIsHydrated();
+        $this->ensureContentIsHydrated();
+        $this->ensureAttachmentsAreHydrated();
+    }
+
+    /**
+     * Ensure the mailable's headers are hydrated from the "headers" method.
+     *
+     * @return void
+     */
+    private function ensureHeadersAreHydrated()
+    {
+        if (! method_exists($this, 'headers')) {
+            return;
+        }
+
+        $headers = $this->headers();
+
+        $this->withSymfonyMessage(function ($message) use ($headers) {
+            if ($headers->messageId) {
+                $message->getHeaders()->addIdHeader('Message-Id', $headers->messageId);
+            }
+
+            if (count($headers->references) > 0) {
+                $message->getHeaders()->addTextHeader('References', $headers->referencesString());
+            }
+
+            foreach ($headers->text as $key => $value) {
+                $message->getHeaders()->addTextHeader($key, $value);
+            }
+        });
+    }
+
+    /**
+     * Ensure the mailable's "envelope" data is hydrated from the "envelope" method.
+     *
+     * @return void
+     */
+    private function ensureEnvelopeIsHydrated()
+    {
+        if (! method_exists($this, 'envelope')) {
+            return;
+        }
+
+        $envelope = $this->envelope();
+
+        if (isset($envelope->from)) {
+            $this->from($envelope->from->address, $envelope->from->name);
+        }
+
+        foreach (['to', 'cc', 'bcc', 'replyTo'] as $type) {
+            foreach ($envelope->{$type} as $address) {
+                $this->{$type}($address->address, $address->name);
+            }
+        }
+
+        if ($envelope->subject) {
+            $this->subject($envelope->subject);
+        }
+
+        foreach ($envelope->tags as $tag) {
+            $this->tag($tag);
+        }
+
+        foreach ($envelope->metadata as $key => $value) {
+            $this->metadata($key, $value);
+        }
+
+        foreach ($envelope->using as $callback) {
+            $this->withSymfonyMessage($callback);
+        }
+    }
+
+    /**
+     * Ensure the mailable's content is hydrated from the "content" method.
+     *
+     * @return void
+     */
+    private function ensureContentIsHydrated()
+    {
+        if (! method_exists($this, 'content')) {
+            return;
+        }
+
+        $content = $this->content();
+
+        if ($content->view) {
+            $this->view($content->view);
+        }
+
+        if ($content->html) {
+            $this->view($content->html);
+        }
+
+        if ($content->text) {
+            $this->text($content->text);
+        }
+
+        if ($content->markdown) {
+            $this->markdown($content->markdown);
+        }
+
+        if ($content->htmlString) {
+            $this->html($content->htmlString);
+        }
+
+        foreach ($content->with as $key => $value) {
+            $this->with($key, $value);
+        }
+    }
+
+    /**
+     * Ensure the mailable's attachments are hydrated from the "attachments" method.
+     *
+     * @return void
+     */
+    private function ensureAttachmentsAreHydrated()
+    {
+        if (! method_exists($this, 'attachments')) {
+            return;
+        }
+
+        $attachments = $this->attachments();
+
+        Collection::make(is_object($attachments) ? [$attachments] : $attachments)
+            ->each(function ($attachment) {
+                $this->attach($attachment);
+            });
+    }
+
+    /**
+     * Set the name of the mailer that should send the message.
+     *
+     * @param  string  $mailer
+     * @return $this
+     */
+    public function mailer($mailer)
+    {
+        $this->mailer = $mailer;
+
+        return $this;
+    }
+
+    /**
+     * Register a callback to be called with the Symfony message instance.
      *
      * @param  callable  $callback
      * @return $this
      */
-    public function withSwiftMessage($callback)
+    public function withSymfonyMessage($callback)
     {
         $this->callbacks[] = $callback;
 
@@ -646,20 +1787,35 @@ class Mailable implements MailableContract
     }
 
     /**
+     * Register a callback to be called while building the view data.
+     *
+     * @param  callable  $callback
+     * @return void
+     */
+    public static function buildViewDataUsing(callable $callback)
+    {
+        static::$viewDataCallback = $callback;
+    }
+
+    /**
      * Dynamically bind parameters to the message.
      *
      * @param  string  $method
-     * @param  array   $parameters
+     * @param  array  $parameters
      * @return $this
      *
      * @throws \BadMethodCallException
      */
     public function __call($method, $parameters)
     {
-        if (Str::startsWith($method, 'with')) {
-            return $this->with(Str::snake(substr($method, 4)), $parameters[0]);
+        if (static::hasMacro($method)) {
+            return $this->macroCall($method, $parameters);
         }
 
-        throw new BadMethodCallException("Method [$method] does not exist on mailable.");
+        if (str_starts_with($method, 'with')) {
+            return $this->with(Str::camel(substr($method, 4)), $parameters[0]);
+        }
+
+        static::throwBadMethodCallException($method);
     }
 }

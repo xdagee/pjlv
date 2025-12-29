@@ -31,7 +31,7 @@ class JobsController extends Controller
         // $jobs = Job::latest()->get();
 
         // explicitly selecting jobs
-        $jobs = Job::select('id','job_title','job_description','is_multiple_staff')->latest()->get();
+        $jobs = Job::select('id', 'job_title', 'job_description', 'is_multiple_staff')->latest()->get();
 
         // json
         return $jobs;
@@ -46,7 +46,7 @@ class JobsController extends Controller
     public function create()
     {
         //
-        return view ('jobs.create');
+        return view('jobs.create');
     }
 
     /**
@@ -65,8 +65,8 @@ class JobsController extends Controller
         ]);
 
         //
-        $jobs = Job::create(request (
-            ['job_title','job_description','is_multiple_staff']
+        $jobs = Job::create(request(
+            ['job_title', 'job_description', 'is_multiple_staff']
         ));
 
         return redirect('jobs');
@@ -99,7 +99,7 @@ class JobsController extends Controller
         // find id
         $job = Job::findOrFail($id);
         // return $job;
-        return view ('jobs.edit', compact('job'));
+        return view('jobs.edit', compact('job'));
     }
 
     /**
@@ -113,16 +113,18 @@ class JobsController extends Controller
     {
         //
         $this->validate($request, [
-            'job_title'=>'required',
-            'job_description'=>'required',
-            'is_multiple_staff'=>'required',
+            'job_title' => 'required',
+            'job_description' => 'required',
+            'is_multiple_staff' => 'required',
         ]);
 
         $job = Job::findOrFail($id);
-        $job -> job_title = $request -> input('job_title');
-        $job -> job_description = $request -> input('job_description');
-        $job -> is_multiple_staff = $request -> input('is_multiple_staff');
-        $job = save();
+        $job->job_title = $request->input('job_title');
+        $job->job_description = $request->input('job_description');
+        $job->is_multiple_staff = $request->input('is_multiple_staff');
+        $job->save();
+
+        return redirect('/jobs')->with('success', 'Job updated successfully.');
     }
 
     /**
@@ -133,8 +135,9 @@ class JobsController extends Controller
      */
     public function destroy($id)
     {
-        // 
-        // $job = Job::findOrFail($id);
-        // $job->delete();
+        $job = Job::findOrFail($id);
+        $job->delete();
+
+        return redirect('/jobs')->with('success', 'Job deleted successfully.');
     }
 }

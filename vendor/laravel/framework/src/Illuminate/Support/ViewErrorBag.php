@@ -78,7 +78,7 @@ class ViewErrorBag implements Countable
      *
      * @return int
      */
-    public function count()
+    public function count(): int
     {
         return $this->getBag('default')->count();
     }
@@ -116,5 +116,15 @@ class ViewErrorBag implements Countable
     public function __set($key, $value)
     {
         $this->put($key, $value);
+    }
+
+    /**
+     * Convert the default bag to its string representation.
+     *
+     * @return string
+     */
+    public function __toString()
+    {
+        return (string) $this->getBag('default');
     }
 }

@@ -4,101 +4,95 @@ namespace App\Http\Controllers;
 
 use App\LeaveType;
 use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
 
 class LeaveTypesController extends Controller
 {
-    /**
-     * Create a new controller instance.
-     *
-     * @return void
-     */
     public function __construct()
     {
         $this->middleware('auth');
     }
 
     /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
+     * Display a listing of leave types.
      */
     public function index()
     {
-        //
-        $leavetypes = LeaveType::get();
-        return $leavetypes;
-
-        // return ('leaveTypes');
+        $leavetypes = LeaveType::all();
+        return view('leavetypes.index', compact('leavetypes'));
     }
 
     /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
+     * Show the form for creating a new leave type.
      */
     public function create()
     {
-        //
+        return view('leavetypes.create');
     }
 
     /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * Store a newly created leave type.
      */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'leave_type_name' => 'required|string|max:100|unique:leave_types',
+            'leave_duration' => 'required|integer|min:0',
+        ]);
+
+        LeaveType::create($validated);
+
+        return redirect('/leavetypes')->with('success', 'Leave type created successfully.');
     }
 
     /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * Display the specified leave type.
      */
     public function show($id)
     {
-        $leavetypes = LeaveType::FindOrFail($id);
-        // json
-        return $leavetypes;
-        // view
-        // return view ('leavetypes.show', compact('leavetypes'));
+        $leavetype = LeaveType::findOrFail($id);
+        return view('leavetypes.show', compact('leavetype'));
     }
 
     /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * Show the form for editing the specified leave type.
      */
     public function edit($id)
     {
-        //
+        $leavetype = LeaveType::findOrFail($id);
+        return view('leavetypes.edit', compact('leavetype'));
     }
 
     /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * Update the specified leave type.
      */
     public function update(Request $request, $id)
     {
-        //
+        $leavetype = LeaveType::findOrFail($id);
+
+        $validated = $request->validate([
+            'leave_type_name' => 'required|string|max:100|unique:leave_types,leave_type_name,' . $id,
+            'leave_duration' => 'required|integer|min:0',
+        ]);
+
+        $leavetype->update($validated);
+
+        return redirect('/leavetypes')->with('success', 'Leave type updated successfully.');
     }
 
     /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * Remove the specified leave type.
      */
     public function destroy($id)
     {
-        //
+        $leavetype = LeaveType::findOrFail($id);
+
+        // Check if leave type is in use
+        if ($leavetype->staffLeaves()->exists()) {
+            return redirect('/leavetypes')->with('error', 'Cannot delete leave type that is in use.');
+        }
+
+        $leavetype->delete();
+
+        return redirect('/leavetypes')->with('success', 'Leave type deleted successfully.');
     }
 }

@@ -2,19 +2,13 @@
 
 namespace Illuminate\Broadcasting;
 
-use Illuminate\Support\ServiceProvider;
-use Illuminate\Contracts\Broadcasting\Factory as BroadcastingFactory;
 use Illuminate\Contracts\Broadcasting\Broadcaster as BroadcasterContract;
+use Illuminate\Contracts\Broadcasting\Factory as BroadcastingFactory;
+use Illuminate\Contracts\Support\DeferrableProvider;
+use Illuminate\Support\ServiceProvider;
 
-class BroadcastServiceProvider extends ServiceProvider
+class BroadcastServiceProvider extends ServiceProvider implements DeferrableProvider
 {
-    /**
-     * Indicates if loading of the provider is deferred.
-     *
-     * @var bool
-     */
-    protected $defer = true;
-
     /**
      * Register the service provider.
      *
@@ -22,9 +16,7 @@ class BroadcastServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->app->singleton(BroadcastManager::class, function ($app) {
-            return new BroadcastManager($app);
-        });
+        $this->app->singleton(BroadcastManager::class, fn ($app) => new BroadcastManager($app));
 
         $this->app->singleton(BroadcasterContract::class, function ($app) {
             return $app->make(BroadcastManager::class)->connection();

@@ -12,6 +12,7 @@
 namespace Symfony\Component\Console\Tests\Logger;
 
 use PHPUnit\Framework\TestCase;
+use Psr\Log\InvalidArgumentException;
 use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
 use Symfony\Component\Console\Logger\ConsoleLogger;
@@ -20,22 +21,14 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Tests\Fixtures\DummyOutput;
 
 /**
- * Console logger test.
- *
  * @author Kévin Dunglas <dunglas@gmail.com>
  * @author Jordi Boggiano <j.boggiano@seld.be>
  */
 class ConsoleLoggerTest extends TestCase
 {
-    /**
-     * @var DummyOutput
-     */
-    protected $output;
+    protected DummyOutput $output;
 
-    /**
-     * @return LoggerInterface
-     */
-    public function getLogger()
+    public function getLogger(): LoggerInterface
     {
         $this->output = new DummyOutput(OutputInterface::VERBOSITY_VERBOSE);
 
@@ -56,7 +49,7 @@ class ConsoleLoggerTest extends TestCase
      *
      * @return string[]
      */
-    public function getLogs()
+    public function getLogs(): array
     {
         return $this->output->getLogs();
     }
@@ -70,10 +63,10 @@ class ConsoleLoggerTest extends TestCase
         $logger = new ConsoleLogger($out, $addVerbosityLevelMap);
         $logger->log($logLevel, 'foo bar');
         $logs = $out->fetch();
-        $this->assertEquals($isOutput ? "[$logLevel] foo bar".PHP_EOL : '', $logs);
+        $this->assertEquals($isOutput ? "[$logLevel] foo bar".\PHP_EOL : '', $logs);
     }
 
-    public function provideOutputMappingParams()
+    public static function provideOutputMappingParams()
     {
         $quietMap = [LogLevel::EMERGENCY => OutputInterface::VERBOSITY_QUIET];
 
@@ -108,7 +101,7 @@ class ConsoleLoggerTest extends TestCase
 
     public function testImplements()
     {
-        $this->assertInstanceOf('Psr\Log\LoggerInterface', $this->getLogger());
+        $this->assertInstanceOf(LoggerInterface::class, $this->getLogger());
     }
 
     /**
@@ -127,7 +120,7 @@ class ConsoleLoggerTest extends TestCase
         $this->assertEquals($expected, $this->getLogs());
     }
 
-    public function provideLevelsAndMessages()
+    public static function provideLevelsAndMessages()
     {
         return [
             LogLevel::EMERGENCY => [LogLevel::EMERGENCY, 'message of level emergency with context: {user}'],
@@ -141,13 +134,10 @@ class ConsoleLoggerTest extends TestCase
         ];
     }
 
-    /**
-     * @expectedException \Psr\Log\InvalidArgumentException
-     */
     public function testThrowsOnInvalidLevel()
     {
-        $logger = $this->getLogger();
-        $logger->log('invalid level', 'Foo');
+        $this->expectException(InvalidArgumentException::class);
+        $this->getLogger()->log('invalid level', 'Foo');
     }
 
     public function testContextReplacement()
@@ -162,11 +152,11 @@ class ConsoleLoggerTest extends TestCase
     public function testObjectCastToString()
     {
         if (method_exists($this, 'createPartialMock')) {
-            $dummy = $this->createPartialMock('Symfony\Component\Console\Tests\Logger\DummyTest', ['__toString']);
+            $dummy = $this->createPartialMock(DummyTest::class, ['__toString']);
         } else {
-            $dummy = $this->getMock('Symfony\Component\Console\Tests\Logger\DummyTest', ['__toString']);
+            $dummy = $this->createPartialMock(DummyTest::class, ['__toString']);
         }
-        $dummy->method('__toString')->will($this->returnValue('DUMMY'));
+        $dummy->method('__toString')->willReturn('DUMMY');
 
         $this->getLogger()->warning($dummy);
 
@@ -183,7 +173,7 @@ class ConsoleLoggerTest extends TestCase
             'int' => 0,
             'float' => 0.5,
             'nested' => ['with object' => new DummyTest()],
-            'object' => new \DateTime(),
+            'object' => new \DateTimeImmutable(),
             'resource' => fopen('php://memory', 'r'),
         ];
 
@@ -209,7 +199,7 @@ class ConsoleLoggerTest extends TestCase
 
 class DummyTest
 {
-    public function __toString()
+    public function __toString(): string
     {
     }
 }

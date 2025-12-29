@@ -14,7 +14,11 @@ class User extends Authenticatable
      *
      * @var array
      */
-    protected $guarded = [];
+    protected $fillable = [
+        'id',
+        'email',
+        'password',
+    ];
 
     /**
      * The attributes that should be hidden for arrays.
@@ -22,14 +26,15 @@ class User extends Authenticatable
      * @var array
      */
     protected $hidden = [
-        'password', 'remember_token',
+        'password',
+        'remember_token',
     ];
 
 
     public function staff()
     {
         return $this->belongsTo(Staff::class, 'id');
-    }    
+    }
 
     // public function role()
     // {

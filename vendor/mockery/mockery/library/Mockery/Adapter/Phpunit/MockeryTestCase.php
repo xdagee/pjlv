@@ -1,30 +1,27 @@
 <?php
 
+/**
+ * Mockery (https://docs.mockery.io/)
+ *
+ * @copyright https://github.com/mockery/mockery/blob/HEAD/COPYRIGHT.md
+ * @license https://github.com/mockery/mockery/blob/HEAD/LICENSE BSD 3-Clause License
+ * @link https://github.com/mockery/mockery for the canonical source repository
+ */
+
 namespace Mockery\Adapter\Phpunit;
 
-use Mockery;
+use PHPUnit\Framework\TestCase;
 
-abstract class MockeryTestCase extends \PHPUnit_Framework_TestCase
+abstract class MockeryTestCase extends TestCase
 {
-    protected function assertPostConditions()
-    {
-        $this->addMockeryExpectationsToAssertionCount();
-        $this->closeMockery();
+    use MockeryPHPUnitIntegration;
+    use MockeryTestCaseSetUp;
 
-        parent::assertPostConditions();
+    protected function mockeryTestSetUp()
+    {
     }
 
-    protected function addMockeryExpectationsToAssertionCount()
+    protected function mockeryTestTearDown()
     {
-        $container = Mockery::getContainer();
-        if ($container != null) {
-            $count = $container->mockery_getExpectationCount();
-            $this->addToAssertionCount($count);
-        }
-    }
-
-    protected function closeMockery()
-    {
-        Mockery::close();
     }
 }

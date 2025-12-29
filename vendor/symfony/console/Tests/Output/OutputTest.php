@@ -81,6 +81,19 @@ class OutputTest extends TestCase
         $this->assertEquals("foo\nbar\n", $output->output, '->writeln() can take an array of messages to output');
     }
 
+    public function testWriteAnIterableOfMessages()
+    {
+        $output = new TestOutput();
+        $output->writeln($this->generateMessages());
+        $this->assertEquals("foo\nbar\n", $output->output, '->writeln() can take an iterable of messages to output');
+    }
+
+    private function generateMessages(): iterable
+    {
+        yield 'foo';
+        yield 'bar';
+    }
+
     /**
      * @dataProvider provideWriteArguments
      */
@@ -91,7 +104,7 @@ class OutputTest extends TestCase
         $this->assertEquals($expectedOutput, $output->output);
     }
 
-    public function provideWriteArguments()
+    public static function provideWriteArguments()
     {
         return [
             ['<info>foo</info>', Output::OUTPUT_RAW, "<info>foo</info>\n"],
@@ -148,7 +161,7 @@ class OutputTest extends TestCase
         $this->assertEquals($expected, $output->output, $msg);
     }
 
-    public function verbosityProvider()
+    public static function verbosityProvider()
     {
         return [
             [Output::VERBOSITY_QUIET, '2', '->write() in QUIET mode only outputs when an explicit QUIET verbosity is passed'],
@@ -162,14 +175,14 @@ class OutputTest extends TestCase
 
 class TestOutput extends Output
 {
-    public $output = '';
+    public string $output = '';
 
     public function clear()
     {
         $this->output = '';
     }
 
-    protected function doWrite($message, $newline)
+    protected function doWrite(string $message, bool $newline): void
     {
         $this->output .= $message.($newline ? "\n" : '');
     }

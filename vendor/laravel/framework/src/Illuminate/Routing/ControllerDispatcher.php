@@ -3,10 +3,11 @@
 namespace Illuminate\Routing;
 
 use Illuminate\Container\Container;
+use Illuminate\Routing\Contracts\ControllerDispatcher as ControllerDispatcherContract;
 
-class ControllerDispatcher
+class ControllerDispatcher implements ControllerDispatcherContract
 {
-    use RouteDependencyResolverTrait;
+    use FiltersControllerMiddleware, ResolvesRouteDependencies;
 
     /**
      * The container instance.
@@ -36,9 +37,7 @@ class ControllerDispatcher
      */
     public function dispatch(Route $route, $controller, $method)
     {
-        $parameters = $this->resolveClassMethodDependencies(
-            $route->parametersWithoutNulls(), $controller, $method
-        );
+        $parameters = $this->resolveParameters($route, $controller, $method);
 
         if (method_exists($controller, 'callAction')) {
             return $controller->callAction($method, $parameters);
@@ -48,13 +47,28 @@ class ControllerDispatcher
     }
 
     /**
+     * Resolve the parameters for the controller.
+     *
+     * @param  \Illuminate\Routing\Route  $route
+     * @param  mixed  $controller
+     * @param  string  $method
+     * @return array
+     */
+    protected function resolveParameters(Route $route, $controller, $method)
+    {
+        return $this->resolveClassMethodDependencies(
+            $route->parametersWithoutNulls(), $controller, $method
+        );
+    }
+
+    /**
      * Get the middleware for the controller instance.
      *
      * @param  \Illuminate\Routing\Controller  $controller
      * @param  string  $method
      * @return array
      */
-    public static function getMiddleware($controller, $method)
+    public function getMiddleware($controller, $method)
     {
         if (! method_exists($controller, 'getMiddleware')) {
             return [];
@@ -63,18 +77,5 @@ class ControllerDispatcher
         return collect($controller->getMiddleware())->reject(function ($data) use ($method) {
             return static::methodExcludedByOptions($method, $data['options']);
         })->pluck('middleware')->all();
-    }
-
-    /**
-     * Determine if the given options exclude a particular method.
-     *
-     * @param  string  $method
-     * @param  array  $options
-     * @return bool
-     */
-    protected static function methodExcludedByOptions($method, array $options)
-    {
-        return (isset($options['only']) && ! in_array($method, (array) $options['only'])) ||
-            (! empty($options['except']) && in_array($method, (array) $options['except']));
     }
 }

@@ -1,242 +1,28 @@
 <?php
+
 /**
- * Mockery
+ * Mockery (https://docs.mockery.io/)
  *
- * LICENSE
- *
- * This source file is subject to the new BSD license that is bundled
- * with this package in the file LICENSE.txt.
- * It is also available through the world-wide-web at this URL:
- * http://github.com/padraic/mockery/blob/master/LICENSE
- * If you did not receive a copy of the license and are unable to
- * obtain it through the world-wide-web, please send an email
- * to padraic@php.net so we can send you a copy immediately.
- *
- * @category   Mockery
- * @package    Mockery
- * @copyright  Copyright (c) 2010-2014 Pádraic Brady (http://blog.astrumfutura.com)
- * @license    http://github.com/padraic/mockery/blob/master/LICENSE New BSD License
+ * @copyright https://github.com/mockery/mockery/blob/HEAD/COPYRIGHT.md
+ * @license https://github.com/mockery/mockery/blob/HEAD/LICENSE BSD 3-Clause License
+ * @link https://github.com/mockery/mockery for the canonical source repository
  */
 
 namespace Mockery;
 
-interface MockInterface
+interface MockInterface extends LegacyMockInterface
 {
-
     /**
-     * Alternative setup method to constructor
+     * @param mixed $something String method name or map of method => return
      *
-     * @param \Mockery\Container $container
-     * @param object $partialObject
-     * @return void
+     * @return Expectation|ExpectationInterface|HigherOrderMessage|self
      */
-    public function mockery_init(\Mockery\Container $container = null, $partialObject = null);
+    public function allows($something = []);
 
     /**
-     * Set expected method calls
+     * @param mixed $something String method name (optional)
      *
-     * @param mixed ...
-     * @return \Mockery\Expectation
+     * @return Expectation|ExpectationInterface|ExpectsHigherOrderMessage
      */
-    public function shouldReceive();
-
-    /**
-     * Shortcut method for setting an expectation that a method should not be called.
-     *
-     * @param mixed ...
-     * @return \Mockery\Expectation
-     */
-    public function shouldNotReceive();
-
-    /**
-     * Allows additional methods to be mocked that do not explicitly exist on mocked class
-     * @param String $method name of the method to be mocked
-     */
-    public function shouldAllowMockingMethod($method);
-
-    /**
-     * Set mock to ignore unexpected methods and return Undefined class
-     * @param mixed $returnValue the default return value for calls to missing functions on this mock
-     * @return Mock
-     */
-    public function shouldIgnoreMissing($returnValue = null);
-
-    /**
-     * @return Mock
-     */
-    public function shouldAllowMockingProtectedMethods();
-
-    /**
-     * Set mock to defer unexpected methods to its parent if possible
-     *
-     * @return Mock
-     */
-    public function shouldDeferMissing();
-    
-    /**
-     * Set mock to defer unexpected methods to its parent if possible
-     *
-     * @return Mock
-     */
-    public function makePartial();
-
-    /**
-     * @param $method
-     * @param null $args
-     * @return \Mockery\Expectation
-     */
-    public function shouldHaveReceived($method, $args = null);
-
-    /**
-     * @param $method
-     * @param null $args
-     * @return null
-     */
-    public function shouldNotHaveReceived($method, $args = null);
-
-
-    /**
-     * In the event shouldReceive() accepting an array of methods/returns
-     * this method will switch them from normal expectations to default
-     * expectations
-     *
-     * @return self
-     */
-    public function byDefault();
-
-    /**
-     * Capture calls to this mock and check against expectations
-     *
-     * @param string $method
-     * @param array $args
-     * @return mixed
-     */
-        /**
-         * Unfortunately we need to allow type hinting agnostic __call()
-         * definitions since any interface/class being mocked can go either
-         * way.
-         */
-    //public function __call($method, array $args);
-
-    /**
-     * Iterate across all expectation directors and validate each
-     *
-     * @throws \Mockery\CountValidator\Exception
-     * @return void
-     */
-    public function mockery_verify();
-
-    /**
-     * Tear down tasks for this mock
-     *
-     * @return void
-     */
-    public function mockery_teardown();
-
-    /**
-     * Fetch the next available allocation order number
-     *
-     * @return int
-     */
-    public function mockery_allocateOrder();
-
-    /**
-     * Set ordering for a group
-     *
-     * @param mixed $group
-     * @param int $order
-     */
-    public function mockery_setGroup($group, $order);
-
-    /**
-     * Fetch array of ordered groups
-     *
-     * @return array
-     */
-    public function mockery_getGroups();
-
-    /**
-     * Set current ordered number
-     *
-     * @param int $order
-     */
-    public function mockery_setCurrentOrder($order);
-
-    /**
-     * Get current ordered number
-     *
-     * @return int
-     */
-    public function mockery_getCurrentOrder();
-
-    /**
-     * Validate the current mock's ordering
-     *
-     * @param string $method
-     * @param int $order
-     * @throws \Mockery\Exception
-     * @return void
-     */
-    public function mockery_validateOrder($method, $order);
-
-    /**
-     * Gets the count of expectations for this mock
-     *
-     * @return int
-     */
-    public function mockery_getExpectationCount();
-
-    /**
-     * Return the expectations director for the given method
-     *
-     * @var string $method
-     * @return \Mockery\ExpectationDirector|null
-     */
-    public function mockery_setExpectationsFor($method, \Mockery\ExpectationDirector $director);
-
-    /**
-     * Return the expectations director for the given method
-     *
-     * @var string $method
-     * @return \Mockery\ExpectationDirector|null
-     */
-    public function mockery_getExpectationsFor($method);
-
-    /**
-     * Find an expectation matching the given method and arguments
-     *
-     * @var string $method
-     * @var array $args
-     * @return \Mockery\Expectation|null
-     */
-    public function mockery_findExpectation($method, array $args);
-
-    /**
-     * Return the container for this mock
-     *
-     * @return \Mockery\Container
-     */
-    public function mockery_getContainer();
-
-    /**
-     * Return the name for this mock
-     *
-     * @return string
-     */
-    public function mockery_getName();
-
-    /**
-     * @return array
-     */
-    public function mockery_getMockableProperties();
-
-    /**
-     * @return string[]
-     */
-    public function mockery_getMockableMethods();
-
-    /**
-     * @return bool
-     */
-    public function mockery_isAnonymous();
+    public function expects($something = null);
 }

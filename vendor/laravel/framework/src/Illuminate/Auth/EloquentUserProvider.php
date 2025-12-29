@@ -2,10 +2,11 @@
 
 namespace Illuminate\Auth;
 
-use Illuminate\Support\Str;
+use Closure;
+use Illuminate\Contracts\Auth\Authenticatable as UserContract;
 use Illuminate\Contracts\Auth\UserProvider;
 use Illuminate\Contracts\Hashing\Hasher as HasherContract;
-use Illuminate\Contracts\Auth\Authenticatable as UserContract;
+use Illuminate\Contracts\Support\Arrayable;
 
 class EloquentUserProvider implements UserProvider
 {
@@ -22,6 +23,13 @@ class EloquentUserProvider implements UserProvider
      * @var string
      */
     protected $model;
+
+    /**
+     * The callback that may modify the user retrieval queries.
+     *
+     * @var (\Closure(\Illuminate\Database\Eloquent\Builder):mixed)|null
+     */
+    protected $queryCallback;
 
     /**
      * Create a new database user provider.
@@ -46,9 +54,9 @@ class EloquentUserProvider implements UserProvider
     {
         $model = $this->createModel();
 
-        return $model->newQuery()
-            ->where($model->getAuthIdentifierName(), $identifier)
-            ->first();
+        return $this->newModelQuery($model)
+                    ->where($model->getAuthIdentifierName(), $identifier)
+                    ->first();
     }
 
     /**
@@ -62,10 +70,17 @@ class EloquentUserProvider implements UserProvider
     {
         $model = $this->createModel();
 
-        return $model->newQuery()
-            ->where($model->getAuthIdentifierName(), $identifier)
-            ->where($model->getRememberTokenName(), $token)
-            ->first();
+        $retrievedModel = $this->newModelQuery($model)->where(
+            $model->getAuthIdentifierName(), $identifier
+        )->first();
+
+        if (! $retrievedModel) {
+            return;
+        }
+
+        $rememberToken = $retrievedModel->getRememberToken();
+
+        return $rememberToken && hash_equals($rememberToken, $token) ? $retrievedModel : null;
     }
 
     /**
@@ -96,6 +111,12 @@ class EloquentUserProvider implements UserProvider
      */
     public function retrieveByCredentials(array $credentials)
     {
+        $credentials = array_filter(
+            $credentials,
+            fn ($key) => ! str_contains($key, 'password'),
+            ARRAY_FILTER_USE_KEY
+        );
+
         if (empty($credentials)) {
             return;
         }
@@ -103,10 +124,14 @@ class EloquentUserProvider implements UserProvider
         // First we will add each credential element to the query as a where clause.
         // Then we can execute the query and, if we found a user, return it in a
         // Eloquent User "model" that will be utilized by the Guard instances.
-        $query = $this->createModel()->newQuery();
+        $query = $this->newModelQuery();
 
         foreach ($credentials as $key => $value) {
-            if (! Str::contains($key, 'password')) {
+            if (is_array($value) || $value instanceof Arrayable) {
+                $query->whereIn($key, $value);
+            } elseif ($value instanceof Closure) {
+                $value($query);
+            } else {
                 $query->where($key, $value);
             }
         }
@@ -123,9 +148,28 @@ class EloquentUserProvider implements UserProvider
      */
     public function validateCredentials(UserContract $user, array $credentials)
     {
-        $plain = $credentials['password'];
+        if (is_null($plain = $credentials['password'])) {
+            return false;
+        }
 
         return $this->hasher->check($plain, $user->getAuthPassword());
+    }
+
+    /**
+     * Get a new query builder for the model instance.
+     *
+     * @param  \Illuminate\Database\Eloquent\Model|null  $model
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    protected function newModelQuery($model = null)
+    {
+        $query = is_null($model)
+                ? $this->createModel()->newQuery()
+                : $model->newQuery();
+
+        with($query, $this->queryCallback);
+
+        return $query;
     }
 
     /**
@@ -182,6 +226,29 @@ class EloquentUserProvider implements UserProvider
     public function setModel($model)
     {
         $this->model = $model;
+
+        return $this;
+    }
+
+    /**
+     * Get the callback that modifies the query before retrieving users.
+     *
+     * @return \Closure|null
+     */
+    public function getQueryCallback()
+    {
+        return $this->queryCallback;
+    }
+
+    /**
+     * Sets the callback to modify the query before retrieving users.
+     *
+     * @param  (\Closure(\Illuminate\Database\Eloquent\Builder):mixed)|null  $queryCallback
+     * @return $this
+     */
+    public function withQuery($queryCallback = null)
+    {
+        $this->queryCallback = $queryCallback;
 
         return $this;
     }

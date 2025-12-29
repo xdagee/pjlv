@@ -20,10 +20,29 @@ class QtFileDumperTest extends TestCase
     public function testFormatCatalogue()
     {
         $catalogue = new MessageCatalogue('en');
-        $catalogue->add(['foo' => 'bar'], 'resources');
+        $catalogue->add(['foo' => 'bar', 'foo_bar' => 'foobar', 'bar_foo' => 'barfoo'], 'resources');
+        $catalogue->setMetadata('foo_bar', [
+            'comments' => [
+                'Comment 1',
+                'Comment 2',
+            ],
+            'flags' => [
+                'fuzzy',
+                'another',
+            ],
+            'sources' => [
+                'src/file_1',
+                'src/file_2:50',
+            ],
+        ], 'resources');
+        $catalogue->setMetadata('bar_foo', [
+            'comments' => 'Comment',
+            'flags' => 'fuzzy',
+            'sources' => 'src/file_1',
+        ], 'resources');
 
         $dumper = new QtFileDumper();
 
-        $this->assertStringEqualsFile(__DIR__.'/../fixtures/resources.ts', $dumper->formatCatalogue($catalogue, 'resources'));
+        $this->assertStringEqualsFile(__DIR__.'/../Fixtures/resources.ts', $dumper->formatCatalogue($catalogue, 'resources'));
     }
 }

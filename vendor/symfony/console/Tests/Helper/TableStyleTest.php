@@ -16,13 +16,10 @@ use Symfony\Component\Console\Helper\TableStyle;
 
 class TableStyleTest extends TestCase
 {
-    /**
-     * @expectedException        \InvalidArgumentException
-     * @expectedExceptionMessage Invalid padding type. Expected one of (STR_PAD_LEFT, STR_PAD_RIGHT, STR_PAD_BOTH).
-     */
     public function testSetPadTypeWithInvalidType()
     {
-        $style = new TableStyle();
-        $style->setPadType('TEST');
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Invalid padding type. Expected one of (STR_PAD_LEFT, STR_PAD_RIGHT, STR_PAD_BOTH).');
+        (new TableStyle())->setPadType(31);
     }
 }

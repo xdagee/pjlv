@@ -74,7 +74,7 @@ class ArrayInputTest extends TestCase
         $this->assertEquals($expectedOptions, $input->getOptions(), $message);
     }
 
-    public function provideOptions()
+    public static function provideOptions(): array
     {
         return [
             [
@@ -127,17 +127,13 @@ class ArrayInputTest extends TestCase
      */
     public function testParseInvalidInput($parameters, $definition, $expectedExceptionMessage)
     {
-        if (method_exists($this, 'expectException')) {
-            $this->expectException('InvalidArgumentException');
-            $this->expectExceptionMessage($expectedExceptionMessage);
-        } else {
-            $this->setExpectedException('InvalidArgumentException', $expectedExceptionMessage);
-        }
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage($expectedExceptionMessage);
 
         new ArrayInput($parameters, $definition);
     }
 
-    public function provideInvalidInput()
+    public static function provideInvalidInput(): array
     {
         return [
             [
@@ -166,10 +162,10 @@ class ArrayInputTest extends TestCase
     public function testToString()
     {
         $input = new ArrayInput(['-f' => null, '-b' => 'bar', '--foo' => 'b a z', '--lala' => null, 'test' => 'Foo', 'test2' => "A\nB'C"]);
-        $this->assertEquals('-f -b=bar --foo='.escapeshellarg('b a z').' --lala Foo '.escapeshellarg("A\nB'C"), (string) $input);
+        $this->assertEquals('-f -b bar --foo='.escapeshellarg('b a z').' --lala Foo '.escapeshellarg("A\nB'C"), (string) $input);
 
         $input = new ArrayInput(['-b' => ['bval_1', 'bval_2'], '--f' => ['fval_1', 'fval_2']]);
-        $this->assertSame('-b=bval_1 -b=bval_2 --f=fval_1 --f=fval_2', (string) $input);
+        $this->assertSame('-b bval_1 -b bval_2 --f=fval_1 --f=fval_2', (string) $input);
 
         $input = new ArrayInput(['array_arg' => ['val_1', 'val_2']]);
         $this->assertSame('val_1 val_2', (string) $input);

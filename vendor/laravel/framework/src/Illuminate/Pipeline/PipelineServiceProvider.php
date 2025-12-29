@@ -2,18 +2,12 @@
 
 namespace Illuminate\Pipeline;
 
-use Illuminate\Support\ServiceProvider;
 use Illuminate\Contracts\Pipeline\Hub as PipelineHubContract;
+use Illuminate\Contracts\Support\DeferrableProvider;
+use Illuminate\Support\ServiceProvider;
 
-class PipelineServiceProvider extends ServiceProvider
+class PipelineServiceProvider extends ServiceProvider implements DeferrableProvider
 {
-    /**
-     * Indicates if loading of the provider is deferred.
-     *
-     * @var bool
-     */
-    protected $defer = true;
-
     /**
      * Register the service provider.
      *
@@ -22,8 +16,11 @@ class PipelineServiceProvider extends ServiceProvider
     public function register()
     {
         $this->app->singleton(
-            PipelineHubContract::class, Hub::class
+            PipelineHubContract::class,
+            Hub::class
         );
+
+        $this->app->bind('pipeline', fn ($app) => new Pipeline($app));
     }
 
     /**
@@ -35,6 +32,7 @@ class PipelineServiceProvider extends ServiceProvider
     {
         return [
             PipelineHubContract::class,
+            'pipeline',
         ];
     }
 }

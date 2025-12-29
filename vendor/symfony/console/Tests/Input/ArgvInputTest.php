@@ -25,7 +25,6 @@ class ArgvInputTest extends TestCase
         $input = new ArgvInput();
         $r = new \ReflectionObject($input);
         $p = $r->getProperty('tokens');
-        $p->setAccessible(true);
 
         $this->assertEquals(['foo'], $p->getValue($input), '__construct() automatically get its input from the argv server variable');
     }
@@ -51,7 +50,17 @@ class ArgvInputTest extends TestCase
         $this->assertSame($expectedOptions, $input->getOptions(), $message);
     }
 
-    public function provideOptions()
+    /**
+     * @dataProvider provideNegatableOptions
+     */
+    public function testParseOptionsNegatable($input, $options, $expectedOptions, $message)
+    {
+        $input = new ArgvInput($input);
+        $input->bind(new InputDefinition($options));
+        $this->assertEquals($expectedOptions, $input->getOptions(), $message);
+    }
+
+    public static function provideOptions()
     {
         return [
             [
@@ -177,23 +186,77 @@ class ArgvInputTest extends TestCase
         ];
     }
 
+    public static function provideNegatableOptions()
+    {
+        return [
+            [
+                ['cli.php', '--foo'],
+                [new InputOption('foo', null, InputOption::VALUE_NEGATABLE)],
+                ['foo' => true],
+                '->parse() parses long options without a value',
+            ],
+            [
+                ['cli.php', '--foo'],
+                [new InputOption('foo', null, InputOption::VALUE_NONE | InputOption::VALUE_NEGATABLE)],
+                ['foo' => true],
+                '->parse() parses long options without a value',
+            ],
+            [
+                ['cli.php', '--no-foo'],
+                [new InputOption('foo', null, InputOption::VALUE_NEGATABLE)],
+                ['foo' => false],
+                '->parse() parses long options without a value',
+            ],
+            [
+                ['cli.php', '--no-foo'],
+                [new InputOption('foo', null, InputOption::VALUE_NONE | InputOption::VALUE_NEGATABLE)],
+                ['foo' => false],
+                '->parse() parses long options without a value',
+            ],
+            [
+                ['cli.php'],
+                [new InputOption('foo', null, InputOption::VALUE_NEGATABLE)],
+                ['foo' => null],
+                '->parse() parses long options without a value',
+            ],
+            [
+                ['cli.php'],
+                [new InputOption('foo', null, InputOption::VALUE_NONE | InputOption::VALUE_NEGATABLE)],
+                ['foo' => null],
+                '->parse() parses long options without a value',
+            ],
+            [
+                ['cli.php'],
+                [new InputOption('foo', null, InputOption::VALUE_NEGATABLE, '', false)],
+                ['foo' => false],
+                '->parse() parses long options without a value',
+            ],
+        ];
+    }
+
     /**
      * @dataProvider provideInvalidInput
      */
     public function testInvalidInput($argv, $definition, $expectedExceptionMessage)
     {
-        if (method_exists($this, 'expectException')) {
-            $this->expectException('RuntimeException');
-            $this->expectExceptionMessage($expectedExceptionMessage);
-        } else {
-            $this->setExpectedException('RuntimeException', $expectedExceptionMessage);
-        }
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage($expectedExceptionMessage);
 
-        $input = new ArgvInput($argv);
-        $input->bind($definition);
+        (new ArgvInput($argv))->bind($definition);
     }
 
-    public function provideInvalidInput()
+    /**
+     * @dataProvider provideInvalidNegatableInput
+     */
+    public function testInvalidInputNegatable($argv, $definition, $expectedExceptionMessage)
+    {
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage($expectedExceptionMessage);
+
+        (new ArgvInput($argv))->bind($definition);
+    }
+
+    public static function provideInvalidInput(): array
     {
         return [
             [
@@ -250,6 +313,42 @@ class ArgvInputTest extends TestCase
                 ['cli.php', '-fЩ'],
                 new InputDefinition([new InputOption('foo', 'f', InputOption::VALUE_NONE)]),
                 'The "-Щ" option does not exist.',
+            ],
+            [
+                ['cli.php', 'acme:foo', 'bar'],
+                new InputDefinition([new InputArgument('command', InputArgument::REQUIRED)]),
+                'No arguments expected for "acme:foo" command, got "bar"',
+            ],
+            [
+                ['cli.php', 'acme:foo', 'bar'],
+                new InputDefinition([new InputArgument('name', InputArgument::REQUIRED)]),
+                'Too many arguments, expected arguments "name".',
+            ],
+        ];
+    }
+
+    public static function provideInvalidNegatableInput(): array
+    {
+        return [
+            [
+                ['cli.php', '--no-foo=bar'],
+                new InputDefinition([new InputOption('foo', 'f', InputOption::VALUE_NEGATABLE)]),
+                'The "--no-foo" option does not accept a value.',
+            ],
+            [
+                ['cli.php', '--no-foo='],
+                new InputDefinition([new InputOption('foo', 'f', InputOption::VALUE_NEGATABLE)]),
+                'The "--no-foo" option does not accept a value.',
+            ],
+            [
+                ['cli.php', '--no-foo=bar'],
+                new InputDefinition([new InputOption('foo', 'f', InputOption::VALUE_NONE | InputOption::VALUE_NEGATABLE)]),
+                'The "--no-foo" option does not accept a value.',
+            ],
+            [
+                ['cli.php', '--no-foo='],
+                new InputDefinition([new InputOption('foo', 'f', InputOption::VALUE_NONE | InputOption::VALUE_NEGATABLE)]),
+                'The "--no-foo" option does not accept a value.',
             ],
         ];
     }
@@ -312,6 +411,14 @@ class ArgvInputTest extends TestCase
 
         $input = new ArgvInput(['cli.php', '-fbbar', 'foo']);
         $this->assertEquals('foo', $input->getFirstArgument(), '->getFirstArgument() returns the first argument from the raw input');
+
+        $input = new ArgvInput(['cli.php', '--foo', 'fooval', 'bar']);
+        $input->bind(new InputDefinition([new InputOption('foo', 'f', InputOption::VALUE_OPTIONAL), new InputArgument('arg')]));
+        $this->assertSame('bar', $input->getFirstArgument());
+
+        $input = new ArgvInput(['cli.php', '-bf', 'fooval', 'argval']);
+        $input->bind(new InputDefinition([new InputOption('bar', 'b', InputOption::VALUE_NONE), new InputOption('foo', 'f', InputOption::VALUE_OPTIONAL), new InputArgument('arg')]));
+        $this->assertSame('argval', $input->getFirstArgument());
     }
 
     public function testHasParameterOption()
@@ -406,7 +513,7 @@ class ArgvInputTest extends TestCase
         $this->assertEquals($expected, $input->getParameterOption($key, $default, $onlyParams), '->getParameterOption() returns the expected value');
     }
 
-    public function provideGetParameterOptionValues()
+    public static function provideGetParameterOptionValues()
     {
         return [
             [['app/console', 'foo:bar'], '-e', 'default', false, 'default'],

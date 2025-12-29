@@ -2,29 +2,44 @@
 
 namespace Illuminate\Http;
 
-use JsonSerializable;
-use InvalidArgumentException;
-use Illuminate\Contracts\Support\Jsonable;
 use Illuminate\Contracts\Support\Arrayable;
+use Illuminate\Contracts\Support\Jsonable;
+use Illuminate\Support\Traits\Macroable;
+use InvalidArgumentException;
+use JsonSerializable;
 use Symfony\Component\HttpFoundation\JsonResponse as BaseJsonResponse;
 
 class JsonResponse extends BaseJsonResponse
 {
-    use ResponseTrait;
+    use ResponseTrait, Macroable {
+        Macroable::__call as macroCall;
+    }
 
     /**
-     * Constructor.
+     * Create a new JSON response instance.
      *
      * @param  mixed  $data
-     * @param  int    $status
+     * @param  int  $status
      * @param  array  $headers
-     * @param  int    $options
+     * @param  int  $options
+     * @param  bool  $json
+     * @return void
      */
-    public function __construct($data = null, $status = 200, $headers = [], $options = 0)
+    public function __construct($data = null, $status = 200, $headers = [], $options = 0, $json = false)
     {
         $this->encodingOptions = $options;
 
-        parent::__construct($data, $status, $headers);
+        parent::__construct($data, $status, $headers, $json);
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * @return static
+     */
+    public static function fromJsonString(?string $data = null, int $status = 200, array $headers = []): static
+    {
+        return new static($data, $status, $headers, 0, true);
     }
 
     /**
@@ -52,20 +67,22 @@ class JsonResponse extends BaseJsonResponse
 
     /**
      * {@inheritdoc}
+     *
+     * @return static
      */
-    public function setData($data = [])
+    public function setData($data = []): static
     {
         $this->original = $data;
 
-        if ($data instanceof Arrayable) {
-            $this->data = json_encode($data->toArray(), $this->encodingOptions);
-        } elseif ($data instanceof Jsonable) {
-            $this->data = $data->toJson($this->encodingOptions);
-        } elseif ($data instanceof JsonSerializable) {
-            $this->data = json_encode($data->jsonSerialize(), $this->encodingOptions);
-        } else {
-            $this->data = json_encode($data, $this->encodingOptions);
-        }
+        // Ensure json_last_error() is cleared...
+        json_decode('[]');
+
+        $this->data = match (true) {
+            $data instanceof Jsonable => $data->toJson($this->encodingOptions),
+            $data instanceof JsonSerializable => json_encode($data->jsonSerialize(), $this->encodingOptions),
+            $data instanceof Arrayable => json_encode($data->toArray(), $this->encodingOptions),
+            default => json_encode($data, $this->encodingOptions),
+        };
 
         if (! $this->hasValidJson(json_last_error())) {
             throw new InvalidArgumentException(json_last_error_msg());
@@ -82,15 +99,24 @@ class JsonResponse extends BaseJsonResponse
      */
     protected function hasValidJson($jsonError)
     {
-        return $jsonError === JSON_ERROR_NONE ||
-                ($jsonError === JSON_ERROR_UNSUPPORTED_TYPE &&
-                $this->hasEncodingOption(JSON_PARTIAL_OUTPUT_ON_ERROR));
+        if ($jsonError === JSON_ERROR_NONE) {
+            return true;
+        }
+
+        return $this->hasEncodingOption(JSON_PARTIAL_OUTPUT_ON_ERROR) &&
+                    in_array($jsonError, [
+                        JSON_ERROR_RECURSION,
+                        JSON_ERROR_INF_OR_NAN,
+                        JSON_ERROR_UNSUPPORTED_TYPE,
+                    ]);
     }
 
     /**
      * {@inheritdoc}
+     *
+     * @return static
      */
-    public function setEncodingOptions($options)
+    public function setEncodingOptions($options): static
     {
         $this->encodingOptions = (int) $options;
 

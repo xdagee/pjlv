@@ -21,7 +21,7 @@ class StaffController extends Controller
     {
         $this->middleware('auth');
     }
-    
+
     /**
      * Display a listing of the resource.
      *
@@ -37,9 +37,9 @@ class StaffController extends Controller
 
         // explicitly selecting
         $data = array();
-        $staff = Staff::select('id','staff_number','title','firstname','lastname', 'mobile_number','is_active', 'supervisor_id')->latest()->get();
+        $staff = Staff::select('id', 'staff_number', 'title', 'firstname', 'lastname', 'mobile_number', 'is_active', 'supervisor_id')->latest()->get();
         // json
-        $data['data']=$staff;
+        $data['data'] = $staff;
         return $data;
 
         // view
@@ -54,7 +54,7 @@ class StaffController extends Controller
     public function create()
     {
         // a view for staff
-        return view ('staff.create');
+        return view('staff.create');
     }
 
     /**
@@ -66,11 +66,11 @@ class StaffController extends Controller
     public function store(Request $request)
     {
         // server side validation
-        $this->validate(request(),[
-            'title'=>'required',
-            'firstname'=>'required',
-            'lastname'=>'required',
-            'dob'=> 'required',
+        $this->validate(request(), [
+            'title' => 'required',
+            'firstname' => 'required',
+            'lastname' => 'required',
+            'dob' => 'required',
             'mobile_number' => 'required',
             'gender' => 'required',
             'date_joined' => 'required',
@@ -82,14 +82,14 @@ class StaffController extends Controller
         Staff::create(
             [
                 'title' => request('title'),
-                'firstname' => request ('firstname'),
-                'lastname' => request ('lastname'),
-                'dob' => request ('dob'),
-                'mobile_number' => request ('mobile_number'),
-                'gender' => request ('gender'),
-                'date_joined' => request ('date_joined'),
-                'leave_level_id' => request ('leave_level_id'),
-                'role_id' => request ('role_id')
+                'firstname' => request('firstname'),
+                'lastname' => request('lastname'),
+                'dob' => request('dob'),
+                'mobile_number' => request('mobile_number'),
+                'gender' => request('gender'),
+                'date_joined' => request('date_joined'),
+                'leave_level_id' => request('leave_level_id'),
+                'role_id' => request('role_id')
             ]
         );
 
@@ -143,24 +143,26 @@ class StaffController extends Controller
     {
         // validate fields
         $this->validate($request, [
-            'title'=>'required',
-            'firstname'=>'required',
-            'lastname'=>'required',
-            'dob'=> 'required',
+            'title' => 'required',
+            'firstname' => 'required',
+            'lastname' => 'required',
+            'dob' => 'required',
             'mobile_number' => 'required',
             'gender' => 'required',
             'date_joined' => 'required'
         ]);
 
         $staff = Staff::findOrFail($id);
-        $staff -> title = $request->input('title');
-        $staff -> firstname = $request->input('firstname');
-        $staff -> lastname = $request->input('lastname');
-        $staff -> dob = $request->input('dob');
-        $staff -> mobile_number->input('mobile_number');
-        $staff -> gender->input('gender');
-        $staff -> date_joined->input('date_joined');
-        $staff -> save();
+        $staff->title = $request->input('title');
+        $staff->firstname = $request->input('firstname');
+        $staff->lastname = $request->input('lastname');
+        $staff->dob = $request->input('dob');
+        $staff->mobile_number = $request->input('mobile_number');
+        $staff->gender = $request->input('gender');
+        $staff->date_joined = $request->input('date_joined');
+        $staff->save();
+
+        return redirect('/staff')->with('success', 'Staff updated successfully.');
     }
 
     /**
@@ -171,8 +173,12 @@ class StaffController extends Controller
      */
     public function destroy($id)
     {
-        //
-        // $staff = Staff::findOrFail($id);
-        // $staff->delete();
+        $staff = Staff::findOrFail($id);
+
+        // Soft delete - just mark as inactive instead of deleting
+        $staff->is_active = false;
+        $staff->save();
+
+        return redirect('/staff')->with('success', 'Staff deactivated successfully.');
     }
 }

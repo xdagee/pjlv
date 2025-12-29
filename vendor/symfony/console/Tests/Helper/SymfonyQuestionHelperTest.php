@@ -1,10 +1,21 @@
 <?php
 
+/*
+ * This file is part of the Symfony package.
+ *
+ * (c) Fabien Potencier <fabien@symfony.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Symfony\Component\Console\Tests\Helper;
 
+use Symfony\Component\Console\Exception\RuntimeException;
 use Symfony\Component\Console\Helper\FormatterHelper;
 use Symfony\Component\Console\Helper\HelperSet;
 use Symfony\Component\Console\Helper\SymfonyQuestionHelper;
+use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\StreamOutput;
 use Symfony\Component\Console\Question\ChoiceQuestion;
 use Symfony\Component\Console\Question\Question;
@@ -12,7 +23,7 @@ use Symfony\Component\Console\Question\Question;
 /**
  * @group tty
  */
-class SymfonyQuestionHelperTest extends AbstractQuestionHelperTest
+class SymfonyQuestionHelperTest extends AbstractQuestionHelperTestCase
 {
     public function testAskChoice()
     {
@@ -90,7 +101,7 @@ class SymfonyQuestionHelperTest extends AbstractQuestionHelperTest
     {
         $questionHelper = new SymfonyQuestionHelper();
         $question = new Question('What is your favorite superhero?');
-        $question->setValidator(function ($value) { return $value; });
+        $question->setValidator(fn ($value) => $value);
         $input = $this->createStreamableInputInterfaceMock($this->getInputStream("\n"));
         $this->assertNull($questionHelper->ask($input, $this->createOutputInterface(), $question));
     }
@@ -122,14 +133,54 @@ class SymfonyQuestionHelperTest extends AbstractQuestionHelperTest
         $this->assertOutputContains('Question with a trailing \\', $output);
     }
 
-    /**
-     * @expectedException        \Symfony\Component\Console\Exception\RuntimeException
-     * @expectedExceptionMessage Aborted
-     */
     public function testAskThrowsExceptionOnMissingInput()
     {
-        $dialog = new SymfonyQuestionHelper();
-        $dialog->ask($this->createStreamableInputInterfaceMock($this->getInputStream('')), $this->createOutputInterface(), new Question('What\'s your name?'));
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('Aborted.');
+        (new SymfonyQuestionHelper())->ask($this->createStreamableInputInterfaceMock($this->getInputStream('')), $this->createOutputInterface(), new Question('What\'s your name?'));
+    }
+
+    public function testChoiceQuestionPadding()
+    {
+        $choiceQuestion = new ChoiceQuestion('qqq', [
+            'foo' => 'foo',
+            'żółw' => 'bar',
+            'łabądź' => 'baz',
+        ]);
+
+        (new SymfonyQuestionHelper())->ask(
+            $this->createStreamableInputInterfaceMock($this->getInputStream("foo\n")),
+            $output = $this->createOutputInterface(),
+            $choiceQuestion
+        );
+
+        $this->assertOutputContains(<<<EOT
+ qqq:
+  [foo   ] foo
+  [żółw  ] bar
+  [łabądź] baz
+ >
+EOT
+            , $output, true);
+    }
+
+    public function testChoiceQuestionCustomPrompt()
+    {
+        $choiceQuestion = new ChoiceQuestion('qqq', ['foo']);
+        $choiceQuestion->setPrompt(' >ccc> ');
+
+        (new SymfonyQuestionHelper())->ask(
+            $this->createStreamableInputInterfaceMock($this->getInputStream("foo\n")),
+            $output = $this->createOutputInterface(),
+            $choiceQuestion
+        );
+
+        $this->assertOutputContains(<<<EOT
+ qqq:
+  [0] foo
+ >ccc>
+EOT
+            , $output, true);
     }
 
     protected function getInputStream($input)
@@ -151,18 +202,41 @@ class SymfonyQuestionHelperTest extends AbstractQuestionHelperTest
 
     protected function createInputInterfaceMock($interactive = true)
     {
-        $mock = $this->getMockBuilder('Symfony\Component\Console\Input\InputInterface')->getMock();
+        $mock = $this->createMock(InputInterface::class);
         $mock->expects($this->any())
             ->method('isInteractive')
-            ->will($this->returnValue($interactive));
+            ->willReturn($interactive);
 
         return $mock;
     }
 
-    private function assertOutputContains($expected, StreamOutput $output)
+    private function assertOutputContains($expected, StreamOutput $output, $normalize = false)
     {
         rewind($output->getStream());
         $stream = stream_get_contents($output->getStream());
-        $this->assertContains($expected, $stream);
+
+        if ($normalize) {
+            $stream = str_replace(\PHP_EOL, "\n", $stream);
+        }
+
+        $this->assertStringContainsString($expected, $stream);
+    }
+
+    public function testAskMultilineQuestionIncludesHelpText()
+    {
+        $expected = 'Write an essay (press Ctrl+D to continue)';
+
+        if ('Windows' === \PHP_OS_FAMILY) {
+            $expected = 'Write an essay (press Ctrl+Z then Enter to continue)';
+        }
+
+        $question = new Question('Write an essay');
+        $question->setMultiline(true);
+
+        $helper = new SymfonyQuestionHelper();
+        $input = $this->createStreamableInputInterfaceMock($this->getInputStream('\\'));
+        $helper->ask($input, $output = $this->createOutputInterface(), $question);
+
+        $this->assertOutputContains($expected, $output);
     }
 }

@@ -9,7 +9,7 @@ class FoobarCommand extends Command
     public $input;
     public $output;
 
-    protected function configure()
+    protected function configure(): void
     {
         $this
             ->setName('foobar:foo')
@@ -17,9 +17,11 @@ class FoobarCommand extends Command
         ;
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $this->input = $input;
         $this->output = $output;
+
+        return 0;
     }
 }

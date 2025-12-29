@@ -3,7 +3,9 @@
 namespace Illuminate\Foundation\Console;
 
 use Illuminate\Console\Command;
+use Symfony\Component\Console\Attribute\AsCommand;
 
+#[AsCommand(name: 'env')]
 class EnvironmentCommand extends Command
 {
     /**
@@ -25,8 +27,11 @@ class EnvironmentCommand extends Command
      *
      * @return void
      */
-    public function fire()
+    public function handle()
     {
-        $this->line('<info>Current application environment:</info> <comment>'.$this->laravel['env'].'</comment>');
+        $this->components->info(sprintf(
+            'The application environment is [%s].',
+            $this->laravel['env'],
+        ));
     }
 }

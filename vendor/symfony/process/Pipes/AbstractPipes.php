@@ -20,34 +20,32 @@ use Symfony\Component\Process\Exception\InvalidArgumentException;
  */
 abstract class AbstractPipes implements PipesInterface
 {
-    public $pipes = [];
+    public array $pipes = [];
 
-    private $inputBuffer = '';
+    private string $inputBuffer = '';
+    /** @var resource|string|\Iterator */
     private $input;
-    private $blocked = true;
-    private $lastError;
+    private bool $blocked = true;
+    private ?string $lastError = null;
 
     /**
-     * @param resource|string|int|float|bool|\Iterator|null $input
+     * @param resource|string|\Iterator $input
      */
     public function __construct($input)
     {
         if (\is_resource($input) || $input instanceof \Iterator) {
             $this->input = $input;
-        } elseif (\is_string($input)) {
-            $this->inputBuffer = $input;
         } else {
             $this->inputBuffer = (string) $input;
         }
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function close()
+    public function close(): void
     {
         foreach ($this->pipes as $pipe) {
-            fclose($pipe);
+            if (\is_resource($pipe)) {
+                fclose($pipe);
+            }
         }
         $this->pipes = [];
     }
@@ -55,31 +53,41 @@ abstract class AbstractPipes implements PipesInterface
     /**
      * Returns true if a system call has been interrupted.
      *
-     * @return bool
+     * stream_select() returns false when the `select` system call is interrupted by an incoming signal.
      */
-    protected function hasSystemCallBeenInterrupted()
+    protected function hasSystemCallBeenInterrupted(): bool
     {
         $lastError = $this->lastError;
         $this->lastError = null;
 
-        // stream_select returns false when the `select` system call is interrupted by an incoming signal
-        return null !== $lastError && false !== stripos($lastError, 'interrupted system call');
+        if (null === $lastError) {
+            return false;
+        }
+
+        if (false !== stripos($lastError, 'interrupted system call')) {
+            return true;
+        }
+
+        // on applications with a different locale than english, the message above is not found because
+        // it's translated. So we also check for the SOCKET_EINTR constant which is defined under
+        // Windows and UNIX-like platforms (if available on the platform).
+        return \defined('SOCKET_EINTR') && str_starts_with($lastError, 'stream_select(): Unable to select ['.\SOCKET_EINTR.']');
     }
 
     /**
      * Unblocks streams.
      */
-    protected function unblock()
+    protected function unblock(): void
     {
         if (!$this->blocked) {
             return;
         }
 
         foreach ($this->pipes as $pipe) {
-            stream_set_blocking($pipe, 0);
+            stream_set_blocking($pipe, false);
         }
         if (\is_resource($this->input)) {
-            stream_set_blocking($this->input, 0);
+            stream_set_blocking($this->input, false);
         }
 
         $this->blocked = false;
@@ -90,10 +98,10 @@ abstract class AbstractPipes implements PipesInterface
      *
      * @throws InvalidArgumentException When an input iterator yields a non supported value
      */
-    protected function write()
+    protected function write(): ?array
     {
         if (!isset($this->pipes[0])) {
-            return;
+            return null;
         }
         $input = $this->input;
 
@@ -101,11 +109,11 @@ abstract class AbstractPipes implements PipesInterface
             if (!$input->valid()) {
                 $input = null;
             } elseif (\is_resource($input = $input->current())) {
-                stream_set_blocking($input, 0);
+                stream_set_blocking($input, false);
             } elseif (!isset($this->inputBuffer[0])) {
                 if (!\is_string($input)) {
-                    if (!is_scalar($input)) {
-                        throw new InvalidArgumentException(sprintf('%s yielded a value of type "%s", but only scalars and stream resources are supported', \get_class($this->input), \gettype($input)));
+                    if (!\is_scalar($input)) {
+                        throw new InvalidArgumentException(\sprintf('"%s" yielded a value of type "%s", but only scalars and stream resources are supported.', get_debug_type($this->input), get_debug_type($input)));
                     }
                     $input = (string) $input;
                 }
@@ -122,7 +130,7 @@ abstract class AbstractPipes implements PipesInterface
 
         // let's have a look if something changed in streams
         if (false === @stream_select($r, $w, $e, 0, 0)) {
-            return;
+            return null;
         }
 
         foreach ($w as $stdin) {
@@ -135,7 +143,7 @@ abstract class AbstractPipes implements PipesInterface
             }
 
             if ($input) {
-                for (;;) {
+                while (true) {
                     $data = fread($input, self::CHUNK_SIZE);
                     if (!isset($data[0])) {
                         break;
@@ -166,12 +174,14 @@ abstract class AbstractPipes implements PipesInterface
         } elseif (!$w) {
             return [$this->pipes[0]];
         }
+
+        return null;
     }
 
     /**
      * @internal
      */
-    public function handleError($type, $msg)
+    public function handleError(int $type, string $msg): void
     {
         $this->lastError = $msg;
     }

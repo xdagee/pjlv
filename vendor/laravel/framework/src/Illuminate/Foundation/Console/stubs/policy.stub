@@ -1,58 +1,65 @@
 <?php
 
-namespace DummyNamespace;
+namespace {{ namespace }};
 
-use DummyRootNamespaceUser;
-use NamespacedDummyModel;
-use Illuminate\Auth\Access\HandlesAuthorization;
+use Illuminate\Auth\Access\Response;
+use {{ namespacedModel }};
+use {{ namespacedUserModel }};
 
-class DummyClass
+class {{ class }}
 {
-    use HandlesAuthorization;
-
     /**
-     * Determine whether the user can view the dummyModel.
-     *
-     * @param  \DummyRootNamespaceUser  $user
-     * @param  \NamespacedDummyModel  $dummyModel
-     * @return mixed
+     * Determine whether the user can view any models.
      */
-    public function view(User $user, DummyModel $dummyModel)
+    public function viewAny({{ user }} $user): bool
     {
         //
     }
 
     /**
-     * Determine whether the user can create dummyPluralModel.
-     *
-     * @param  \DummyRootNamespaceUser  $user
-     * @return mixed
+     * Determine whether the user can view the model.
      */
-    public function create(User $user)
+    public function view({{ user }} $user, {{ model }} ${{ modelVariable }}): bool
     {
         //
     }
 
     /**
-     * Determine whether the user can update the dummyModel.
-     *
-     * @param  \DummyRootNamespaceUser  $user
-     * @param  \NamespacedDummyModel  $dummyModel
-     * @return mixed
+     * Determine whether the user can create models.
      */
-    public function update(User $user, DummyModel $dummyModel)
+    public function create({{ user }} $user): bool
     {
         //
     }
 
     /**
-     * Determine whether the user can delete the dummyModel.
-     *
-     * @param  \DummyRootNamespaceUser  $user
-     * @param  \NamespacedDummyModel  $dummyModel
-     * @return mixed
+     * Determine whether the user can update the model.
      */
-    public function delete(User $user, DummyModel $dummyModel)
+    public function update({{ user }} $user, {{ model }} ${{ modelVariable }}): bool
+    {
+        //
+    }
+
+    /**
+     * Determine whether the user can delete the model.
+     */
+    public function delete({{ user }} $user, {{ model }} ${{ modelVariable }}): bool
+    {
+        //
+    }
+
+    /**
+     * Determine whether the user can restore the model.
+     */
+    public function restore({{ user }} $user, {{ model }} ${{ modelVariable }}): bool
+    {
+        //
+    }
+
+    /**
+     * Determine whether the user can permanently delete the model.
+     */
+    public function forceDelete({{ user }} $user, {{ model }} ${{ modelVariable }}): bool
     {
         //
     }

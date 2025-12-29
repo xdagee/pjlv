@@ -23,8 +23,8 @@ class Processor
      *
      * @param  \Illuminate\Database\Query\Builder  $query
      * @param  string  $sql
-     * @param  array   $values
-     * @param  string  $sequence
+     * @param  array  $values
+     * @param  string|null  $sequence
      * @return int
      */
     public function processInsertGetId(Builder $query, $sql, $values, $sequence = null)
@@ -37,7 +37,94 @@ class Processor
     }
 
     /**
+     * Process the results of a tables query.
+     *
+     * @param  array  $results
+     * @return array
+     */
+    public function processTables($results)
+    {
+        return array_map(function ($result) {
+            $result = (object) $result;
+
+            return [
+                'name' => $result->name,
+                'schema' => $result->schema ?? null, // PostgreSQL and SQL Server
+                'size' => isset($result->size) ? (int) $result->size : null,
+                'comment' => $result->comment ?? null, // MySQL and PostgreSQL
+                'collation' => $result->collation ?? null, // MySQL only
+                'engine' => $result->engine ?? null, // MySQL only
+            ];
+        }, $results);
+    }
+
+    /**
+     * Process the results of a views query.
+     *
+     * @param  array  $results
+     * @return array
+     */
+    public function processViews($results)
+    {
+        return array_map(function ($result) {
+            $result = (object) $result;
+
+            return [
+                'name' => $result->name,
+                'schema' => $result->schema ?? null, // PostgreSQL and SQL Server
+                'definition' => $result->definition,
+            ];
+        }, $results);
+    }
+
+    /**
+     * Process the results of a types query.
+     *
+     * @param  array  $results
+     * @return array
+     */
+    public function processTypes($results)
+    {
+        return $results;
+    }
+
+    /**
+     * Process the results of a columns query.
+     *
+     * @param  array  $results
+     * @return array
+     */
+    public function processColumns($results)
+    {
+        return $results;
+    }
+
+    /**
+     * Process the results of an indexes query.
+     *
+     * @param  array  $results
+     * @return array
+     */
+    public function processIndexes($results)
+    {
+        return $results;
+    }
+
+    /**
+     * Process the results of a foreign keys query.
+     *
+     * @param  array  $results
+     * @return array
+     */
+    public function processForeignKeys($results)
+    {
+        return $results;
+    }
+
+    /**
      * Process the results of a column listing query.
+     *
+     * @deprecated Will be removed in a future Laravel version.
      *
      * @param  array  $results
      * @return array

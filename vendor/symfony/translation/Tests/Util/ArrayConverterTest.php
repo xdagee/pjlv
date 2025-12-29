@@ -24,7 +24,7 @@ class ArrayConverterTest extends TestCase
         $this->assertEquals($expectedOutput, ArrayConverter::expandToTree($input));
     }
 
-    public function messagesData()
+    public static function messagesData()
     {
         return [
             [
@@ -66,6 +66,34 @@ class ArrayConverterTest extends TestCase
                         'level2' => 'value2',
                         'level2.level3.level4' => 'value1',
                         'bar' => 'value3',
+                    ],
+                ],
+            ],
+            [
+                // input
+                [
+                    'foo.' => 'foo.',
+                    '.bar' => '.bar',
+                    'abc.abc' => 'value',
+                    'bcd.bcd.' => 'value',
+                    '.cde.cde.' => 'value',
+                    '.def.def' => 'value',
+                ],
+                // expected output
+                [
+                    'foo.' => 'foo.',
+                    '.bar' => '.bar',
+                    'abc' => [
+                        'abc' => 'value',
+                    ],
+                    'bcd' => [
+                        'bcd.' => 'value',
+                    ],
+                    '.cde' => [
+                        'cde.' => 'value',
+                    ],
+                    '.def' => [
+                        'def' => 'value',
                     ],
                 ],
             ],
