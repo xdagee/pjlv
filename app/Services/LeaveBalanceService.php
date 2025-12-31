@@ -2,12 +2,19 @@
 
 namespace App\Services;
 
-use App\Staff;
-use App\StaffLeave;
-use App\LeaveType;
+use App\Models\Staff;
+use App\Models\StaffLeave;
+use App\Models\LeaveType;
+use App\Enums\LeaveStatusEnum;
+use Illuminate\Support\Facades\Cache;
 
 class LeaveBalanceService
 {
+    /**
+     * Cache TTL in seconds (1 hour)
+     */
+    protected const CACHE_TTL = 3600;
+
     /**
      * Get the remaining leave balance for a staff member
      *
@@ -17,15 +24,19 @@ class LeaveBalanceService
      */
     public function getBalance(int $staffId, ?int $leaveTypeId = null): int
     {
-        $staff = Staff::find($staffId);
-        if (!$staff) {
-            return 0;
-        }
+        $cacheKey = $this->getBalanceCacheKey($staffId, $leaveTypeId);
 
-        $totalAllowance = $staff->total_leave_days;
-        $usedDays = $this->getUsedDays($staffId, $leaveTypeId);
+        return Cache::remember($cacheKey, self::CACHE_TTL, function () use ($staffId, $leaveTypeId) {
+            $staff = Staff::find($staffId);
+            if (!$staff) {
+                return 0;
+            }
 
-        return max(0, $totalAllowance - $usedDays);
+            $totalAllowance = $staff->total_leave_days;
+            $usedDays = $this->getUsedDays($staffId, $leaveTypeId);
+
+            return max(0, $totalAllowance - $usedDays);
+        });
     }
 
     /**
@@ -39,7 +50,11 @@ class LeaveBalanceService
     {
         $query = StaffLeave::where('staff_id', $staffId)
             ->whereHas('leaveAction', function ($q) {
-                $q->where('status_id', 2); // Approved status
+                // strict compliance: Pending (Unattended) requests must deduct temporarily
+                $q->whereIn('status_id', [
+                    LeaveStatusEnum::APPROVED->value,
+                    LeaveStatusEnum::UNATTENDED->value
+                ]);
             });
 
         if ($leaveTypeId) {
@@ -58,41 +73,56 @@ class LeaveBalanceService
      */
     public function canApply(int $staffId, int $days): bool
     {
-        return $this->getBalance($staffId) >= $days;
+        $balance = $this->getBalance($staffId);
+        return $balance >= $days;
     }
 
     /**
-     * Get leave balance breakdown by leave type
+     * Get breakdown of leave balance by type
      *
      * @param int $staffId
      * @return array
      */
     public function getBalanceBreakdown(int $staffId): array
     {
-        $staff = Staff::find($staffId);
-        if (!$staff) {
-            return [];
-        }
+        $cacheKey = "leave_breakdown_{$staffId}";
 
-        $leaveTypes = LeaveType::all();
-        $breakdown = [];
+        return Cache::remember($cacheKey, self::CACHE_TTL, function () use ($staffId) {
+            $staff = Staff::find($staffId);
+            if (!$staff) {
+                return [
+                    'total_allowance' => 0,
+                    'total_used' => 0,
+                    'remaining' => 0,
+                    'by_type' => [],
+                ];
+            }
 
-        foreach ($leaveTypes as $type) {
-            $used = $this->getUsedDays($staffId, $type->id);
-            $breakdown[] = [
-                'type' => $type->leave_type_name,
-                'type_id' => $type->id,
-                'used' => $used,
-                'duration_limit' => $type->leave_duration,
+            $leaveTypes = LeaveType::all();
+            $breakdown = [];
+
+            foreach ($leaveTypes as $leaveType) {
+                $usedDays = $this->getUsedDays($staffId, $leaveType->id);
+                $allocated = $leaveType->leave_duration ?? 0;
+                $remaining = max(0, $allocated - $usedDays);
+
+                $breakdown[$leaveType->leave_type_name] = [
+                    'allocated' => $allocated,
+                    'used' => $usedDays,
+                    'remaining' => $remaining,
+                    'type_id' => $leaveType->id,
+                ];
+            }
+
+            $totalUsed = array_sum(array_column($breakdown, 'used'));
+
+            return [
+                'total_allowance' => $staff->total_leave_days,
+                'total_used' => $totalUsed,
+                'remaining' => max(0, $staff->total_leave_days - $totalUsed),
+                'by_type' => $breakdown,
             ];
-        }
-
-        return [
-            'total_allowance' => $staff->total_leave_days,
-            'total_used' => $this->getUsedDays($staffId),
-            'remaining' => $this->getBalance($staffId),
-            'by_type' => $breakdown,
-        ];
+        });
     }
 
     /**
@@ -116,7 +146,11 @@ class LeaveBalanceService
                     });
             })
             ->whereHas('leaveAction', function ($q) {
-                $q->whereIn('status_id', [1, 2, 4]); // Pending, Approved, Recommended
+                $q->whereIn('status_id', [
+                    LeaveStatusEnum::UNATTENDED->value,
+                    LeaveStatusEnum::APPROVED->value,
+                    LeaveStatusEnum::RECOMMENDED->value,
+                ]);
             });
 
         if ($excludeLeaveId) {
@@ -124,5 +158,32 @@ class LeaveBalanceService
         }
 
         return $query->exists();
+    }
+
+    /**
+     * Clear cache for a staff member's leave balance.
+     *
+     * @param int $staffId
+     * @return void
+     */
+    public function clearCache(int $staffId): void
+    {
+        // Clear all possible cache keys for this staff
+        Cache::forget($this->getBalanceCacheKey($staffId, null));
+        Cache::forget("leave_breakdown_{$staffId}");
+
+        // Clear type-specific caches
+        $leaveTypes = LeaveType::all();
+        foreach ($leaveTypes as $leaveType) {
+            Cache::forget($this->getBalanceCacheKey($staffId, $leaveType->id));
+        }
+    }
+
+    /**
+     * Get cache key for balance.
+     */
+    protected function getBalanceCacheKey(int $staffId, ?int $leaveTypeId): string
+    {
+        return "leave_balance_{$staffId}" . ($leaveTypeId ? "_{$leaveTypeId}" : "");
     }
 }
