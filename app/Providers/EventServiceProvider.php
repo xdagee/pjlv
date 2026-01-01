@@ -2,6 +2,12 @@
 
 namespace App\Providers;
 
+use App\Events\LeaveSubmitted;
+use App\Events\LeaveStatusChanged;
+use App\Events\LeaveUpdated;
+use App\Listeners\HandleLeaveSubmitted;
+use App\Listeners\HandleLeaveStatusChanged;
+use App\Listeners\HandleLeaveUpdated;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 
@@ -13,8 +19,14 @@ class EventServiceProvider extends ServiceProvider
      * @var array
      */
     protected $listen = [
-        'App\Events\SomeEvent' => [
-            'App\Listeners\EventListener',
+        LeaveSubmitted::class => [
+            HandleLeaveSubmitted::class,
+        ],
+        LeaveStatusChanged::class => [
+            HandleLeaveStatusChanged::class,
+        ],
+        LeaveUpdated::class => [
+            HandleLeaveUpdated::class,
         ],
     ];
 

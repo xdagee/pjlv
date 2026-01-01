@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use App\Enums\RoleEnum;
 
 class ApproveLeaveRequest extends FormRequest
 {
@@ -14,8 +15,15 @@ class ApproveLeaveRequest extends FormRequest
         $user = auth()->user();
         $staff = $user->staff;
 
-        // Only HR, Admin, DG, Director can approve
-        return $staff && in_array($staff->role_id, [1, 2, 3, 4]);
+        // Only Admin, HR, CEO, OPS, HOD can approve
+        // RoleEnum: ADMIN=1, HR=2, CEO=3, OPS=4, HOD=5
+        return $staff && in_array($staff->role_id, [
+            RoleEnum::ADMIN->value,
+            RoleEnum::HR->value,
+            RoleEnum::CEO->value,
+            RoleEnum::OPS->value,
+            RoleEnum::HOD->value,
+        ]);
     }
 
     /**

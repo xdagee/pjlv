@@ -1,0 +1,15 @@
+@include ('layouts.header')
+
+@include ('layouts.admin_sidebar')
+
+<div class="content">
+    <div class="container-fluid">
+        @yield('content')
+    </div>
+</div>
+
+@include ('layouts.footer')
+@yield('scripts')
+</body>
+
+</html>

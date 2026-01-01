@@ -2,102 +2,100 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\LeaveLevel;
 use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
-
-use App\LeaveLevel;
 
 class LeaveLevelsController extends Controller
 {
     /**
      * Create a new controller instance.
-     *
-     * @return void
      */
     public function __construct()
     {
         $this->middleware('auth');
     }
-    
+
     /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
+     * Display a listing of leave levels.
      */
     public function index()
     {
-        //
         $leavelevels = LeaveLevel::get();
-        return $leavelevels;
+        return view('admin.leavelevels.index', compact('leavelevels'));
     }
 
     /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
+     * Show the form for creating a new leave level.
      */
     public function create()
     {
-        //
+        return view('admin.leavelevels.create');
     }
 
     /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * Store a newly created leave level.
      */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'level_name' => 'required|string|max:100|unique:leave_levels',
+            'annual_leave_days' => 'required|integer|min:0',
+        ]);
+
+        LeaveLevel::create($validated);
+
+        return redirect()->route('leavelevels.index')->with('success', 'Leave level created successfully!');
     }
 
     /**
      * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
      */
     public function show($id)
-    {   
+    {
         $leavelevel = LeaveLevel::findOrFail($id);
-        //json
-        return $leavelevel;
-        // view
-        // return view('leavelevels.show', compact('leavelevel'));
+        return view('admin.leavelevels.show', compact('leavelevel'));
     }
 
     /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * Show the form for editing.
      */
     public function edit($id)
     {
-        //
+        $leavelevel = LeaveLevel::findOrFail($id);
+        return view('admin.leavelevels.edit', compact('leavelevel'));
     }
 
     /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * Update the specified resource.
      */
     public function update(Request $request, $id)
     {
-        //
+        $leavelevel = LeaveLevel::findOrFail($id);
+
+        $validated = $request->validate([
+            'level_name' => 'required|string|max:100|unique:leave_levels,level_name,' . $id,
+            'annual_leave_days' => 'required|integer|min:0',
+        ]);
+
+        $leavelevel->update($validated);
+
+        return redirect()->route('leavelevels.index')->with('success', 'Leave level updated successfully!');
     }
 
     /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * Remove the specified resource.
      */
     public function destroy($id)
     {
-        //
+        $leavelevel = LeaveLevel::findOrFail($id);
+
+        // Check usage if Staff uses this level?
+        if ($leavelevel->staff()->exists()) {
+            return redirect()->route('leavelevels.index')->with('error', 'Cannot delete leave level assigned to staff.');
+        }
+
+        $leavelevel->delete();
+
+        return redirect()->route('leavelevels.index')->with('success', 'Leave level deleted successfully!');
     }
 }

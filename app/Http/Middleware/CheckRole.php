@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Support\Facades\Auth;
+use App\Enums\RoleEnum;
 
 class CheckRole
 {
@@ -32,19 +33,15 @@ class CheckRole
         $userRole = strtolower($staff->role->role_name);
         $requiredRole = strtolower($role);
 
-        // Define role hierarchy (higher roles can access lower role routes)
-        $roleHierarchy = [
-            'admin' => 5,
-            'dg' => 4,
-            'director' => 3,
-            'hr' => 2,
-            'normal' => 1,
-        ];
+        // Use RoleEnum for role hierarchy
+        $userRoleEnum = RoleEnum::fromName($userRole);
+        $requiredRoleEnum = RoleEnum::fromName($requiredRole);
 
-        $userLevel = $roleHierarchy[$userRole] ?? 0;
-        $requiredLevel = $roleHierarchy[$requiredRole] ?? 0;
+        if (!$userRoleEnum || !$requiredRoleEnum) {
+            return redirect('/dashboard')->with('error', 'Invalid role configuration.');
+        }
 
-        if ($userLevel < $requiredLevel) {
+        if ($userRoleEnum->level() > $requiredRoleEnum->level()) {
             return redirect('/dashboard')->with('error', 'Access denied. Insufficient permissions.');
         }
 

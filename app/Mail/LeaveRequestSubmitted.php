@@ -2,15 +2,26 @@
 
 namespace App\Mail;
 
-use App\StaffLeave;
-use App\Staff;
+use App\Models\StaffLeave;
+use App\Models\Staff;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 
-class LeaveRequestSubmitted extends Mailable
+class LeaveRequestSubmitted extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
+
+    /**
+     * The number of times the job may be attempted.
+     */
+    public int $tries = 3;
+
+    /**
+     * The number of seconds to wait before retrying.
+     */
+    public int $backoff = 60;
 
     public $leave;
     public $applicant;

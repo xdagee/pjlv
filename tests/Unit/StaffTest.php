@@ -4,10 +4,10 @@ namespace Tests\Unit;
 
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use App\Staff;
-use App\Role;
-use App\LeaveLevel;
-use App\LeaveType;
+use App\Models\Staff;
+use App\Models\Role;
+use App\Models\LeaveLevel;
+use App\Models\LeaveType;
 
 class StaffTest extends TestCase
 {

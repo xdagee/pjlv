@@ -11,28 +11,11 @@ class UsersTableSeeder extends Seeder
 {
     public function run(): void
     {
-        // Admin user
-        DB::table('users')->insert([
-            'id' => 1,
-            'email' => 'admin@admin.com',
-            'password' => Hash::make('adminpass'),
-            'remember_token' => Str::random(10)
-        ]);
+        // Note: System Admin (user ID 1) is handled by AdminAccountSeeder.
+        // This seeder is for any additional user accounts if needed.
 
-        // HR Manager
-        DB::table('users')->insert([
-            'id' => 2,
-            'email' => 'hr@company.com',
-            'password' => Hash::make('hrpass123'),
-            'remember_token' => Str::random(10)
-        ]);
-
-        // Normal Employee
-        DB::table('users')->insert([
-            'id' => 3,
-            'email' => 'john.doe@company.com',
-            'password' => Hash::make('userpass123'),
-            'remember_token' => Str::random(10)
-        ]);
+        // Staff users are created when staff records are seeded
+        // and they register or have accounts created for them.
     }
 }
+

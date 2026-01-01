@@ -17,12 +17,12 @@
             <div class="sidebar-wrapper">
                 <div class="user">
                     <div class="photo">
-                        <img src="/img/faces/nan.jpg" />
+                        <img src="{{ Auth::user()->staff->picture ?? '/img/faces/nan.jpg' }}" />
                     </div>
                     <div class="info">
                         <a data-toggle="collapse" href="#profile" class="collapsed">
                             <span>
-                                Obaa Papa Bi
+                                {{ Auth::user()->staff->firstname ?? '' }} {{ Auth::user()->staff->lastname ?? '' }}
                                 <b class="caret"></b>
                             </span>
                         </a>
@@ -36,16 +36,16 @@
                                     </a>
                                 </li>
                                 <li>
-                                    <a href="{{ url('/logout') }}"
-                                            onclick="event.preventDefault();
+                                    <a href="{{ url('/logout') }}" onclick="event.preventDefault();
                                                      document.getElementById('logout-form').submit();">
                                         <span class="sidebar-mini"> L </span>
                                         <span class="sidebar-normal"> Logout </span>
                                     </a>
 
-                                    <form id="logout-form" action="{{ url('/logout') }}" method="POST" style="display: none;">
-                                            {{ csrf_field() }}
-                                        </form>
+                                    <form id="logout-form" action="{{ url('/logout') }}" method="POST"
+                                        style="display: none;">
+                                        {{ csrf_field() }}
+                                    </form>
                                 </li>
                             </ul>
                         </div>
@@ -54,43 +54,78 @@
 
 
 
+                @php
+                    $userRoleId = Auth::user()->staff->role_id ?? null;
+                    $userDepartment = Auth::user()->staff->department ?? null;
+                    $canViewAll = in_array($userRoleId, [
+                        \App\Enums\RoleEnum::ADMIN->value,
+                        \App\Enums\RoleEnum::HR->value,
+                        \App\Enums\RoleEnum::CEO->value,
+                        \App\Enums\RoleEnum::OPS->value,
+                    ]);
+                    $canViewStaff = in_array($userRoleId, [
+                        \App\Enums\RoleEnum::ADMIN->value,
+                        \App\Enums\RoleEnum::HR->value,
+                        \App\Enums\RoleEnum::CEO->value,
+                        \App\Enums\RoleEnum::OPS->value,
+                        \App\Enums\RoleEnum::HOD->value,
+                    ]);
+                @endphp
 
                 <ul class="nav">
-                   <li>
-                            <a id="apply-leave" href="{{ url ('/apply') }}">
-                                <i class="material-icons">filter_none</i>
-                                <p>Apply for leave</p>
-                            </a>
+                    <li class="{{ request()->is('leaves/apply*') ? 'active' : '' }}">
+                        <a href="{{ url('/leaves/apply') }}">
+                            <i class="material-icons">note_add</i>
+                            <p>Apply for Leave</p>
+                        </a>
                     </li>
-
-                    <li>
-                        <a href="{{ url ('/dashboard') }}">
+                    <li class="{{ request()->is('dashboard*') ? 'active' : '' }}">
+                        <a href="{{ url('/dashboard') }}">
                             <i class="material-icons">dashboard</i>
                             <p> Dashboard </p>
                         </a>
                     </li>
-                    <li>
-                        <a href="{{ url ('/staff') }}">
-                            <i class="material-icons">people</i>
-                            <p> Staff </p>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{{ url ('/leaves') }}">
-                            <i class="material-icons">library_books</i>
-                            <p> Leaves </p>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{{ url ('/calendar') }}">
+                    @if($canViewAll)
+                        <li class="{{ request()->is('departments*') ? 'active' : '' }}">
+                            <a href="{{ url('/departments') }}">
+                                <i class="material-icons">business</i>
+                                <p> All Departments </p>
+                            </a>
+                        </li>
+                    @endif
+                    @if($canViewStaff)
+                        <li class="{{ request()->is('staff') || request()->is('staff/*') ? 'active' : '' }}">
+                            <a href="{{ url('/staff') }}">
+                                <i class="material-icons">groups</i>
+                                <p> All Staff </p>
+                            </a>
+                        </li>
+                    @endif
+                    @if($userDepartment)
+                        <li class="{{ request()->is('my-department*') ? 'active' : '' }}">
+                            <a href="{{ url('/my-department') }}">
+                                <i class="material-icons">people</i>
+                                <p> My Department </p>
+                            </a>
+                        </li>
+                    @endif
+                    <li class="{{ request()->is('calendar*') && !request()->is('admin/*') ? 'active' : '' }}">
+                        <a href="{{ url('/calendar') }}">
                             <i class="material-icons">calendar_today</i>
                             <p> Calendar </p>
                         </a>
                     </li>
-                    <li>
-                        <a href="{{ url ('/reports') }}">
-                            <i class="material-icons">assignment</i>
-                            <p> Reports </p>
+                    <li
+                        class="{{ request()->is('leaves') || (request()->is('leaves/*') && !request()->is('leaves/apply*')) ? 'active' : '' }}">
+                        <a href="{{ url('/leaves') }}">
+                            <i class="material-icons">event_note</i>
+                            <p> My Leaves </p>
+                        </a>
+                    </li>
+                    <li class="{{ request()->is('staff/reports*') ? 'active' : '' }}">
+                        <a href="{{ url('/staff/reports') }}">
+                            <i class="material-icons">assessment</i>
+                            <p> My Reports </p>
                         </a>
                     </li>
                 </ul>
@@ -105,7 +140,7 @@
                             <i class="material-icons visible-on-sidebar-mini">view_list</i>
                         </button>
                     </div>
-                    
+
                     <div class="navbar-header">
                         <button type="button" class="navbar-toggle" data-toggle="collapse">
                             <span class="sr-only">Toggle navigation</span>
@@ -127,19 +162,29 @@
                             <li class="dropdown">
                                 <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                                     <i class="material-icons">notifications</i>
-                                    <span class="notification">3</span>
+                                    @if($unreadNotifications && $unreadNotifications->count() > 0)
+                                        <span class="notification">{{ $unreadNotifications->count() }}</span>
+                                    @endif
                                     <p class="hidden-lg hidden-md">
                                         Notifications
                                         <b class="caret"></b>
                                     </p>
                                 </a>
                                 <ul class="dropdown-menu">
-                                    <li>
-                                        <a href="#">Mike John responded to your email</a>
-                                    </li>
-                                    <li>
-                                        <a href="#">You have 5 new tasks</a>
-                                    </li>
+                                    @forelse($unreadNotifications as $notification)
+                                        <li>
+                                            <a
+                                                href="{{ url($notification->link ?? '#') }}">{{ \Illuminate\Support\Str::limit($notification->message, 40) }}</a>
+                                        </li>
+                                    @empty
+                                        <li>
+                                            <a href="#">No new notifications</a>
+                                        </li>
+                                    @endforelse
+                                    @if($unreadNotifications->count() > 0)
+                                        <li role="separator" class="divider"></li>
+                                        <li><a href="{{ url('/notifications') }}" class="text-center">View All</a></li>
+                                    @endif
                                 </ul>
                             </li>
                             <li>

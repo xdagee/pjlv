@@ -63,7 +63,7 @@ class StoreLeaveRequest extends FormRequest
             $days = $this->input('leave_days');
 
             // Check leave balance
-            if (!$leaveService->canApply($staff->id, $days)) {
+            if (!$leaveService->canApply($staff->id, (int) $days)) {
                 $balance = $leaveService->getBalance($staff->id);
                 $validator->errors()->add('leave_days', "Insufficient leave balance. You have {$balance} days remaining.");
             }

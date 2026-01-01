@@ -20,6 +20,7 @@ use App\Http\Controllers\AdminCalendarController;
 use App\Http\Controllers\DepartmentsController;
 use App\Http\Controllers\AdminProfileController;
 use App\Http\Controllers\LeaveBalanceDashboardController;
+use App\Http\Controllers\AnalyticsDashboardController;
 
 /*
 |--------------------------------------------------------------------------
@@ -214,6 +215,11 @@ Route::middleware(['auth', 'superadmin', 'throttle:60,1'])->prefix('admin')->gro
 	Route::get('/leavetypes/{leavetype}/edit', [LeaveTypesController::class, 'edit'])->name('leavetypes.edit');
 	Route::put('/leavetypes/{leavetype}', [LeaveTypesController::class, 'update'])->name('leavetypes.update');
 	Route::delete('/leavetypes/{leavetype}', [LeaveTypesController::class, 'destroy'])->name('leavetypes.destroy');
+
+	// Analytics Dashboard (Admin Only)
+	Route::get('/analytics', [AnalyticsDashboardController::class, 'index'])->name('admin.analytics.index');
+	Route::get('/analytics/export', [AnalyticsDashboardController::class, 'exportCsv'])->name('admin.analytics.export');
+	Route::get('/analytics/export-pdf', [AnalyticsDashboardController::class, 'exportPdf'])->name('admin.analytics.export-pdf');
 
 	// Reports
 	Route::get('/reports', [ReportsController::class, 'index']);

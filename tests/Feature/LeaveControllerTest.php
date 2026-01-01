@@ -4,8 +4,8 @@ namespace Tests\Feature;
 
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use App\Staff;
-use App\User;
+use App\Models\Staff;
+use App\Models\User;
 
 class LeaveControllerTest extends TestCase
 {

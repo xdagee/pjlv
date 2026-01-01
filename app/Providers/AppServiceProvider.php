@@ -13,7 +13,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        //
+        \App\Models\Staff::observe(\App\Observers\StaffObserver::class);
+
+        // Register view composer for notifications in sidebar
+        view()->composer('layouts.sidebar', \App\Http\View\Composers\NotificationComposer::class);
     }
 
     /**

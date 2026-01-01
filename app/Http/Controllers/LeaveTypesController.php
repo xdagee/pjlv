@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\LeaveType;
+use App\Models\LeaveType;
 use Illuminate\Http\Request;
 
 class LeaveTypesController extends Controller
@@ -18,7 +18,7 @@ class LeaveTypesController extends Controller
     public function index()
     {
         $leavetypes = LeaveType::all();
-        return view('leavetypes.index', compact('leavetypes'));
+        return view('admin.leavetypes.index', compact('leavetypes'));
     }
 
     /**
@@ -26,7 +26,7 @@ class LeaveTypesController extends Controller
      */
     public function create()
     {
-        return view('leavetypes.create');
+        return view('admin.leavetypes.create');
     }
 
     /**
@@ -50,7 +50,7 @@ class LeaveTypesController extends Controller
     public function show($id)
     {
         $leavetype = LeaveType::findOrFail($id);
-        return view('leavetypes.show', compact('leavetype'));
+        return view('admin.leavetypes.show', compact('leavetype'));
     }
 
     /**
@@ -59,7 +59,7 @@ class LeaveTypesController extends Controller
     public function edit($id)
     {
         $leavetype = LeaveType::findOrFail($id);
-        return view('leavetypes.edit', compact('leavetype'));
+        return view('admin.leavetypes.edit', compact('leavetype'));
     }
 
     /**
@@ -88,11 +88,11 @@ class LeaveTypesController extends Controller
 
         // Check if leave type is in use
         if ($leavetype->staffLeaves()->exists()) {
-            return redirect('/leavetypes')->with('error', 'Cannot delete leave type that is in use.');
+            return redirect()->back()->with('error', 'Cannot delete leave type that is in use.');
         }
 
         $leavetype->delete();
 
-        return redirect('/leavetypes')->with('success', 'Leave type deleted successfully.');
+        return redirect()->route('leavetypes.index')->with('success', 'Leave type deleted successfully.');
     }
 }

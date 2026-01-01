@@ -10,13 +10,18 @@ class JobTableSeeder extends Seeder
     public function run(): void
     {
         $jobs = [
-            ['job_title' => 'Software Developer', 'job_description' => 'Develops and maintains software applications', 'is_multiple_staff' => 1],
-            ['job_title' => 'Project Manager', 'job_description' => 'Manages project timelines and deliverables', 'is_multiple_staff' => 1],
-            ['job_title' => 'HR Manager', 'job_description' => 'Handles human resources operations', 'is_multiple_staff' => 0],
-            ['job_title' => 'Accountant', 'job_description' => 'Manages financial records and transactions', 'is_multiple_staff' => 1],
-            ['job_title' => 'System Administrator', 'job_description' => 'Maintains IT systems and infrastructure', 'is_multiple_staff' => 1],
+            ['job_title' => 'Chief Executive Officer (CEO)', 'job_description' => 'Overall leadership, product vision, software & platform development', 'is_multiple_staff' => 0],
+            ['job_title' => 'Chief Evangelist Officer (CEOv)', 'job_description' => 'Advocacy, community engagement, mentorship, storytelling', 'is_multiple_staff' => 0],
+            ['job_title' => 'Chief Business Development Officer (CBDO)', 'job_description' => 'Market expansion, partnerships, sales strategy', 'is_multiple_staff' => 0],
+            ['job_title' => 'Operations Lead', 'job_description' => 'Cross-functional leadership role that ensures smooth coordination and execution of organizational activities across departments', 'is_multiple_staff' => 0],
+
         ];
 
-        DB::table('jobs')->insert($jobs);
+        foreach ($jobs as $job) {
+            DB::table('jobs')->updateOrInsert(
+                ['job_title' => $job['job_title']],
+                $job
+            );
+        }
     }
 }

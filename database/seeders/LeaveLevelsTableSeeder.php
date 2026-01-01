@@ -12,9 +12,16 @@ class LeaveLevelsTableSeeder extends Seeder
         $leave_levels = [
             ['level_name' => 'Management', 'annual_leave_days' => 36],
             ['level_name' => 'Senior', 'annual_leave_days' => 28],
-            ['level_name' => 'Junior', 'annual_leave_days' => 21]
+            ['level_name' => 'Junior', 'annual_leave_days' => 21],
+            ['level_name' => 'NSS', 'annual_leave_days' => 30],
+            ['level_name' => 'Intern', 'annual_leave_days' => 15],
         ];
 
-        DB::table('leave_levels')->insert($leave_levels);
+        foreach ($leave_levels as $level) {
+            DB::table('leave_levels')->updateOrInsert(
+                ['level_name' => $level['level_name']],
+                $level
+            );
+        }
     }
 }

@@ -18,6 +18,11 @@ class LeaveStatusesTableSeeder extends Seeder
             ['status_name' => 'Cancelled']
         ];
 
-        DB::table('leave_statuses')->insert($leave_statuses);
+        foreach ($leave_statuses as $status) {
+            DB::table('leave_statuses')->updateOrInsert(
+                ['status_name' => $status['status_name']],
+                $status
+            );
+        }
     }
 }

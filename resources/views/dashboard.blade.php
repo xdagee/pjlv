@@ -46,11 +46,12 @@
                 </div>
                 <div class="card-content">
                     <p class="category">Your Leave Balance</p>
-                    <h3 class="card-title">{{ $remainingLeave }} <small>days</small></h3>
+                    <h3 class="card-title">{{ $balanceBreakdown['remaining'] }} <small>days</small></h3>
                 </div>
                 <div class="card-footer">
                     <div class="stats">
-                        <i class="material-icons">info</i> {{ $usedLeaveDays }} used of {{ $leaveBalance }}
+                        <i class="material-icons">info</i> {{ $balanceBreakdown['total_used'] }} used of
+                        {{ $balanceBreakdown['total_allowance'] }}
                     </div>
                 </div>
             </div>
@@ -153,6 +154,9 @@
                     <a href="/calendar" class="btn btn-simple btn-success">View Calendar</a>
                 </div>
             </div>
+
+            <!-- Leave Usage Breakdown -->
+            @include('components.leave-balance-card', ['breakdown' => $balanceBreakdown])
         </div>
     </div>
 

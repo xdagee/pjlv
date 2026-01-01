@@ -4,11 +4,14 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\StaffLeave;
-use App\Staff;
-use App\Holiday;
-use App\LeaveStatus;
+use App\Models\StaffLeave;
+use App\Models\Staff;
+use App\Models\Holiday;
+use App\Models\LeaveStatus;
+use App\Enums\LeaveStatusEnum;
+use App\Enums\RoleEnum;
 use Carbon\Carbon;
+use App\Services\LeaveBalanceService;
 
 class DashboardController extends Controller
 {
@@ -25,24 +28,25 @@ class DashboardController extends Controller
     /**
      * Show the application dashboard with real leave data.
      *
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Contracts\View\View|\Illuminate\Contracts\View\Factory
      */
-    public function index()
+    public function index(LeaveBalanceService $balanceService)
     {
         $user = Auth::user();
         $staff = $user->staff;
 
         // Get pending leave requests (for HR/Admin - all pending, for others - their own)
-        $pendingStatusId = LeaveStatus::where('status_name', 'Unattended')->first()?->id ?? 1;
-
-        if ($staff && in_array($staff->role_id, [1, 2])) { // Admin or HR
-            $pendingLeaves = StaffLeave::whereHas('leaveAction', function ($q) use ($pendingStatusId) {
-                $q->where('status_id', $pendingStatusId);
+        if ($staff && in_array($staff->role_id, [RoleEnum::ADMIN->value, RoleEnum::HR->value])) {
+            $pendingLeaves = StaffLeave::whereHas('leaveAction', function ($q) {
+                $q->where('status_id', LeaveStatusEnum::UNATTENDED->value);
             })->orWhereDoesntHave('leaveAction')->count();
         } else {
             $pendingLeaves = $staff ? StaffLeave::where('staff_id', $staff->id)
                 ->whereDoesntHave('leaveAction', function ($q) {
-                    $q->whereIn('status_id', [2, 3]); // Approved or Disapproved
+                    $q->whereIn('status_id', [
+                        LeaveStatusEnum::APPROVED->value,
+                        LeaveStatusEnum::DISAPPROVED->value,
+                    ]);
                 })->count() : 0;
         }
 
@@ -51,16 +55,16 @@ class DashboardController extends Controller
         $staffOnLeaveToday = StaffLeave::where('start_date', '<=', $today)
             ->where('end_date', '>=', $today)
             ->whereHas('leaveAction', function ($q) {
-                $q->where('status_id', 2); // Approved
+                $q->where('status_id', LeaveStatusEnum::APPROVED->value);
             })->count();
 
-        // Get user's leave balance
-        $leaveBalance = $staff ? $staff->total_leave_days : 0;
-        $usedLeaveDays = $staff ? StaffLeave::where('staff_id', $staff->id)
-            ->whereHas('leaveAction', function ($q) {
-                $q->where('status_id', 2); // Approved
-            })->sum('leave_days') : 0;
-        $remainingLeave = max(0, $leaveBalance - $usedLeaveDays);
+        // Get user's leave balance breakdown via Service
+        $balanceBreakdown = $staff ? $balanceService->getBalanceBreakdown($staff->id) : [
+            'total_allowance' => 0,
+            'total_used' => 0,
+            'remaining' => 0,
+            'by_type' => []
+        ];
 
         // Get upcoming holidays (next 30 days)
         $upcomingHolidays = Holiday::where('date', '>=', Carbon::today())
@@ -81,9 +85,7 @@ class DashboardController extends Controller
         return view('dashboard', compact(
             'pendingLeaves',
             'staffOnLeaveToday',
-            'leaveBalance',
-            'usedLeaveDays',
-            'remainingLeave',
+            'balanceBreakdown',
             'upcomingHolidays',
             'recentLeaves',
             'totalStaff',

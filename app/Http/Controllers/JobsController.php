@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Job;
+use App\Models\Job;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
@@ -23,37 +23,32 @@ class JobsController extends Controller
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\View\View
      */
     public function index()
     {
         // getting all jobs
-        // $jobs = Job::latest()->get();
-
-        // explicitly selecting jobs
         $jobs = Job::select('id', 'job_title', 'job_description', 'is_multiple_staff')->latest()->get();
 
-        // json
-        return $jobs;
-        // return view('jobs.index', compact('jobs')); // view
+        // return view
+        return view('admin.jobs.index', compact('jobs'));
     }
 
     /**
      * Show the form for creating a new resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\View\View
      */
     public function create()
     {
-        //
-        return view('jobs.create');
+        return view('admin.jobs.create');
     }
 
     /**
      * Store a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function store(Request $request)
     {
@@ -69,37 +64,36 @@ class JobsController extends Controller
             ['job_title', 'job_description', 'is_multiple_staff']
         ));
 
-        return redirect('jobs');
+        return redirect('admin/jobs')->with('success', 'Job created successfully.');
     }
 
     /**
      * Display the specified resource.
      *
      * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\View\View
      */
     public function show($id)
     {
         //find the id
         $job = Job::findOrFail($id);
-        // json
-        return $job;
+
         // view
-        // return view ('jobs.show', compact('job'));
+        return view('admin.jobs.show', compact('job'));
     }
 
     /**
      * Show the form for editing the specified resource.
      *
      * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\View\View
      */
     public function edit($id)
     {
         // find id
         $job = Job::findOrFail($id);
-        // return $job;
-        return view('jobs.edit', compact('job'));
+
+        return view('admin.jobs.edit', compact('job'));
     }
 
     /**
@@ -107,7 +101,7 @@ class JobsController extends Controller
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function update(Request $request, $id)
     {
@@ -124,20 +118,20 @@ class JobsController extends Controller
         $job->is_multiple_staff = $request->input('is_multiple_staff');
         $job->save();
 
-        return redirect('/jobs')->with('success', 'Job updated successfully.');
+        return redirect('/admin/jobs')->with('success', 'Job updated successfully.');
     }
 
     /**
      * Remove the specified resource from storage.
      *
      * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function destroy($id)
     {
         $job = Job::findOrFail($id);
         $job->delete();
 
-        return redirect('/jobs')->with('success', 'Job deleted successfully.');
+        return redirect('/admin/jobs')->with('success', 'Job deleted successfully.');
     }
 }

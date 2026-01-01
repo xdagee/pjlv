@@ -3,14 +3,18 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Notification;
+use App\Models\Notification;
+use App\Services\SettingsService;
 use Illuminate\Support\Facades\Auth;
 
 class NotificationController extends Controller
 {
-    public function __construct()
+    protected $settingsService;
+
+    public function __construct(SettingsService $settingsService)
     {
         $this->middleware('auth');
+        $this->settingsService = $settingsService;
     }
 
     /**
@@ -18,9 +22,11 @@ class NotificationController extends Controller
      */
     public function index()
     {
+        $perPage = $this->settingsService->get('display.pagination_size', 15);
+
         $notifications = Notification::where('user_id', Auth::id())
             ->orderBy('created_at', 'desc')
-            ->paginate(20);
+            ->paginate($perPage);
 
         return view('notifications.index', compact('notifications'));
     }

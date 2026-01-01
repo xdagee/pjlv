@@ -5,25 +5,35 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Http\Requests\StoreLeaveRequest;
 use App\Http\Requests\ApproveLeaveRequest;
-use App\StaffLeave;
-use App\LeaveType;
-use App\LeaveAction;
-use App\LeaveStatus;
+use App\Models\StaffLeave;
+use App\Models\LeaveType;
+use App\Models\LeaveAction;
+use App\Models\LeaveStatus;
+use App\Models\Staff;
 use App\Mail\LeaveRequestSubmitted;
 use App\Mail\LeaveRequestApproved;
 use App\Mail\LeaveRequestRejected;
 use App\Services\LeaveBalanceService;
+use App\Services\SettingsService;
+use App\Enums\LeaveStatusEnum;
+use App\Enums\RoleEnum;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
+use App\Services\NotificationService;
+use App\Services\LeaveCalculatorService;
 
 class StaffLeavesController extends Controller
 {
     protected $leaveService;
+    protected $leaveCalculator;
+    protected $settingsService;
 
-    public function __construct()
+    public function __construct(LeaveCalculatorService $leaveCalculator, SettingsService $settingsService)
     {
         $this->middleware('auth');
         $this->leaveService = new LeaveBalanceService();
+        $this->leaveCalculator = $leaveCalculator;
+        $this->settingsService = $settingsService;
     }
 
     /**
@@ -33,21 +43,22 @@ class StaffLeavesController extends Controller
     {
         $user = Auth::user();
         $staff = $user->staff;
+        $perPage = $this->settingsService->get('display.pagination_size', 15);
 
         if (!$staff) {
             return redirect('/dashboard')->with('error', 'Staff profile not found.');
         }
 
         // HR and Admin see all leaves, others see only their own
-        if (in_array($staff->role_id, [1, 2])) {
+        if (in_array($staff->role_id, [RoleEnum::ADMIN->value, RoleEnum::HR->value])) {
             $leaves = StaffLeave::with(['staff', 'leaveType', 'leaveAction.leaveStatus'])
                 ->orderBy('created_at', 'desc')
-                ->paginate(15);
+                ->paginate($perPage);
         } else {
             $leaves = StaffLeave::where('staff_id', $staff->id)
                 ->with(['leaveType', 'leaveAction.leaveStatus'])
                 ->orderBy('created_at', 'desc')
-                ->paginate(15);
+                ->paginate($perPage);
         }
 
         return view('leaves.index', compact('leaves', 'staff'));
@@ -76,20 +87,33 @@ class StaffLeavesController extends Controller
             return redirect()->back()->with('error', 'Staff profile not found.');
         }
 
+        // Calculate working days automatically (Ghana Labour Act Compliance)
+        $calculatedDays = $this->leaveCalculator->calculateWorkingDays($request->start_date, $request->end_date);
+
+        if ($calculatedDays <= 0) {
+            return redirect()->back()->with('error', 'Invalid leave duration. Ensure start date is before end date and includes working days.');
+        }
+
+        // Strict Compliance: Check balance before applying
+        if (!$this->leaveService->canApply($staff->id, $calculatedDays)) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', "Insufficient leave balance. You requested $calculatedDays working days, but do not have enough.");
+        }
+
         // Create leave request
         $leave = StaffLeave::create([
             'staff_id' => $staff->id,
             'leave_type_id' => $request->leave_type_id,
             'start_date' => $request->start_date,
             'end_date' => $request->end_date,
-            'leave_days' => $request->leave_days,
+            'leave_days' => $calculatedDays, // Use calculated days, ignore request->leave_days
         ]);
 
         // Create initial leave action (Pending)
-        $pendingStatus = LeaveStatus::where('status_name', 'Unattended')->first();
         LeaveAction::create([
             'leave_id' => $leave->id,
-            'status_id' => $pendingStatus->id ?? 1,
+            'status_id' => LeaveStatusEnum::UNATTENDED->value,
             'actionby' => $staff->id,
         ]);
 
@@ -110,8 +134,9 @@ class StaffLeavesController extends Controller
         $user = Auth::user();
         $staff = $user->staff;
 
-        // Check authorization
-        if (!$staff || ($leave->staff_id !== $staff->id && !in_array($staff->role_id, [1, 2, 3, 4]))) {
+        // Check authorization - owner or any approver role can view
+        $approverRoleIds = array_map(fn($r) => $r->value, RoleEnum::approverRoles());
+        if (!$staff || ($leave->staff_id !== $staff->id && !in_array($staff->role_id, $approverRoleIds))) {
             return redirect('/leaves')->with('error', 'You are not authorized to view this request.');
         }
 
@@ -139,7 +164,10 @@ class StaffLeavesController extends Controller
     /**
      * Update the specified leave request (for approvals).
      */
-    public function update(ApproveLeaveRequest $request, $id)
+    /**
+     * Update the specified leave request (for approvals).
+     */
+    public function update(ApproveLeaveRequest $request, NotificationService $notificationService, $id)
     {
         $leave = StaffLeave::findOrFail($id);
         $user = Auth::user();
@@ -148,44 +176,39 @@ class StaffLeavesController extends Controller
         $action = $request->action;
         $reason = $request->reason;
 
-        // Determine the status based on action
-        $statusMap = [
-            'approve' => 'Approved',
-            'reject' => 'Rejected',
-            'recommend' => 'Recommended',
+        // Determine the status based on action using enum
+        $statusEnumMap = [
+            'approve' => LeaveStatusEnum::APPROVED,
+            'reject' => LeaveStatusEnum::REJECTED,
+            'recommend' => LeaveStatusEnum::RECOMMENDED,
         ];
 
-        $status = LeaveStatus::where('status_name', $statusMap[$action])->first();
+        $statusEnum = $statusEnumMap[$action];
 
         // Create leave action record
         LeaveAction::create([
             'leave_id' => $leave->id,
-            'status_id' => $status->id,
+            'status_id' => $statusEnum->value,
             'actionby' => $staff->id,
             'action_reason' => $reason,
         ]);
 
-        // Send notification to applicant
-        $applicant = $leave->staff;
-        if ($applicant && $applicant->user && $applicant->user->email) {
-            try {
-                if ($action === 'approve') {
-                    Mail::to($applicant->user->email)->send(new LeaveRequestApproved($leave, $applicant, $staff));
-                } elseif ($action === 'reject') {
-                    Mail::to($applicant->user->email)->send(new LeaveRequestRejected($leave, $applicant, $staff, $reason));
-                }
-            } catch (\Exception $e) {
-                \Log::error('Failed to send notification: ' . $e->getMessage());
-            }
+        // Notifications
+        if ($action === 'recommend') {
+            // Notify HR
+            $notificationService->notifyHR($leave);
+        } else {
+            // Notify Staff of final decision
+            $notificationService->notifyStaff($leave, $statusEnum->label());
         }
 
-        return redirect('/leaves/' . $id)->with('success', 'Leave request has been ' . $statusMap[$action] . '.');
+        return redirect('/leaves/' . $id)->with('success', 'Leave request has been ' . $statusEnum->label() . '.');
     }
 
     /**
      * Cancel a leave request.
      */
-    public function cancel($id)
+    public function cancel(NotificationService $notificationService, $id)
     {
         $leave = StaffLeave::findOrFail($id);
         $user = Auth::user();
@@ -196,13 +219,22 @@ class StaffLeavesController extends Controller
             return redirect('/leaves')->with('error', 'You can only cancel your own requests.');
         }
 
-        $cancelledStatus = LeaveStatus::where('status_name', 'Cancelled')->first();
+        // Strict Compliance: Can only cancel Pending (Unattended) requests
+        // Check the LATEST action status
+        $currentStatus = $leave->leaveAction->sortByDesc('created_at')->first();
+
+        if (!$currentStatus || $currentStatus->status_id !== LeaveStatusEnum::UNATTENDED->value) {
+            return redirect('/leaves')->with('error', 'You can only cancel Pending leave requests. If approved, please contact HR.');
+        }
 
         LeaveAction::create([
             'leave_id' => $leave->id,
-            'status_id' => $cancelledStatus->id ?? 6,
+            'status_id' => LeaveStatusEnum::CANCELLED->value,
             'actionby' => $staff->id,
         ]);
+
+        // Notify Supervisor/HR about cancellation
+        $notificationService->notifyLeaveCancelled($leave);
 
         return redirect('/leaves')->with('success', 'Leave request cancelled successfully.');
     }
@@ -217,7 +249,8 @@ class StaffLeavesController extends Controller
         $staff = $user->staff;
 
         // Only HR/Admin can delete, or owner can delete pending requests
-        if (!$staff || (!in_array($staff->role_id, [1, 2]) && $leave->staff_id !== $staff->id)) {
+        $managerRoleIds = [RoleEnum::ADMIN->value, RoleEnum::HR->value];
+        if (!$staff || (!in_array($staff->role_id, $managerRoleIds) && $leave->staff_id !== $staff->id)) {
             return redirect('/leaves')->with('error', 'You are not authorized to delete this request.');
         }
 
@@ -232,16 +265,87 @@ class StaffLeavesController extends Controller
      */
     private function notifySupervisor(StaffLeave $leave, $applicant)
     {
-        // Find HR users to notify
-        $hrStaff = \App\Staff::where('role_id', 2)->where('is_active', 1)->first();
+        $notificationService = new NotificationService();
+        $notificationService->notifySupervisor($leave);
+    }
 
-        if ($hrStaff && $hrStaff->user && $hrStaff->user->email) {
-            try {
-                Mail::to($hrStaff->user->email)->send(new LeaveRequestSubmitted($leave, $applicant));
-            } catch (\Exception $e) {
-                // Log error but don't fail the request
-                \Log::error('Failed to send leave notification: ' . $e->getMessage());
-            }
+    /**
+     * Display personal leave reports for the logged-in staff.
+     */
+    public function myReports()
+    {
+        $user = Auth::user();
+        $staff = $user->staff;
+
+        if (!$staff) {
+            return redirect('/dashboard')->with('error', 'Staff profile not found.');
         }
+
+        // Get all leaves for this staff member with statistics
+        $leaves = StaffLeave::with(['leaveType', 'leaveAction.leaveStatus'])
+            ->where('staff_id', $staff->id)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        // Calculate statistics
+        $stats = [
+            'total_allowance' => $staff->total_leave_days,
+            'total_used' => $leaves->where('leaveAction.0.status_id', LeaveStatusEnum::APPROVED->value)->sum('leave_days'),
+            'pending' => $leaves->filter(fn($l) => $l->leaveAction->last()?->status_id == LeaveStatusEnum::UNATTENDED->value)->count(),
+            'approved' => $leaves->filter(fn($l) => $l->leaveAction->last()?->status_id == LeaveStatusEnum::APPROVED->value)->count(),
+            'rejected' => $leaves->filter(fn($l) => in_array($l->leaveAction->last()?->status_id, [LeaveStatusEnum::REJECTED->value, LeaveStatusEnum::DISAPPROVED->value]))->count(),
+        ];
+        $stats['remaining'] = max(0, $stats['total_allowance'] - $stats['total_used']);
+
+        // Group by leave type for breakdown
+        $byType = $leaves->groupBy('leaveType.leave_type_name')->map(fn($group) => $group->sum('leave_days'));
+
+        return view('staff.reports', compact('leaves', 'stats', 'byType', 'staff'));
+    }
+
+    /**
+     * Export personal leave report as CSV.
+     */
+    public function exportMyReports()
+    {
+        $user = Auth::user();
+        $staff = $user->staff;
+
+        if (!$staff) {
+            return redirect('/dashboard')->with('error', 'Staff profile not found.');
+        }
+
+        $leaves = StaffLeave::with(['leaveType', 'leaveAction.leaveStatus'])
+            ->where('staff_id', $staff->id)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        $filename = 'leave_report_' . $staff->staff_number . '_' . date('Y-m-d') . '.csv';
+
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+        ];
+
+        $callback = function () use ($leaves) {
+            $file = fopen('php://output', 'w');
+            fputcsv($file, ['Leave Type', 'Start Date', 'End Date', 'Days', 'Status', 'Applied On']);
+
+            foreach ($leaves as $leave) {
+                $status = $leave->leaveAction->last()?->leaveStatus?->status_name ?? 'Unknown';
+                fputcsv($file, [
+                    $leave->leaveType->leave_type_name ?? 'N/A',
+                    $leave->start_date,
+                    $leave->end_date,
+                    $leave->leave_days,
+                    $status,
+                    $leave->created_at->format('Y-m-d'),
+                ]);
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
     }
 }

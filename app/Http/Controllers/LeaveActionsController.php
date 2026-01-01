@@ -3,16 +3,20 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\LeaveAction;
-use App\StaffLeave;
-use App\LeaveStatus;
+use App\Models\LeaveAction;
+use App\Models\StaffLeave;
+use App\Models\LeaveStatus;
+use App\Services\SettingsService;
 use Illuminate\Support\Facades\Auth;
 
 class LeaveActionsController extends Controller
 {
-    public function __construct()
+    protected $settingsService;
+
+    public function __construct(SettingsService $settingsService)
     {
         $this->middleware('auth');
+        $this->settingsService = $settingsService;
     }
 
     /**
@@ -20,9 +24,11 @@ class LeaveActionsController extends Controller
      */
     public function index()
     {
+        $perPage = $this->settingsService->get('display.pagination_size', 15);
+
         $leaveactions = LeaveAction::with(['staffLeave.staff', 'leaveStatus', 'actionBy'])
             ->orderBy('action_date', 'desc')
-            ->paginate(20);
+            ->paginate($perPage);
 
         return view('leaveactions.index', compact('leaveactions'));
     }

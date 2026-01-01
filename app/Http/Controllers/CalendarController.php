@@ -3,17 +3,22 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\StaffLeave;
-use App\Holiday;
-use App\LeaveType;
+use App\Models\StaffLeave;
+use App\Models\Holiday;
+use App\Models\LeaveType;
+use App\Enums\LeaveStatusEnum;
+use App\Services\SettingsService;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 
 class CalendarController extends Controller
 {
-    public function __construct()
+    protected $settingsService;
+
+    public function __construct(SettingsService $settingsService)
     {
         $this->middleware('auth');
+        $this->settingsService = $settingsService;
     }
 
     /**
@@ -22,7 +27,14 @@ class CalendarController extends Controller
     public function index()
     {
         $leaveTypes = LeaveType::all();
-        return view('calendar', compact('leaveTypes'));
+        $calendarSettings = [
+            'weekStart' => $this->settingsService->get('calendar.week_start', 'monday'),
+            'defaultView' => $this->settingsService->get('calendar.default_view', 'month'),
+            'showWeekends' => $this->settingsService->get('calendar.show_weekends', true),
+            'businessHoursStart' => $this->settingsService->get('calendar.business_hours_start', '08:00'),
+            'businessHoursEnd' => $this->settingsService->get('calendar.business_hours_end', '17:00'),
+        ];
+        return view('calendar', compact('leaveTypes', 'calendarSettings'));
     }
 
     /**
@@ -33,12 +45,15 @@ class CalendarController extends Controller
         $start = $request->input('start', Carbon::now()->startOfMonth()->toDateString());
         $end = $request->input('end', Carbon::now()->endOfMonth()->toDateString());
 
+        // Get configurable holiday color
+        $holidayColor = $this->settingsService->get('calendar.holiday_color', '#4caf50');
+
         $events = [];
 
         // Get approved leaves
         $leaves = StaffLeave::with(['staff', 'leaveType'])
             ->whereHas('leaveAction', function ($q) {
-                $q->where('status_id', 2); // Approved
+                $q->where('status_id', LeaveStatusEnum::APPROVED->value);
             })
             ->where(function ($q) use ($start, $end) {
                 $q->whereBetween('start_date', [$start, $end])
@@ -61,16 +76,16 @@ class CalendarController extends Controller
             ];
         }
 
-        // Get holidays
+        // Get holidays with configurable color
         $holidays = Holiday::whereBetween('date', [$start, $end])->get();
 
         foreach ($holidays as $holiday) {
             $events[] = [
                 'id' => 'holiday-' . $holiday->id,
-                'title' => '🎉 Public Holiday',
+                'title' => '🎉 ' . ($holiday->name ?? 'Public Holiday'),
                 'start' => $holiday->date,
                 'end' => $holiday->date,
-                'color' => '#4caf50',
+                'color' => $holidayColor, // Uses configurable setting
                 'type' => 'holiday',
                 'allDay' => true,
             ];
