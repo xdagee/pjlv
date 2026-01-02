@@ -21,7 +21,10 @@ class RolesController extends Controller
             $roles = Role::all();
             return response()->json(['data' => $roles]);
         }
-        return view('admin.roles.index');
+
+        // Use admin view for /admin/roles, staff view for /roles
+        $view = request()->is('admin/*') ? 'admin.roles.index' : 'staff.roles.index';
+        return view($view);
     }
 
     /**

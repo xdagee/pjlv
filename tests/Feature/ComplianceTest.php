@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 use App\Models\User;
 use App\Models\Role;
@@ -25,7 +26,7 @@ class ComplianceTest extends TestCase
         $this->seed();
     }
 
-    /** @test */
+    #[Test]
     public function system_owner_admin_has_unrestricted_access_via_id_1()
     {
         // Ensure User ID 1 exists as System Owner
@@ -47,7 +48,7 @@ class ComplianceTest extends TestCase
         $response->assertStatus(200);
     }
 
-    /** @test */
+    #[Test]
     public function pending_leaves_deduct_from_balance()
     {
         $service = new LeaveBalanceService();
@@ -85,7 +86,7 @@ class ComplianceTest extends TestCase
         $this->assertEquals(15, $balance, "Pending leaves must temporarily deduct from balance.");
     }
 
-    /** @test */
+    #[Test]
     public function roles_auto_activate_and_deactivate()
     {
         // Create a new Inactive Role

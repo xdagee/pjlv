@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 use App\Models\User;
 use App\Models\Admin;
@@ -22,7 +23,7 @@ class RolesControllerTest extends TestCase
         $this->seed(\Database\Seeders\RolesTableSeeder::class);
     }
 
-    /** @test */
+    #[Test]
     public function super_admin_can_view_roles_page()
     {
         $admin = $this->createSuperAdmin();
@@ -33,7 +34,7 @@ class RolesControllerTest extends TestCase
         $response->assertViewIs('admin.roles.index');
     }
 
-    /** @test */
+    #[Test]
     public function super_admin_can_get_roles_json()
     {
         $admin = $this->createSuperAdmin();
@@ -46,7 +47,7 @@ class RolesControllerTest extends TestCase
         $this->assertGreaterThan(0, count($response->json('data')));
     }
 
-    /** @test */
+    #[Test]
     public function super_admin_can_create_role()
     {
         $admin = $this->createSuperAdmin();
@@ -69,7 +70,7 @@ class RolesControllerTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function cannot_create_duplicate_role()
     {
         $admin = $this->createSuperAdmin();
@@ -92,7 +93,7 @@ class RolesControllerTest extends TestCase
         $response->assertJsonValidationErrors(['role_name']);
     }
 
-    /** @test */
+    #[Test]
     public function super_admin_can_update_role()
     {
         $admin = $this->createSuperAdmin();
@@ -118,7 +119,7 @@ class RolesControllerTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function cannot_edit_super_admin_role()
     {
         $admin = $this->createSuperAdmin();
@@ -136,7 +137,7 @@ class RolesControllerTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function cannot_delete_super_admin_role()
     {
         $admin = $this->createSuperAdmin();
@@ -151,7 +152,7 @@ class RolesControllerTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function super_admin_can_delete_unused_role()
     {
         $admin = $this->createSuperAdmin();
@@ -169,7 +170,7 @@ class RolesControllerTest extends TestCase
         $this->assertDatabaseMissing('roles', ['id' => $role->id]);
     }
 
-    /** @test */
+    #[Test]
     public function non_admin_cannot_access_roles()
     {
         // Explicitly use ID 999 to avoid ID 1 which gets super admin access

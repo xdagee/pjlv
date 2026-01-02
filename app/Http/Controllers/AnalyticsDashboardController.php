@@ -27,8 +27,8 @@ class AnalyticsDashboardController extends Controller
      */
     public function index(Request $request)
     {
-        $year = $request->input('year', Carbon::now()->year);
-        $month = $request->input('month');
+        $year = (int) $request->input('year', Carbon::now()->year);
+        $month = $request->input('month') ? (int) $request->input('month') : null;
 
         // Get all analytics data
         $stats = $this->analyticsService->getOverviewStats($year, $month);
@@ -63,8 +63,8 @@ class AnalyticsDashboardController extends Controller
      */
     public function exportCsv(Request $request)
     {
-        $year = $request->input('year', Carbon::now()->year);
-        $month = $request->input('month');
+        $year = (int) $request->input('year', Carbon::now()->year);
+        $month = $request->input('month') ? (int) $request->input('month') : null;
 
         $data = $this->analyticsService->getExportData($year, $month);
 
@@ -167,8 +167,8 @@ class AnalyticsDashboardController extends Controller
      */
     public function exportPdf(Request $request)
     {
-        $year = $request->input('year', Carbon::now()->year);
-        $month = $request->input('month');
+        $year = (int) $request->input('year', Carbon::now()->year);
+        $month = $request->input('month') ? (int) $request->input('month') : null;
 
         $data = $this->analyticsService->getExportData($year, $month);
 

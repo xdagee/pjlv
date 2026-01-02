@@ -1,6 +1,6 @@
 # PJLV - Employee Leave Management System
 
-A Laravel 10 based employee leave management system for organizations to streamline leave requests, approvals, and tracking.
+A Laravel 12 based employee leave management system for organizations to streamline leave requests, approvals, and tracking.
 
 ## ✨ Features
 
@@ -62,7 +62,7 @@ A Laravel 10 based employee leave management system for organizations to streaml
 
 ## Requirements
 
-- PHP 8.1 or higher
+- PHP 8.2 or higher
 - Composer 2.x
 - MySQL 5.7+ or SQLite
 - Node.js (optional, for frontend assets)
@@ -101,7 +101,7 @@ Open <http://localhost:8000> in your browser.
 ## Default Admin Account
 
 | Role | Email | Password |
-|------|-------|----------|
+| --- | --- | --- |
 | Super Admin | <admin@admin.com> | adminpass |
 
 > ⚠️ **Security Warning:** Change the default password immediately after first login!
@@ -109,7 +109,7 @@ Open <http://localhost:8000> in your browser.
 ## User Roles & Permissions
 
 | Role | Permissions |
-|------|-------------|
+| --- | --- |
 | **Admin** | Full access - manage staff, roles, departments, settings, leave types |
 | **HR** | Staff management, leave approval, reports, exports |
 | **CEO** | View all, approve/reject leaves, access analytics |
@@ -119,7 +119,7 @@ Open <http://localhost:8000> in your browser.
 
 ## Leave Workflow
 
-```
+```text
 Employee Applies → Pending → Supervisor Reviews → Recommended → HR Approves → Approved
                                     ↓                              ↓
                                  Rejected                     Disapproved
@@ -138,7 +138,7 @@ Employee can Cancel pending requests at any time.
 
 ## Project Structure
 
-```
+```text
 pjlv/
 ├── app/
 │   ├── Enums/               # Role, LeaveStatus enums
@@ -160,7 +160,7 @@ pjlv/
 │       └── SettingsService.php
 ├── database/
 │   ├── migrations/          # Database schema
-│   └── seeders/             # Sample data (Laravel 10 format)
+│   └── seeders/             # Sample data
 ├── resources/views/
 │   ├── admin/               # Admin panel views
 │   │   ├── settings/        # System settings UI
@@ -177,7 +177,7 @@ pjlv/
 ### Authenticated Routes (All Users)
 
 | Method | URI | Description |
-|--------|-----|-------------|
+| --- | --- | --- |
 | GET | /dashboard | Dashboard with statistics |
 | GET | /calendar | Interactive leave calendar |
 | GET | /leaves | List leave requests |
@@ -190,7 +190,7 @@ pjlv/
 ### HR/Manager Routes
 
 | Method | URI | Description |
-|--------|-----|-------------|
+| --- | --- | --- |
 | GET | /staff | List all staff |
 | GET | /reports | Leave reports & analytics |
 | GET | /reports/export | Export CSV report |
@@ -199,7 +199,7 @@ pjlv/
 ### Admin Only Routes (prefix: /admin)
 
 | Method | URI | Description |
-|--------|-----|-------------|
+| --- | --- | --- |
 | GET | /admin/dashboard | Admin dashboard with analytics |
 | GET | /admin/staffs | Manage all staff |
 | GET | /admin/roles | Manage user roles |
@@ -240,17 +240,28 @@ php artisan test tests/Feature/
 
 ## Tech Stack
 
-- **Backend:** Laravel 10.x
+- **Backend:** Laravel 12.x
+- **PHP:** 8.2+
 - **Database:** MySQL / SQLite
 - **Frontend:** Blade Templates, Material Dashboard Pro
 - **Calendar:** FullCalendar.js 5.x
 - **Charts:** Chartist.js
 - **Auth:** Laravel UI
+- **Testing:** PHPUnit 11.x
 - **Icons:** Material Icons, Font Awesome
 
 ## Recent Updates
 
-### v2.0 (January 2026)
+### v3.0 (January 2026)
+
+- ✅ Upgraded to Laravel 12 (from Laravel 10)
+- ✅ Updated PHP requirement to 8.2+
+- ✅ Updated all dependencies to Laravel 12 compatible versions
+- ✅ Migrated test annotations to PHPUnit 11 attributes
+- ✅ Fixed Carbon 3 strict type casting issues
+- ✅ Replaced MySQL-specific FK checks with Schema facade
+
+### v2.0 (December 2025)
 
 - ✅ Added 50+ configurable system settings
 - ✅ Integrated settings into controllers (pagination, calendar, analytics)

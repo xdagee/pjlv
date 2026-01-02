@@ -29,7 +29,7 @@ class HRScenarioSeeder extends Seeder
         $hrUser = User::where('email', $hrEmail)->first();
 
         // Disable FK checks just in case
-        \DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        \Illuminate\Support\Facades\Schema::disableForeignKeyConstraints();
 
         if (!$hrUser) {
             $hrId = max(User::max('id') ?? 0, Staff::max('id') ?? 0) + 1;
@@ -92,7 +92,7 @@ class HRScenarioSeeder extends Seeder
             ]);
         }
 
-        \DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+        \Illuminate\Support\Facades\Schema::enableForeignKeyConstraints();
         $this->command->info("Created 10 staff members successfully.");
     }
 }

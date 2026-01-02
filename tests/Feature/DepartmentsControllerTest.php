@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 use App\Models\User;
 use App\Models\Admin;
@@ -18,7 +19,7 @@ class DepartmentsControllerTest extends TestCase
         $this->seed(\Database\Seeders\DepartmentsTableSeeder::class);
     }
 
-    /** @test */
+    #[Test]
     public function super_admin_can_view_departments_page()
     {
         $admin = $this->createSuperAdmin();
@@ -29,7 +30,7 @@ class DepartmentsControllerTest extends TestCase
         $response->assertViewIs('admin.departments.index');
     }
 
-    /** @test */
+    #[Test]
     public function super_admin_can_get_departments_json()
     {
         $admin = $this->createSuperAdmin();
@@ -42,7 +43,7 @@ class DepartmentsControllerTest extends TestCase
         $this->assertEquals(7, count($response->json('data'))); // 7 seeded departments
     }
 
-    /** @test */
+    #[Test]
     public function super_admin_can_create_department()
     {
         $admin = $this->createSuperAdmin();
@@ -65,7 +66,7 @@ class DepartmentsControllerTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function cannot_create_duplicate_department()
     {
         $admin = $this->createSuperAdmin();
@@ -80,7 +81,7 @@ class DepartmentsControllerTest extends TestCase
         $response->assertJsonValidationErrors(['name']);
     }
 
-    /** @test */
+    #[Test]
     public function super_admin_can_update_department()
     {
         $admin = $this->createSuperAdmin();
@@ -101,7 +102,7 @@ class DepartmentsControllerTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function super_admin_can_delete_unused_department()
     {
         $admin = $this->createSuperAdmin();

@@ -31,7 +31,9 @@ class AnalyticsServiceTest extends TestCase
     {
         parent::setUp();
 
-        $this->analyticsService = new AnalyticsService();
+        $settingsService = \Mockery::mock(\App\Services\SettingsService::class);
+        $settingsService->shouldReceive('get')->andReturn(60); // Default expectation
+        $this->analyticsService = new AnalyticsService($settingsService);
 
         // Create roles
         Role::create(['id' => 1, 'role_name' => 'Admin', 'role_status' => 1]);

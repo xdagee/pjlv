@@ -1,0 +1,38 @@
+[
+    {
+        "id": "ui-balance-component",
+        "description": "Create leave balance section on dashboard.",
+        "inputFiles": [
+            "resources/views/dashboard.blade.php"
+        ],
+        "expectedOutput": "UI shows leave types and remaining days.",
+        "verification": "Screenshot + data correctness."
+    },
+    {
+        "id": "logic-submit-leave",
+        "description": "Controller logic for leave requests.",
+        "inputFiles": [
+            "app/Http/Controllers/LeaveController.php"
+        ],
+        "expectedOutput": "Leave records with proper status.",
+        "verification": "Test + DB record check."
+    },
+    {
+        "id": "test-phpunit-suite",
+        "description": "Write PHPUnit tests (unit + integration).",
+        "inputFiles": [
+            "tests/"
+        ],
+        "expectedOutput": "Comprehensive test suite.",
+        "verification": "`test_report.json` with pass results."
+    },
+    {
+        "id": "infra-health-endpoint",
+        "description": "Implement `/health` route.",
+        "inputFiles": [
+            "routes/web.php"
+        ],
+        "expectedOutput": "JSON status endpoint.",
+        "verification": "API test."
+    }
+]

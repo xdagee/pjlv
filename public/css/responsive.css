@@ -1,0 +1,222 @@
+/**
+ * PJLV Responsive Layout System
+ * Improved grid, form, modal, and breakpoint handling.
+ */
+
+/* ===================================
+   Dashboard Layout - Reduce Density
+   =================================== */
+
+/* Stat cards: ensure consistent spacing */
+.card-stats {
+    margin-bottom: 20px;
+}
+
+.card-stats .card-content {
+    min-height: 60px;
+}
+
+/* Dashboard rows: proper spacing */
+.dashboard-row {
+    margin-bottom: 30px;
+}
+
+/* ===================================
+   Forms - Centered & Constrained
+   =================================== */
+
+/* All main forms should be constrained and centered */
+.form-container,
+.card form,
+.card-content form {
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Form fields spacing */
+.form-group {
+    margin-bottom: 20px;
+}
+
+/* Prevent horizontal overflow */
+.card-content {
+    overflow-x: hidden;
+}
+
+/* ===================================
+   Modals - Mobile Friendly
+   =================================== */
+
+.modal-dialog {
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.modal-body {
+    max-height: calc(90vh - 120px);
+    overflow-y: auto;
+}
+
+@media (max-width: 767px) {
+    .modal-dialog {
+        margin: 10px;
+        width: calc(100% - 20px);
+    }
+}
+
+/* ===================================
+   Responsive Breakpoints
+   =================================== */
+
+/* Mobile: < 768px */
+@media (max-width: 767px) {
+
+    /* Stack all cards vertically */
+    .col-lg-3,
+    .col-lg-4,
+    .col-lg-6,
+    .col-lg-8 {
+        width: 100%;
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+
+    /* Sidebar adjustments */
+    .sidebar {
+        transform: translateX(-260px);
+        transition: transform 0.3s ease;
+    }
+
+    .sidebar.active {
+        transform: translateX(0);
+    }
+
+    /* Table responsiveness */
+    .table-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* Cards full width on mobile */
+    .card {
+        margin-bottom: 20px;
+    }
+
+    /* Buttons stack on mobile */
+    .btn-group-mobile {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .btn-group-mobile .btn {
+        width: 100%;
+    }
+
+    /* Hide secondary columns on mobile tables */
+    .hide-mobile {
+        display: none !important;
+    }
+}
+
+/* Tablet: 768px - 1024px */
+@media (min-width: 768px) and (max-width: 1024px) {
+    .col-lg-3 {
+        width: 50%;
+    }
+
+    .col-lg-4 {
+        width: 50%;
+    }
+
+    .col-lg-8 {
+        width: 100%;
+    }
+
+    /* Adjust sidebar for tablet */
+    .sidebar {
+        width: 200px;
+    }
+
+    .main-panel {
+        width: calc(100% - 200px);
+    }
+}
+
+/* Desktop: > 1024px */
+@media (min-width: 1025px) {
+
+    /* Ensure proper grid alignment */
+    .row {
+        display: flex;
+        flex-wrap: wrap;
+    }
+
+    /* Equal height cards */
+    .card-stats {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .card-stats .card-content {
+        flex-grow: 1;
+    }
+}
+
+/* ===================================
+   Calendar - Mobile Improvements
+   =================================== */
+
+/* Prevent event label truncation */
+.fc-event {
+    white-space: normal !important;
+    overflow: visible !important;
+}
+
+/* Mobile calendar: vertical scroll */
+@media (max-width: 767px) {
+    .fc-view-container {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .fc-day-grid-event {
+        font-size: 11px;
+        padding: 2px 4px;
+    }
+
+    /* Week view: scroll horizontally */
+    .fc-timeGrid-view .fc-time-grid {
+        min-width: 600px;
+    }
+}
+
+/* ===================================
+   Utility Classes
+   =================================== */
+
+/* Prevent horizontal scroll on page */
+html,
+body {
+    overflow-x: hidden;
+    max-width: 100%;
+}
+
+/* Smooth scrolling */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Better touch targets on mobile */
+@media (max-width: 767px) {
+    .btn {
+        min-height: 44px;
+        min-width: 44px;
+    }
+
+    a,
+    button {
+        touch-action: manipulation;
+    }
+}

@@ -116,7 +116,9 @@ class ReportsController extends Controller
         $departments = Department::all();
         $years = range(Carbon::now()->year - 2, Carbon::now()->year);
 
-        return view('admin.reports.index', compact('leaveByType', 'leaveByDepartment', 'monthlyTrend', 'topLeaveTakers', 'stats', 'leaveTypes', 'departments', 'years', 'year', 'month'));
+        // Use admin view for /admin/reports, staff view for /reports
+        $view = request()->is('admin/*') ? 'admin.reports.index' : 'staff.reports.index';
+        return view($view, compact('leaveByType', 'leaveByDepartment', 'monthlyTrend', 'topLeaveTakers', 'stats', 'leaveTypes', 'departments', 'years', 'year', 'month'));
     }
 
     /**

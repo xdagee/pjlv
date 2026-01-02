@@ -116,7 +116,7 @@ class AdminAccountSeeder extends Seeder
         // Temporarily disable FK checks for system admin bootstrap
         // This is necessary because users.id has FK to staff.id, but the 
         // system admin is NOT a staff member - it's a standalone account.
-        DB::statement('SET FOREIGN_KEY_CHECKS=0');
+        \Illuminate\Support\Facades\Schema::disableForeignKeyConstraints();
 
         try {
             DB::table('users')->insertOrIgnore([
@@ -129,7 +129,7 @@ class AdminAccountSeeder extends Seeder
             ]);
         } finally {
             // Always re-enable FK checks
-            DB::statement('SET FOREIGN_KEY_CHECKS=1');
+            \Illuminate\Support\Facades\Schema::enableForeignKeyConstraints();
         }
 
         $this->command->info('  ✓ System admin user created');

@@ -43,6 +43,7 @@ Route::middleware(['auth'])->group(function () {
 
 	// Dashboard
 	Route::get('/dashboard', [DashboardController::class, 'index']);
+	Route::get('/dashboard/modern', [DashboardController::class, 'modern']); // Modern Dashboard Pilot
 	Route::get('/home', [DashboardController::class, 'index']); // Alias
 
 	// User Profile
@@ -108,6 +109,12 @@ Route::middleware(['auth'])->group(function () {
 	Route::post('/notifications/{notification}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
 	Route::post('/notifications/mark-all-read', [NotificationController::class, 'markAllAsRead'])->name('notifications.readAll');
 	Route::delete('/notifications/{notification}', [NotificationController::class, 'destroy'])->name('notifications.destroy');
+
+	// Holidays - All users can view holidays (read-only)
+	Route::get('/holidays', function () {
+		$holidays = \App\Models\Holiday::orderBy('date', 'asc')->get();
+		return view('staff.holidays.index', compact('holidays'));
+	})->name('staff.holidays.index');
 });
 
 /*
@@ -129,6 +136,15 @@ Route::middleware(['auth', 'role:hod'])->group(function () {
 	Route::put('/staff/{staff}', [StaffController::class, 'update']);
 	Route::delete('/staff/{staff}', [StaffController::class, 'destroy']);
 
+	// Jobs - HR can view and manage jobs
+	Route::get('/jobs', [JobsController::class, 'index'])->name('jobs.index');
+	Route::get('/jobs/create', [JobsController::class, 'create'])->name('jobs.create');
+	Route::post('/jobs', [JobsController::class, 'store'])->name('jobs.store');
+	Route::get('/jobs/{job}', [JobsController::class, 'show'])->name('jobs.show');
+	Route::get('/jobs/{job}/edit', [JobsController::class, 'edit'])->name('jobs.edit');
+	Route::put('/jobs/{job}', [JobsController::class, 'update'])->name('jobs.update');
+	Route::delete('/jobs/{job}', [JobsController::class, 'destroy'])->name('jobs.destroy');
+
 
 	// Leave actions
 	Route::get('/leaveactions', [LeaveActionsController::class, 'index']);
@@ -140,6 +156,18 @@ Route::middleware(['auth', 'role:hod'])->group(function () {
 	Route::get('/reports', [ReportsController::class, 'index']);
 	Route::get('/reports/export', [ReportsController::class, 'export']);
 	Route::get('/reports/export-pdf', [ReportsController::class, 'exportPdf']);
+
+	// All Leaves - HR/Admin/CEO/OPS can view all organization leaves
+	Route::get('/all-leaves', [AdminLeavesController::class, 'index'])->name('all-leaves.index');
+
+	// Roles - HR/CEO can view roles (read-only, full management is admin only)
+	Route::get('/roles', [App\Http\Controllers\RolesController::class, 'index'])->name('staff.roles.index');
+
+	// Departments - accessible for HR/CEO/OPS
+	Route::get('/departments', function () {
+		$departments = \App\Models\Department::withCount('staff')->get();
+		return view('staff.departments', compact('departments'));
+	})->name('staff.departments.index');
 });
 
 /*

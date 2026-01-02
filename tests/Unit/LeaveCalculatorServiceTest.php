@@ -2,6 +2,7 @@
 
 namespace Tests\Unit;
 
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 use App\Services\LeaveCalculatorService;
 use App\Models\Holiday;
@@ -20,7 +21,7 @@ class LeaveCalculatorServiceTest extends TestCase
         $this->calculator = new LeaveCalculatorService();
     }
 
-    /** @test */
+    #[Test]
     public function calculates_working_days_correctly_without_holidays()
     {
         // Monday to Friday (5 working days)
@@ -29,7 +30,7 @@ class LeaveCalculatorServiceTest extends TestCase
         $this->assertEquals(5, $days);
     }
 
-    /** @test */
+    #[Test]
     public function excludes_weekends_from_calculation()
     {
         // Monday to Sunday (should be 5 working days, excluding Sat-Sun)
@@ -38,7 +39,7 @@ class LeaveCalculatorServiceTest extends TestCase
         $this->assertEquals(5, $days);
     }
 
-    /** @test */
+    #[Test]
     public function excludes_public_holidays()
     {
         // Create a holiday on Wednesday
@@ -53,7 +54,7 @@ class LeaveCalculatorServiceTest extends TestCase
         $this->assertEquals(4, $days);
     }
 
-    /** @test */
+    #[Test]
     public function excludes_both_weekends_and_holidays()
     {
         // Create holiday on Monday
@@ -68,7 +69,7 @@ class LeaveCalculatorServiceTest extends TestCase
         $this->assertEquals(4, $days);
     }
 
-    /** @test */
+    #[Test]
     public function returns_zero_for_invalid_date_range()
     {
         // End date before start date
@@ -77,7 +78,7 @@ class LeaveCalculatorServiceTest extends TestCase
         $this->assertEquals(0, $days);
     }
 
-    /** @test */
+    #[Test]
     public function handles_single_day_correctly()
     {
         // Single weekday
@@ -86,7 +87,7 @@ class LeaveCalculatorServiceTest extends TestCase
         $this->assertEquals(1, $days);
     }
 
-    /** @test */
+    #[Test]
     public function single_weekend_day_returns_zero()
     {
         // Saturday
@@ -95,7 +96,7 @@ class LeaveCalculatorServiceTest extends TestCase
         $this->assertEquals(0, $days);
     }
 
-    /** @test */
+    #[Test]
     public function calculates_long_period_correctly()
     {
         // Full month (January 2025: 31 days, 23 working days)

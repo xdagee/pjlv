@@ -46,7 +46,7 @@ class ReportsControllerTest extends TestCase
             ->get('/reports/export?year=2025');
 
         $response->assertStatus(200);
-        $response->assertHeader('Content-Type', 'text/csv; charset=UTF-8');
+        $response->assertHeader('Content-Type', 'text/csv; charset=utf-8');
     }
 
     public function test_hr_can_export_pdf()

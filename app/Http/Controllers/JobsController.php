@@ -30,8 +30,10 @@ class JobsController extends Controller
         // getting all jobs
         $jobs = Job::select('id', 'job_title', 'job_description', 'is_multiple_staff')->latest()->get();
 
-        // return view
-        return view('admin.jobs.index', compact('jobs'));
+        // Use admin view for /admin/jobs, staff view for /jobs
+        $view = request()->is('admin/*') ? 'admin.jobs.index' : 'staff.jobs.index';
+
+        return view($view, compact('jobs'));
     }
 
     /**

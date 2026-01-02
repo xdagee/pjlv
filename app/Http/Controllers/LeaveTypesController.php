@@ -18,7 +18,10 @@ class LeaveTypesController extends Controller
     public function index()
     {
         $leavetypes = LeaveType::all();
-        return view('admin.leavetypes.index', compact('leavetypes'));
+
+        // Use admin view for /admin/leavetypes, staff view for /leavetypes
+        $view = request()->is('admin/*') ? 'admin.leavetypes.index' : 'staff.leavetypes.index';
+        return view($view, compact('leavetypes'));
     }
 
     /**

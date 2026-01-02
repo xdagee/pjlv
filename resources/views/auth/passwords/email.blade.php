@@ -15,9 +15,13 @@
     <!--  Material Dashboard CSS    -->
     <link href="/css/material-dashboard_cdea83f9.css" rel="stylesheet" />
     <!--     Fonts and icons     -->
-    {{-- <link href="https://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css" rel="stylesheet" /> --}}
-    {{-- <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons" /> --}}
-    {{-- <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" /> --}}
+    {{--
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css" rel="stylesheet" /> --}}
+    {{--
+    <link rel="stylesheet" type="text/css"
+        href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons" /> --}}
+    {{--
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" /> --}}
     <link href="/css/material.css" rel="stylesheet" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 </head>
@@ -35,8 +39,8 @@
                                     {{ session('status') }}
                                 </div>
                             @endif
-                                <form method="POST" role="form"  action="{{ url('/password/email') }}">
-                                    {{ csrf_field() }}
+                            <form method="POST" role="form" action="{{ url('/password/email') }}">
+                                {{ csrf_field() }}
                                 <div class="card card-login card-hidden">
                                     <div class="card-header text-center" data-background-color="red">
                                         <h4 class="card-title">Reset password!</h4>
@@ -47,11 +51,13 @@
                                     <div class="card-content">
                                         <div class="input-group">
                                             <span class="input-group-addon">
-                                                    <i class="material-icons">email</i>
-                                                </span>
-                                            <div class="form-group label-floating{{ $errors->has('email') ? ' has-error' : '' }}">
+                                                <i class="material-icons">email</i>
+                                            </span>
+                                            <div
+                                                class="form-group label-floating{{ $errors->has('email') ? ' has-error' : '' }}">
                                                 <label for="email" class="control-label">Email</label>
-                                                <input id="email" name="email" type="email" class="form-control" value="{{ old('email') }}" required />
+                                                <input id="email" name="email" type="email" class="form-control"
+                                                    value="{{ old('email') }}" required />
 
                                                 @if ($errors->has('email'))
                                                     <span class="help-block">
@@ -62,7 +68,8 @@
                                         </div>
                                     </div>
                                     <div class="footer text-center">
-                                        <button type="submit" class="btn btn-rose btn-wd btn-lg">send reset instructions</button>
+                                        <button type="submit" class="btn btn-rose btn-wd btn-lg">Send Reset
+                                            Instructions</button>
                                     </div>
                                     <div class="text-center">
                                         <a class="btn-link" href="{{ url('/login') }}">
@@ -94,13 +101,13 @@
 <!-- Material Dashboard javascript methods -->
 <script src="/js/material-dashboard_cdea83f9.js"></script>
 <script type="text/javascript">
-$().ready(function() {
+    $().ready(function () {
 
-    setTimeout(function() {
-        // after 1000 ms we add the class animated to the login/register card
-        $('.card').removeClass('card-hidden');
-    }, 700)
-});
+        setTimeout(function () {
+            // after 1000 ms we add the class animated to the login/register card
+            $('.card').removeClass('card-hidden');
+        }, 700)
+    });
 </script>
 
 </html>

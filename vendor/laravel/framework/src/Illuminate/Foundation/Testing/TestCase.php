@@ -2,8 +2,9 @@
 
 namespace Illuminate\Foundation\Testing;
 
+use Illuminate\Contracts\Console\Kernel;
+use Illuminate\Foundation\Application;
 use PHPUnit\Framework\TestCase as BaseTestCase;
-use Throwable;
 
 abstract class TestCase extends BaseTestCase
 {
@@ -20,13 +21,37 @@ abstract class TestCase extends BaseTestCase
         Concerns\InteractsWithViews;
 
     /**
+     * The list of trait that this test uses, fetched recursively.
+     *
+     * @var array<class-string, int>
+     */
+    protected array $traitsUsedByTest;
+
+    /**
      * Creates the application.
      *
-     * Needs to be implemented by subclasses.
-     *
-     * @return \Symfony\Component\HttpKernel\HttpKernelInterface
+     * @return \Illuminate\Foundation\Application
      */
-    abstract public function createApplication();
+    public function createApplication()
+    {
+        $app = require Application::inferBasePath().'/bootstrap/app.php';
+
+        $this->traitsUsedByTest = array_flip(class_uses_recursive(static::class));
+
+        if (isset(CachedState::$cachedConfig) &&
+            isset($this->traitsUsedByTest[WithCachedConfig::class])) {
+            $this->markConfigCached($app);
+        }
+
+        if (isset(CachedState::$cachedRoutes) &&
+            isset($this->traitsUsedByTest[WithCachedRoutes::class])) {
+            $app->booting(fn () => $this->markRoutesCached($app));
+        }
+
+        $app->make(Kernel::class)->bootstrap();
+
+        return $app;
+    }
 
     /**
      * Setup the test environment.
@@ -35,8 +60,6 @@ abstract class TestCase extends BaseTestCase
      */
     protected function setUp(): void
     {
-        static::$latestResponse = null;
-
         $this->setUpTheTestEnvironment();
     }
 
@@ -48,27 +71,6 @@ abstract class TestCase extends BaseTestCase
     protected function refreshApplication()
     {
         $this->app = $this->createApplication();
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    protected function runTest(): mixed
-    {
-        $result = null;
-
-        try {
-            // @phpstan-ignore-next-line
-            $result = parent::runTest();
-        } catch (Throwable $e) {
-            if (! is_null(static::$latestResponse)) {
-                static::$latestResponse->transformNotSuccessfulException($e);
-            }
-
-            throw $e;
-        }
-
-        return $result;
     }
 
     /**
@@ -90,8 +92,6 @@ abstract class TestCase extends BaseTestCase
      */
     public static function tearDownAfterClass(): void
     {
-        static::$latestResponse = null;
-
         static::tearDownAfterClassUsingTestCase();
     }
 }

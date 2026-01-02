@@ -52,7 +52,7 @@ class StaffController extends Controller
             'role_id',
             'department_id',
             'total_leave_days'
-        )->with(['role', 'department']);
+        )->with(['role', 'department', 'user:id,email']);
 
         // HOD can only see staff in their department
         if ($currentStaff && $currentStaff->role_id === RoleEnum::HOD->value) {
@@ -76,7 +76,8 @@ class StaffController extends Controller
      */
     public function create()
     {
-        $roles = Role::where('role_status', 1)->get();
+        // Exclude Super Admin role (ID 1) - reserved for system admin only
+        $roles = Role::where('role_status', 1)->where('id', '!=', 1)->get();
         // a view for staff
         return view('admin.staff.create', compact('roles'));
     }
@@ -99,7 +100,7 @@ class StaffController extends Controller
             'gender' => 'required|in:0,1',
             'date_joined' => 'required|date',
             'leave_level_id' => 'required|exists:leave_levels,id',
-            'role_id' => 'required|exists:roles,id',
+            'role_id' => 'required|exists:roles,id|not_in:1', // Cannot assign Super Admin role
             'supervisor_id' => 'nullable|exists:staff,id',
             'department_id' => 'nullable|exists:departments,id',
             'total_leave_days' => 'nullable|integer|min:0|max:365',
@@ -108,8 +109,12 @@ class StaffController extends Controller
             'picture' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
+        // Calculate next available ID (must be unique across both Staff and User tables)
+        // This avoids collision with Super Admin user (ID 1) who has no staff record
+        $nextId = max(Staff::max('id') ?? 0, User::max('id') ?? 0) + 1;
+
         // Generate unique staff number
-        $staffNumber = 'STF' . str_pad(Staff::max('id') + 1, 5, '0', STR_PAD_LEFT);
+        $staffNumber = 'STF' . str_pad($nextId, 5, '0', STR_PAD_LEFT);
 
         // Calculate leave days if not provided
         $leaveDays = $validated['total_leave_days'] ?? 21; // Default fallback
@@ -120,8 +125,9 @@ class StaffController extends Controller
             }
         }
 
-        // save staff
+        // save staff with explicit ID to match User ID
         $staff = Staff::create([
+            'id' => $nextId,
             'staff_number' => $staffNumber,
             'title' => $validated['title'],
             'firstname' => $validated['firstname'],
@@ -189,7 +195,8 @@ class StaffController extends Controller
     {
         // update staff info by id
         $staff = Staff::findOrFail($id);
-        $roles = Role::where('role_status', 1)->get();
+        // Exclude Super Admin role (ID 1) - reserved for system admin only
+        $roles = Role::where('role_status', 1)->where('id', '!=', 1)->get();
 
         // a view
         return view('admin.staff.edit', compact('staff', 'roles'));
@@ -215,7 +222,7 @@ class StaffController extends Controller
             'date_joined' => 'required|date',
             'total_leave_days' => 'nullable|integer|min:0|max:365',
             'is_active' => 'nullable|in:0,1',
-            'role_id' => 'required|exists:roles,id',
+            'role_id' => 'required|exists:roles,id|not_in:1', // Cannot assign Super Admin role
         ]);
 
         $staff = Staff::findOrFail($id);

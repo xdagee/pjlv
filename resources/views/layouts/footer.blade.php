@@ -1,16 +1,16 @@
-            <footer class="footer">
-                <div class="container-fluid">
-                    <p class="copyright pull-right">
-                        &copy;
-                        <script>
-                        document.write(new Date().getFullYear())
-                        </script>
-                        excitedFuture&trade; 3.0 made with love for a better web.
-                    </p>
-                </div>
-            </footer>
-        </div>
+<footer class="footer">
+    <div class="container-fluid">
+        <p class="copyright pull-right">
+            &copy;
+            <script>
+                document.write(new Date().getFullYear())
+            </script>
+            excitedFuture&trade; 3.0 made with love for a better web.
+        </p>
     </div>
+</footer>
+</div>
+</div>
 
 <!--   Core JS Files   -->
 <script src="/js/jquery-3.2.1.min.js" type="text/javascript"></script>
@@ -57,3 +57,5 @@
 <script src="/js/material-dashboard_cdea83f9.js"></script>
 <script src="/js/janimate.min.js"></script>
 <script src="/js/bootbox.min.js"></script>
+<!-- PJLV Export Utilities (retry logic, spinner, toast) -->
+<script src="/js/export.js"></script>

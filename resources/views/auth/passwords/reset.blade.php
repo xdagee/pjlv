@@ -15,9 +15,13 @@
     <!--  Material Dashboard CSS    -->
     <link href="/css/material-dashboard_cdea83f9.css" rel="stylesheet" />
     <!--     Fonts and icons     -->
-    {{-- <link href="https://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css" rel="stylesheet" /> --}}
-    {{-- <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons" /> --}}
-    {{-- <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" /> --}}
+    {{--
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css" rel="stylesheet" /> --}}
+    {{--
+    <link rel="stylesheet" type="text/css"
+        href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons" /> --}}
+    {{--
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" /> --}}
     <link href="/css/material.css" rel="stylesheet" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 </head>
@@ -30,16 +34,16 @@
                 <div class="container">
                     <div class="row">
                         <div class="col-md-4 col-sm-6 col-md-offset-4 col-sm-offset-3">
-                                @if (session('status'))
-                                    <div class="alert alert-success">
-                                        {{ session('status') }}
-                                    </div>
-                                @endif
+                            @if (session('status'))
+                                <div class="alert alert-success">
+                                    {{ session('status') }}
+                                </div>
+                            @endif
 
-                                <form method="POST" role="form"  action="{{ url('/password/reset') }}">
-                                    {{ csrf_field() }}
+                            <form method="POST" role="form" action="{{ url('/password/reset') }}">
+                                {{ csrf_field() }}
 
-                                    <input type="hidden" name="token" value="{{ $token }}">
+                                <input type="hidden" name="token" value="{{ $token }}">
 
                                 <div class="card card-login card-hidden">
                                     <div class="card-header text-center" data-background-color="red">
@@ -51,11 +55,13 @@
                                     <div class="card-content">
                                         <div class="input-group">
                                             <span class="input-group-addon">
-                                                    <i class="material-icons">email</i>
-                                                </span>
-                                            <div class="form-group label-floating{{ $errors->has('email') ? ' has-error' : '' }}">
+                                                <i class="material-icons">email</i>
+                                            </span>
+                                            <div
+                                                class="form-group label-floating{{ $errors->has('email') ? ' has-error' : '' }}">
                                                 <label for="email" class="control-label">Email</label>
-                                                <input id="email" name="email" type="email" class="form-control" value="{{ $email or old('email') }}" required autofocus />
+                                                <input id="email" name="email" type="email" class="form-control"
+                                                    value="{{ $email or old('email') }}" required autofocus />
 
                                                 @if ($errors->has('email'))
                                                     <span class="help-block">
@@ -67,11 +73,14 @@
 
                                         <div class="input-group">
                                             <span class="input-group-addon">
-                                                    <i class="material-icons">lock_outline</i>
-                                                </span>
-                                            <div class="form-group label-floating{{ $errors->has('password') ? ' has-error' : '' }}">
-                                                <label id="password" for="password" class="control-label">Password</label>
-                                                <input id="password" name="password" type="password" class="form-control" required>
+                                                <i class="material-icons">lock_outline</i>
+                                            </span>
+                                            <div
+                                                class="form-group label-floating{{ $errors->has('password') ? ' has-error' : '' }}">
+                                                <label id="password" for="password"
+                                                    class="control-label">Password</label>
+                                                <input id="password" name="password" type="password"
+                                                    class="form-control" required>
 
                                                 @if ($errors->has('password'))
                                                     <span class="help-block">
@@ -83,11 +92,14 @@
 
                                         <div class="input-group">
                                             <span class="input-group-addon">
-                                                    <i class="material-icons">lock_outline</i>
-                                                </span>
-                                            <div class="form-group label-floating{{ $errors->has('password_confirmation') ? ' has-error' : '' }}">
-                                                <label for="password-confirm" class="control-label">Confirm Password</label>
-                                                <input id="password-confirm" name="password_confirmation" type="password" class="form-control" required>
+                                                <i class="material-icons">lock_outline</i>
+                                            </span>
+                                            <div
+                                                class="form-group label-floating{{ $errors->has('password_confirmation') ? ' has-error' : '' }}">
+                                                <label for="password-confirm" class="control-label">Confirm
+                                                    Password</label>
+                                                <input id="password-confirm" name="password_confirmation"
+                                                    type="password" class="form-control" required>
 
                                                 @if ($errors->has('password_confirmation'))
                                                     <span class="help-block">
@@ -98,7 +110,7 @@
                                         </div>
                                     </div>
                                     <div class="footer text-center">
-                                        <button type="submit" class="btn btn-rose btn-wd btn-lg">reset password</button>
+                                        <button type="submit" class="btn btn-rose btn-wd btn-lg">Reset Password</button>
                                     </div>
                                 </div>
                             </form>
@@ -109,29 +121,29 @@
         </div>
     </div>
 </body>
-            <!--   Core JS Files   -->
-            <script src="/js/jquery-3.2.1.min.js" type="text/javascript"></script>
-            <script src="/js/bootstrap.min.js" type="text/javascript"></script>
-            <script src="/js/material.min.js" type="text/javascript"></script>
-            <script src="/js/perfect-scrollbar.jquery.min.js" type="text/javascript"></script>
-            <!-- Include a polyfill for ES6 Promises (optional) for IE11, UC Browser and Android browser support SweetAlert -->
-            <script src="/js/core.js" type="text/javascript"></script>
-            <!-- Forms Validations Plugin -->
-            <script src="/js/jquery.validate.min.js"></script>
-            <!--  Plugin for Date Time Picker and Full Calendar Plugin-->
-            <script src="/js/moment.min.js"></script>
-            <!-- Plugin for Tags, full documentation here: https://github.com/bootstrap-tagsinput/bootstrap-tagsinputs  -->
-            <script src="/js/jquery.tagsinput.js"></script>
-            <!-- Material Dashboard javascript methods -->
-            <script src="/js/material-dashboard_cdea83f9.js"></script>
-            <script type="text/javascript">
-            $().ready(function() {
+<!--   Core JS Files   -->
+<script src="/js/jquery-3.2.1.min.js" type="text/javascript"></script>
+<script src="/js/bootstrap.min.js" type="text/javascript"></script>
+<script src="/js/material.min.js" type="text/javascript"></script>
+<script src="/js/perfect-scrollbar.jquery.min.js" type="text/javascript"></script>
+<!-- Include a polyfill for ES6 Promises (optional) for IE11, UC Browser and Android browser support SweetAlert -->
+<script src="/js/core.js" type="text/javascript"></script>
+<!-- Forms Validations Plugin -->
+<script src="/js/jquery.validate.min.js"></script>
+<!--  Plugin for Date Time Picker and Full Calendar Plugin-->
+<script src="/js/moment.min.js"></script>
+<!-- Plugin for Tags, full documentation here: https://github.com/bootstrap-tagsinput/bootstrap-tagsinputs  -->
+<script src="/js/jquery.tagsinput.js"></script>
+<!-- Material Dashboard javascript methods -->
+<script src="/js/material-dashboard_cdea83f9.js"></script>
+<script type="text/javascript">
+    $().ready(function () {
 
-                setTimeout(function() {
-                    // after 1000 ms we add the class animated to the login/register card
-                    $('.card').removeClass('card-hidden');
-                }, 700)
-            });
-            </script>
+        setTimeout(function () {
+            // after 1000 ms we add the class animated to the login/register card
+            $('.card').removeClass('card-hidden');
+        }, 700)
+    });
+</script>
 
-            </html>
+</html>

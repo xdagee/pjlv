@@ -1,0 +1,66 @@
+/**
+ * PJLV Typography System
+ * Global font scale and text utilities for consistent hierarchy.
+ */
+
+:root {
+  /* Font Scale */
+  --font-h1: 2rem;      /* 32px */
+  --font-h2: 1.5rem;    /* 24px */
+  --font-h3: 1.25rem;   /* 20px */
+  --font-h4: 1rem;      /* 16px */
+  --font-h5: 0.875rem;  /* 14px */
+  --font-h6: 0.75rem;   /* 12px */
+  --font-body: 1rem;    /* 16px */
+  --font-small: 0.875rem; /* 14px */
+  --font-button: 0.875rem; /* 14px */
+  
+  /* Font Weights */
+  --weight-light: 300;
+  --weight-normal: 400;
+  --weight-medium: 500;
+  --weight-bold: 700;
+}
+
+/* Headings */
+h1, .h1 { font-size: var(--font-h1); font-weight: var(--weight-medium); }
+h2, .h2 { font-size: var(--font-h2); font-weight: var(--weight-medium); }
+h3, .h3 { font-size: var(--font-h3); font-weight: var(--weight-medium); }
+h4, .h4 { font-size: var(--font-h4); font-weight: var(--weight-medium); }
+h5, .h5 { font-size: var(--font-h5); font-weight: var(--weight-medium); }
+h6, .h6 { font-size: var(--font-h6); font-weight: var(--weight-medium); }
+
+/* Body Text */
+body {
+  font-size: var(--font-body);
+  font-weight: var(--weight-normal);
+  line-height: 1.5;
+}
+
+/* Buttons - Enforce Title Case via text-transform */
+.btn {
+  font-size: var(--font-button);
+  font-weight: var(--weight-medium);
+  text-transform: capitalize;
+}
+
+/* Small Text */
+small, .text-small {
+  font-size: var(--font-small);
+}
+
+/* Modal Text - Prevent shrinking */
+.modal-body {
+  font-size: var(--font-body);
+}
+
+/* Card Titles */
+.card-title {
+  font-size: var(--font-h4);
+  font-weight: var(--weight-medium);
+}
+
+/* Table Headers */
+th {
+  font-weight: var(--weight-medium);
+}

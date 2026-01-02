@@ -2,6 +2,13 @@
 @section('content')
 
     <div class="row">
+        <div class="col-md-12">
+            <h3 class="title"><i class="material-icons">person</i> My Leave Report</h3>
+            <p class="text-muted">Your personal leave history, balance, and usage breakdown.</p>
+        </div>
+    </div>
+
+    <div class="row">
         <!-- Stats Cards -->
         <div class="col-lg-3 col-md-6 col-sm-6">
             <div class="card card-stats">

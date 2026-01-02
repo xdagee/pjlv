@@ -37,7 +37,7 @@ class StaffLeavesController extends Controller
     }
 
     /**
-     * Display a listing of leave requests.
+     * Display a listing of leave requests (personal leaves only - My Leaves).
      */
     public function index()
     {
@@ -49,17 +49,12 @@ class StaffLeavesController extends Controller
             return redirect('/dashboard')->with('error', 'Staff profile not found.');
         }
 
-        // HR and Admin see all leaves, others see only their own
-        if (in_array($staff->role_id, [RoleEnum::ADMIN->value, RoleEnum::HR->value])) {
-            $leaves = StaffLeave::with(['staff', 'leaveType', 'leaveAction.leaveStatus'])
-                ->orderBy('created_at', 'desc')
-                ->paginate($perPage);
-        } else {
-            $leaves = StaffLeave::where('staff_id', $staff->id)
-                ->with(['leaveType', 'leaveAction.leaveStatus'])
-                ->orderBy('created_at', 'desc')
-                ->paginate($perPage);
-        }
+        // Always show only the user's own leaves (My Leaves)
+        // All Leaves for all staff is handled by AdminLeavesController at /all-leaves
+        $leaves = StaffLeave::where('staff_id', $staff->id)
+            ->with(['leaveType', 'leaveAction.leaveStatus'])
+            ->orderBy('created_at', 'desc')
+            ->paginate($perPage);
 
         return view('leaves.index', compact('leaves', 'staff'));
     }
